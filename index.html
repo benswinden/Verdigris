@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Adventure</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="wrapper">
+
+        <header>
+            <div class="player-name">
+                Bub the Mighty
+            </div>
+            <div class="stats">
+                <ul>
+                    <li>Lvl: <div id="lvl-text">1</div> </li>
+                    <li>XP: <div id="xp-text">1</div></li>
+                    <li>HP: <div id="hp-text">1</div></li>
+                    <li>Gold: <div id="gold-text">1</div></li>
+                </ul>
+            </div>
+        </header>
+        <main>
+            <div id="main-text">
+                Welcome to Text Adventure. You must defeat the dragon that is preventing people from leaving town. You are in the town square. Where do you want to go? Use the buttons to choose.
+            </div>
+        </main>
+        <div id="monster-section">
+            <div id="monster-name">
+                ASD
+            </div>
+            <div class="monster-stats">
+                <ul>                    
+                    <li>HP: <div id="monster-hp">1</div></li>                    
+                </ul>
+            </div>
+        </div>
+        <nav>
+            <button id="button1" class="nav-button">Go to store</button>
+            <button id="button2" class="nav-button">Go to cave</button>
+            <button id="button3" class="nav-button">Fight dragon</button>
+        </nav>
+    </div>
+
+    <script  src="script.js"></script>
+</body>
+</html>
