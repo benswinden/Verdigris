@@ -1,8 +1,7 @@
-let lvl = 999;
-let xp = 999;
-let hp = 999;
-let gold = 999;
-
+let lvl = 1;
+let xp = 0;
+let hp = 100;
+let gold = 50;
 let currentWeapon = 0;
 let fighting;
 let monsterHealth;
