@@ -6,6 +6,39 @@
     font-family: Roboto;
 }
 
+#debug {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #3E3E3E;
+    font-size: 25px;
+    font-weight: 400;
+    border-radius: 9px;
+    background-color: #EAEAEA;
+    width: 15%;
+    padding: 40px;
+    margin: 5px 0 15px 0;
+
+    .debug-button {
+        color: rgb(46, 46, 46);
+        font-family: Roboto;
+        font-size: 22px;
+        border-radius: 9px;
+        border: none;
+        background: #cccccc;        
+        height: 50px;        
+        font-weight: 500;
+        padding: 0 40px;
+        margin: 10px 0;
+
+        &:hover {
+            color: black;
+            background: #969696;
+        }
+    }
+}
+
 header {
     color: black;
     font-size: 28px;
@@ -63,7 +96,7 @@ li div {
 }
 
 .nav-button {
-    color: #5a5a5a;
+    color: black;
     font-family: Roboto;
     font-size: 22px;    
     text-align: left;
@@ -79,6 +112,6 @@ li div {
 
     &:hover {
         color: black;
-        border: 3px solid black;
+        border: 3px solid rgb(87, 87, 87);
     }
 }

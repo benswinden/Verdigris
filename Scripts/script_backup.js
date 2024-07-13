@@ -107,7 +107,7 @@ button1.onclick = goStore;
 button2.onclick = goCave;
 button3.onclick = fightDragon;
 
-updateStats();
+UpdateStats();
 
 function update(location) {
 
@@ -124,7 +124,7 @@ function update(location) {
     button3.onclick = location["button functions"][2];
 }
 
-function updateStats() {
+function UpdateStats() {
 
     lvlText.innerText = lvl;
     xpText.innerText = xp;
@@ -148,7 +148,7 @@ function buyHealth() {
 
         gold -= 10;
         hp += 10;        
-        updateStats();
+        UpdateStats();
     }
     else {
         mainText.innerText = "You don't have enough gold";
@@ -163,7 +163,7 @@ function buyWeapon() {
 
             gold -= 30;
             currentWeapon++;
-            updateStats();
+            UpdateStats();
             let newWeapon = weapons[currentWeapon].name;
             mainText.innerText = "You now have a " + newWeapon + ".";
             inventory.push(newWeapon);
@@ -184,7 +184,7 @@ function sellWeapon() {
 
     if (inventory.length > 1) {
         gold += 15;
-        updateStats();
+        UpdateStats();
         let currentWeapon = inventory.shift()
         mainText.innerText = "You sold a " + currentWeapon + ".";
         mainText.innerText += "\nIn you inventory you have: " + inventory;
@@ -231,7 +231,7 @@ function attack() {
     mainText.innerText += "\nYou attack it with your " + weapons[currentWeapon].name + "  [" + damage + " damage]";
     
     monsterHpText.innerText = monsterHealth;
-    updateStats();
+    UpdateStats();
 
     if (hp <= 0)
         lose();
@@ -249,7 +249,7 @@ function defeatMonster() {
 
     gold += Math.floor(monsters[fighting].level * 6.7);
     xp += monsters[fighting].level;
-    updateStats();
+    UpdateStats();
     update(locations[4]);
 }
 
@@ -266,7 +266,7 @@ function restart() {
     gold = 50;
     currentWeapon = 0;
     inventory = ["stick"];
-    updateStats();
+    UpdateStats();
     goTown();
 }
 
