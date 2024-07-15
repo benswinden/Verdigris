@@ -141,6 +141,7 @@ function updateLocation() {
         if (!locationVisited) {
             
             locationsVisited.push(currentContext);
+            save();
             
             if (locations[currentContext].narration != "") {
                 narrationText.style.display = "block";
@@ -308,6 +309,7 @@ function save() {
     localStorage.setItem('currentLocation', JSON.stringify(currentContext));
     localStorage.setItem('storedLocation', JSON.stringify(storedLocation));
     localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
+    localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));
     localStorage.setItem('lvl', JSON.stringify(lvl));
     localStorage.setItem('xp', JSON.stringify(xp));
     localStorage.setItem('hp', JSON.stringify(hp));
@@ -319,6 +321,7 @@ function save() {
     currentContext = JSON.parse(localStorage.getItem('currentLocation'));
     storedLocation = JSON.parse(localStorage.getItem('storedLocation'));    
     currentContextType = JSON.parse(localStorage.getItem('currentLocationType'));
+    locationsVisited = JSON.parse(localStorage.getItem('locationsVisited'));
     lvl = JSON.parse(localStorage.getItem('lvl'));
     xp = JSON.parse(localStorage.getItem('xp'));
     hp = JSON.parse(localStorage.getItem('hp'));

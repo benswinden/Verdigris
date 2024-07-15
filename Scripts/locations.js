@@ -72,7 +72,34 @@ locations = [
         description: "Surrounded by earth and rock, the bottom of the cayon is cool and damp.",
         narration: "You move close to the edge of the rock shelf, looking for a way down. The wet stone has become a perfect bed for a thin layer of slime that coats the rock and when your weight falls on a particularly slimy patch, your foot comes out from under you.\n\nYour body hits the rock and you lose control, rolling over the side. Your fingers catch the rock edge for exactly one second of sheer panic before you lose grip and fall. Down, down, down until you stop with a bone shattering impact followed quickly by a surrender to darkness.",
         actions: [
-            
+            {
+                type: 0,
+                title: "Travel eastwards to the canyon's exit",
+                keyword: "canyon_gate"
+            }
+        ]
+    },
+    {
+        keyword: "canyon_gate",
+        title: "Ruined Canyon Gate",
+        description: "Before you towers the remains of a massive gate that may have once ushered travellers from afar into the Lowland Provinces. Now only the carved stone remains, though much has erroded and fallen away.",
+        narration: "The canyon's quiet is broken by the sound of metal on metal as a dark figure slowly raises itself from a shadow in the rock where it had been sitting lifelessly.",
+        actions: [
+            {
+                type: 0,
+                title: "Travel west deeper into the canyon",
+                keyword: "canyon_bottom"
+            },
+            {
+                type: 1,
+                title: "A long dead knight in rusted armor stands in your path",
+                keyword: "dead_knight"
+            },
+            {
+                type: 0,
+                title: "Travel east through the great canyon gateway",
+                keyword: "canyon_bottom"
+            },
         ]
     }
 ];
