@@ -3,6 +3,8 @@ let xp = 0;
 let hp = 0;
 let gold = 0;
 
+let attackPower = 0;
+
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
 let currentContextType = 0;     // 0 = Location, 1 = Monster, 2 = Item, 3 = NPC
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
@@ -23,6 +25,9 @@ const secondaryTitle =  document.querySelector('#secondary-title');
 const secondaryTitleText =  document.querySelector('#secondary-title-text');
 const mainText =  document.querySelector('#main-text');
 const narrationText =  document.querySelector('#narration-text');
+const monsterHpSection =  document.querySelector('#monster-hp-section');
+const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
+const monsterHpText =  document.querySelector('#monster-hp-text');
 // Buttons
 const button1 = document.querySelector('#button1');
 const button2 = document.querySelector('#button2');
@@ -94,6 +99,8 @@ function initializeGame() {
         hp = 100;
         gold = 20;    
 
+        attackPower = 10;
+
         currentContext = 0;
         storedLocation = -1;
         currentContextType = 0;
@@ -122,6 +129,7 @@ function updateLocation() {
     button2.style.display = "none";
     button3.style.display = "none";
     narrationText.style.display = "none";
+    monsterHpSection.style.display = "none";
 
     // By default, we'll be getting our action buttons from a location
     let actions = [];    
@@ -168,7 +176,11 @@ function updateLocation() {
         switch (currentContextType) {
             case 1:
                 secondaryTitleText.innerText = monsters[currentContext].title;
-                mainText.innerText = monsters[currentContext].description;                
+                mainText.innerText = monsters[currentContext].description;
+
+                monsterHpSection.style.display = "block";
+                updateMonsterUI();
+
                 actions = monsters[currentContext].actions;
                 break;
             case 2:                
@@ -278,10 +290,25 @@ function changeContext(keyword, contextType) {
     }
 }
 
+function updateMonsterUI() {
+
+    monsterHpText.innerText = monsters[currentContext].hpCurrent + "/" + monsters[currentContext].hpMax;
+    let monsterHpCurrentPercent = monsters[currentContext].hpCurrent / monsters[currentContext].hpMax * 100;
+    // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
+    monsterHpBar.style.width = monsterHpCurrentPercent * 2 + 'px';
+}
+
+
+
+
+
 // ACTIONS
 
 function attack() {
-
+    
+    console.log("attack() - Attack Power: " + attackPower);
+    monsters[currentContext].hpCurrent -= attackPower;
+    updateMonsterUI();
 }
 
 function dodge() {

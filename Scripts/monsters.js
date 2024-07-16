@@ -27,7 +27,8 @@ monsters = [
         keyword: "dead_knight",
         title: "A Long Dead Knight",        
         description: "A battered corpse filling a rusted old suit of armor. You can make out the owl-head crest of the Sehran Royal Guard on it's chest.\n\n The creature ambles forward in laboured movements. It's rusted longsword held low.",
-        hp: 100,
+        hpCurrent: 100,
+        hpMax: 100,
         damage: 5,
         actions: [
             {
