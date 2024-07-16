@@ -1,3 +1,5 @@
+let version = 0.002;
+
 let lvl = 0;
 let xp = 0;
 let hp = 0;
@@ -89,7 +91,14 @@ function initializeGame() {
     if (localStorage.getItem('saveExists')) {
         console.log("Save game exists");
 
-        load();        
+        let validVersion = versionCheck();
+
+        if (validVersion)
+            load();
+        else {
+            console.log("Invalid save found - resetting game");
+            resetGame();
+        }
     }
     // No save game, so start a new game
     else {
@@ -305,7 +314,7 @@ function updateMonsterUI() {
 // ACTIONS
 
 function attack() {
-    
+
     console.log("attack() - Attack Power: " + attackPower);
     monsters[currentContext].hpCurrent -= attackPower;
     updateMonsterUI();
@@ -331,8 +340,10 @@ function returnToPrimaryContext() {
 // UTILITIES
 
 function save() {
+
     console.log("save");
     localStorage.setItem('saveExists', "!");        // Used to test whether there is a save
+    localStorage.setItem('version', JSON.stringify(currentContext));
     localStorage.setItem('currentLocation', JSON.stringify(currentContext));
     localStorage.setItem('storedLocation', JSON.stringify(storedLocation));
     localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
@@ -344,7 +355,9 @@ function save() {
   }
   
   function load() {
+
     console.log("Load");
+
     currentContext = JSON.parse(localStorage.getItem('currentLocation'));
     storedLocation = JSON.parse(localStorage.getItem('storedLocation'));    
     currentContextType = JSON.parse(localStorage.getItem('currentLocationType'));
@@ -353,6 +366,12 @@ function save() {
     xp = JSON.parse(localStorage.getItem('xp'));
     hp = JSON.parse(localStorage.getItem('hp'));
     gold = JSON.parse(localStorage.getItem('gold'));
+  }
+
+  function versionCheck() {
+    
+    let saveVersion = JSON.parse(localStorage.getItem('version'));
+    return version === saveVersion;
   }
 
   function resetGame() {
