@@ -1,4 +1,4 @@
-let version = 0.005;
+let version = 0.006;
 
 let lvl = 0;
 let xp = 0;
@@ -36,6 +36,9 @@ const monsterHpText =  document.querySelector('#monster-hp-text');
 const button1 = document.querySelector('#button1');
 const button2 = document.querySelector('#button2');
 const button3 = document.querySelector('#button3');
+const button4 = document.querySelector('#button4');
+const button5 = document.querySelector('#button5');
+const button6 = document.querySelector('#button6');
 //Misc
 const debugWindow = document.querySelector('#debug');
 const debugButton1 = document.querySelector('#debug-button1');
@@ -44,10 +47,14 @@ const debugButton3 = document.querySelector('#debug-button3');
 const debugButton4 = document.querySelector('#debug-button4');
 const debugButton5 = document.querySelector('#debug-button5');
 //Colors
-const colorLocation = '#EAEAEA';
-const colorEnemy = '#FFAFAF';
-const colorItem = '#8ED5EC';
-const colorNPC = '#81DC9B';
+const buttonBackColorLocation = '#EAEAEA';
+const buttonBackcolorEnemy = '#FFAFAF';
+const buttonBackcolorItem = '#8ED5EC';
+const buttonBackcolorNPC = '#81DC9B';
+const buttonBackcolorLocked = '#F6F6F6';
+const buttonTextColorDefault = '#000';
+const buttonTextColorLocked = '#989898';
+
 const mainTitleActive = '#101010';
 const secondaryTitleActive = '#757575';
 
@@ -140,6 +147,9 @@ function updateLocation() {
     button1.style.display = "none";
     button2.style.display = "none";
     button3.style.display = "none";
+    button4.style.display = "none";
+    button5.style.display = "none";
+    button6.style.display = "none";
     narrationText.style.display = "none";
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
@@ -214,32 +224,62 @@ function updateLocation() {
                     break;
                 case 2:
                     button = button3;
+                    break;
+                case 3:
+                    button = button4;
+                    break;
+                case 4:
+                    button = button5;
+                    break;
+                case 5:
+                    button = button6;
                     break; 
             }
             
             switch (element.type) {
+                
                 // Location
                 case 0:
-                    button.style.backgroundColor = colorLocation;
+                    button.style.backgroundColor = buttonBackColorLocation;
+                    button.style.color = buttonTextColorDefault;
+                    button.classList.add("can-hover");
+
                     button.onclick = function() {changeContext(element.keyword, 0)};
                     break;
                 // Monster
                 case 1:
-                    button.style.backgroundColor = colorEnemy;
+                    button.style.backgroundColor = buttonBackcolorEnemy;
+                    button.style.color = buttonTextColorDefault;
+                    button.classList.add("can-hover");
+
                     button.onclick = function() {changeContext(element.keyword, 1)};
                     break;
                 // ITEM
                 case 2:
-                    button.style.backgroundColor = colorItem;
+                    button.style.backgroundColor = buttonBackcolorItem;
+                    button.style.color = buttonTextColorDefault;
+                    button.classList.add("can-hover");
                     break;
                 // NPC
                 case 3:
-                    button.style.backgroundColor = colorNPC;
+                    button.style.backgroundColor = buttonBackcolorNPC;
+                    button.style.color = buttonTextColorDefault;
+                    button.classList.add("can-hover");
                     break;
                 // Misc Action
                 case 4:
-                    button.style.backgroundColor = colorLocation;                    
+                    button.style.backgroundColor = buttonBackColorLocation;                    
+                    button.style.color = buttonTextColorDefault;
+                    button.classList.add("can-hover");
+
                     button.onclick = function() {doAction(element.func)};                    
+                    break;
+                // Locked Action
+                case 5:
+                    
+                    button.style.backgroundColor = buttonBackcolorLocked;
+                    button.style.color = buttonTextColorLocked;
+                    button.classList.remove("can-hover");
                     break;
             }
         

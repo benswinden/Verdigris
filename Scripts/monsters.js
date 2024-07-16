@@ -31,7 +31,7 @@ monsters = [
         description: "A battered corpse filling a rusted old suit of armor. You can make out the owl-head crest of the Sehran Royal Guard on it's chest.\n\n The creature ambles forward in laboured movements. It's rusted longsword held low.",
         hpCurrent: 100,
         hpMax: 100,
-        attackPower: 5,
+        attackPower: 5,        
         actions: [
             {
                 type: 4,

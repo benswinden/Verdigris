@@ -183,10 +183,10 @@ li div {
     font-style: normal;
     font-weight: 500;
     padding: 0 40px;
-    margin: 10px 0;
+    margin: 10px 0;        
+}
 
-    &:hover {
-        color: rgb(7, 7, 7);
-        border: 3px solid rgb(151, 151, 151);
-    }
+.can-hover:hover {
+    color: rgb(7, 7, 7);
+    border: 3px solid rgb(151, 151, 151);
 }

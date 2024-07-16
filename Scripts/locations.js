@@ -6,6 +6,21 @@ locations = [
         narration: "You awaken atop a gentle sloping grass covered hill. Strange.",
         actions: [
             {
+                type: 5,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 5,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 5,
+                title: "East",
+                keyword: ""
+            },
+            {
                 type: 0,
                 title: "South towards a gaping crevasse",
                 keyword: "canyon_edge"
@@ -20,14 +35,24 @@ locations = [
         actions: [
             {
                 type: 0,
+                title: "North up a grassy hill",
+                keyword: "grassy_hill"
+            },
+            {
+                type: 5,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 0,
                 title: "East into the tall grass at the canyon's edge",
                 keyword: "thicket"
             },
             {
-                type: 0,
-                title: "North up a grassy hill",
-                keyword: "grassy_hill"
-            }
+                type: 5,
+                title: "South",
+                keyword: ""
+            }            
         ]
     },
     {
@@ -37,14 +62,24 @@ locations = [
         narration: "",
         actions: [
             {
-                type: 0,
-                title: "South down a slippery slope",
-                keyword: "slippery_slope"
+                type: 5,
+                title: "North",
+                keyword: ""
             },
             {
                 type: 0,
                 title: "West to the canyon's edge",
                 keyword: "canyon_edge"
+            },
+            {
+                type: 5,
+                title: "East",
+                keyword: ""
+            },
+            {
+                type: 0,
+                title: "South down a slippery slope",
+                keyword: "slippery_slope"
             }
         ]
     },
@@ -53,30 +88,60 @@ locations = [
         title: "A Slippery Slope",        
         description: "Earth and stone angle downwards, gently at first then sharply. The rock has broken apart, forming several natural ledges that lead downwards into the canyon. \n\nTrickling water has made the stone here slick and there’s little to grab on to for balance.",
         narration: "",
-        actions: [
+        actions: [   
+            {
+                type: 0,
+                title: "North into the tall grass at the canyon's edge",
+                keyword: "thicket"
+            },
+            {
+                type: 5,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 5,
+                title: "East",
+                keyword: ""
+            },
+            {
+                type: 5,
+                title: "South",
+                keyword: ""
+            },
             {
                 type: 0,
                 title: "Climb down the slippery slope",
                 keyword: "canyon_bottom"
             },
-            {
-                type: 0,
-                title: "North into the tall grass at the canyon's edge",
-                keyword: "thicket"
-            }
         ]
     },
     {
         keyword: "canyon_bottom",
         title: "Bottom of the Canyon",        
-        description: "Surrounded by earth and rock, the bottom of the cayon is cool and damp.",
+        description: "Surrounded by earth and rock, the bottom of the canyon is cool and damp.",
         narration: "You move close to the edge of the rock shelf, looking for a way down. The wet stone has become a perfect bed for a thin layer of slime that coats the rock and when your weight falls on a particularly slimy patch, your foot comes out from under you.\n\nYour body hits the rock and you lose control, rolling over the side. Your fingers catch the rock edge for exactly one second of sheer panic before you lose grip and fall. Down, down, down until you stop with a bone shattering impact followed quickly by a surrender to darkness.",
         actions: [
             {
+                type: 5,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 5,
+                title: "West",
+                keyword: ""
+            },
+            {
                 type: 0,
-                title: "Travel eastwards to the canyon's exit",
+                title: "East to the canyon's end",
                 keyword: "canyon_gate"
-            }
+            },
+            {
+                type: 5,
+                title: "South",
+                keyword: ""
+            },
         ]
     },
     {
@@ -85,21 +150,32 @@ locations = [
         description: "Before you towers the remains of a massive gate that may have once ushered travellers from afar into the Lowland Provinces. Now only the carved stone remains, though much has erroded and fallen away.",
         narration: "The canyon's quiet is broken by the sound of metal on metal as a dark figure slowly raises itself from a shadow in the rock where it had been sitting lifelessly.",
         actions: [
+
+            {
+                type: 5,
+                title: "North",
+                keyword: ""
+            },
             {
                 type: 0,
                 title: "Travel west deeper into the canyon",
                 keyword: "canyon_bottom"
             },
             {
+                type: 0,
+                title: "Travel east through the ancient gateway",
+                keyword: "canyon_bottom"
+            },
+            {
+                type: 5,
+                title: "South",
+                keyword: ""
+            },            
+            {
                 type: 1,
                 title: "A long dead knight in rusted armor stands in your path",
                 keyword: "dead_knight"
-            },
-            {
-                type: 0,
-                title: "Travel east through the great canyon gateway",
-                keyword: "canyon_bottom"
-            },
+            }
         ]
     }
 ];
