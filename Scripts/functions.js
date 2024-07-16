@@ -1,4 +1,4 @@
-let version = 0.002;
+let version = 0.005;
 
 let lvl = 0;
 let xp = 0;
@@ -10,8 +10,9 @@ let attackPower = 0;
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
 let currentContextType = 0;     // 0 = Location, 1 = Monster, 2 = Item, 3 = NPC
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
-
 let locationsVisited = [];      // A list of locations we have already visited
+
+let updateTextString = "";
 
 // Debug
 let debugActive = false;
@@ -27,6 +28,7 @@ const secondaryTitle =  document.querySelector('#secondary-title');
 const secondaryTitleText =  document.querySelector('#secondary-title-text');
 const mainText =  document.querySelector('#main-text');
 const narrationText =  document.querySelector('#narration-text');
+const updateText =  document.querySelector('#update-text');
 const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
 const monsterHpText =  document.querySelector('#monster-hp-text');
@@ -66,15 +68,16 @@ let locations = [{
 let monsters = [
     {
         keyword: "",
-        title: "",        
+        title: "",
+        shortTitle: "",
         description: "",
         hp: 0,
-        damage: 0,
+        attackPower: 0,
         actions: [
             {
                 type: 0,
                 title: "",
-                function: attack
+                func: ""
             }            
         ]
     }
@@ -138,6 +141,7 @@ function updateLocation() {
     button2.style.display = "none";
     button3.style.display = "none";
     narrationText.style.display = "none";
+    updateText.style.display = "none";
     monsterHpSection.style.display = "none";
 
     // By default, we'll be getting our action buttons from a location
@@ -234,8 +238,8 @@ function updateLocation() {
                     break;
                 // Misc Action
                 case 4:
-                    button.style.backgroundColor = colorLocation;
-                    button.onclick = element.function;
+                    button.style.backgroundColor = colorLocation;                    
+                    button.onclick = function() {doAction(element.func)};                    
                     break;
             }
         
@@ -307,21 +311,46 @@ function updateMonsterUI() {
     monsterHpBar.style.width = monsterHpCurrentPercent * 2 + 'px';
 }
 
+function addUpdateText(text) {
 
+    updateText.style.display = "block";
+    updateText.innerText = text;
+}
 
 
 
 // ACTIONS
+
+// Translate a string provided in through the context data into an action
+function doAction(actionString) {
+    
+    switch (actionString) {
+        case "attack":
+            attack();
+            break;
+        case "dodge":
+            dodge();
+            break;
+        case "returnToPrimaryContext":
+            returnToPrimaryContext();
+            break;
+    }
+}
 
 function attack() {
 
     console.log("attack() - Attack Power: " + attackPower);
     monsters[currentContext].hpCurrent -= attackPower;
     updateMonsterUI();
+    hp -= monsters[currentContext].attack;
+    updateStats();
+
+    let updateString = "You do " + attackPower + " damage to the " + monsters[currentContext].shortTitle + ".\nThe " + monsters[currentContext].shortTitle + " does " + monsters[currentContext].attack + " damage to you."
+    addUpdateText(updateString);
 }
 
 function dodge() {
-
+    console.log("didge() - ");
 }
 
 function returnToPrimaryContext() {
@@ -343,7 +372,7 @@ function save() {
 
     console.log("save");
     localStorage.setItem('saveExists', "!");        // Used to test whether there is a save
-    localStorage.setItem('version', JSON.stringify(currentContext));
+    localStorage.setItem('version', JSON.stringify(version));
     localStorage.setItem('currentLocation', JSON.stringify(currentContext));
     localStorage.setItem('storedLocation', JSON.stringify(storedLocation));
     localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
@@ -352,6 +381,9 @@ function save() {
     localStorage.setItem('xp', JSON.stringify(xp));
     localStorage.setItem('hp', JSON.stringify(hp));
     localStorage.setItem('gold', JSON.stringify(gold));
+    localStorage.setItem('attackPower', JSON.stringify(attackPower));
+
+    localStorage.setItem('monsters', JSON.stringify(monsters));
   }
   
   function load() {
@@ -366,11 +398,15 @@ function save() {
     xp = JSON.parse(localStorage.getItem('xp'));
     hp = JSON.parse(localStorage.getItem('hp'));
     gold = JSON.parse(localStorage.getItem('gold'));
+    attackPower = JSON.parse(localStorage.getItem('attackPower'));
+
+    monsters = JSON.parse(localStorage.getItem('monsters'));
   }
 
   function versionCheck() {
     
     let saveVersion = JSON.parse(localStorage.getItem('version'));
+    console.log("Current version: " + version + "    Save Version: " + saveVersion);
     return version === saveVersion;
   }
 
