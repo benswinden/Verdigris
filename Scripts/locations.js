@@ -187,7 +187,7 @@ locations = [
             {
                 type: 0,
                 title: "East through the ancient gateway",
-                keyword: "canyon_bottom",
+                keyword: "gatefront_camp",
                 blocked: "dead_knight"
             },
             {
@@ -200,6 +200,39 @@ locations = [
                 type: 1,
                 title: "A long dead knight in rusted armor stands in your path",
                 keyword: "dead_knight",
+                blocked: ""
+            }
+        ]
+    },    
+    {
+        keyword: "gatefront_camp",
+        title: "Ragged Encampment Before the Canyon Gate",
+        description: "Before you towers the remains of a massive gate that may have once ushered travellers from afar into the Lowland Provinces. Now only the carved stone remains, though much has erroded and fallen away.",
+        narration: "",
+        actions: [
+
+            {
+                type: 5,
+                title: "North",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 0,
+                title: "West through the ancient gateway",
+                keyword: "canyon_gate",
+                blocked: ""
+            },
+            {
+                type: 5,
+                title: "East",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 5,
+                title: "South",
+                keyword: "",
                 blocked: ""
             }
         ]

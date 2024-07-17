@@ -1,4 +1,4 @@
-let version = 0.006;
+let version = 0.007;
 
 let lvl = 0;
 let xp = 0;
@@ -252,12 +252,14 @@ function updateLocation() {
                 case 0:
                                         
                     // Check whether this is a location that may be blocked by a monster
+                    let monsterFound = false;
                     if (element.blocked != "") {
                         
                         // Loop through all actions to see if there is a monster with a matching keyword
                         actions.forEach((actionElement, index) => {                            
                             if (element.blocked == actionElement.keyword) {
                                 
+                                monsterFound = true;
                                 button.style.backgroundColor = buttonBackcolorLocked;
                                 button.style.color = buttonTextColorLocked;
                                 button.classList.remove("can-hover");
@@ -265,7 +267,9 @@ function updateLocation() {
                             }
                         });
                     }
-                    else {
+                    
+                    // If there is no value for blocked, or else we didn't find a monster at this location with the matching keyword
+                    if (element.blocked === "" || !monsterFound) {
                 
                         button.style.backgroundColor = buttonBackColorLocation;
                         button.style.color = buttonTextColorDefault;
@@ -273,6 +277,7 @@ function updateLocation() {
 
                         button.onclick = function() {changeContext(element.keyword, 0)};
                     }
+
                     break;
                 // Monster
                 case 1:
