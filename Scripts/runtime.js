@@ -1,5 +1,6 @@
 // This script holds code that runs immediately at runtime
 
+
 initializeGame();
 
 document.addEventListener('keydown', function(event) {

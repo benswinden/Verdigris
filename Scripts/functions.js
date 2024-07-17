@@ -1,4 +1,4 @@
-let version = 0.007;
+let version = 0.009;
 
 let lvl = 0;
 let xp = 0;
@@ -81,6 +81,8 @@ let monsters = [
         description: "",
         hp: 0,
         attackPower: 0,
+        xp: 0,
+        gold: 0,
         actions: [
             {
                 type: 0,
@@ -90,8 +92,9 @@ let monsters = [
         ]
     }
 ];
-// Stores information about monsters that changes as the player interacts with them
-let monstersUpdated = []
+// Store these containers at runtime because they will be modified as the player plays
+let monstersModified = [];
+let locationsModified = [];
 
 let items = [];
 
@@ -130,7 +133,8 @@ function initializeGame() {
         currentContextType = 0;
         locationsVisited = [];
 
-        monstersUpdated = monsters;
+        monstersModified = monsters;
+        locationsModified = locations;
 
         save();
     }
@@ -157,6 +161,13 @@ function updateLocation() {
     button4.style.display = "none";
     button5.style.display = "none";
     button6.style.display = "none";
+    button1.onclick = '';
+    button2.onclick = '';
+    button3.onclick = '';
+    button4.onclick = '';
+    button5.onclick = '';
+    button6.onclick = '';
+
     narrationText.style.display = "none";
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
@@ -181,37 +192,37 @@ function updateLocation() {
             locationsVisited.push(currentContext);
             save();
             
-            if (locations[currentContext].narration != "") {
+            if (locationsModified[currentContext].narration != "") {
                 narrationText.style.display = "block";
-                narrationText.innerText = locations[currentContext].narration;  // Add the narration text so it appears before the main text for the locat                
+                narrationText.innerText = locationsModified[currentContext].narration;  // Add the narration text so it appears before the main text for the locat                
             }
         }
 
-        actions = locations[currentContext].actions;
+        actions = locationsModified[currentContext].actions;
 
         mainTitleText.style.color = mainTitleActive;
         secondaryTitle.style.display = "none";
         
-        mainTitleText.innerText = locations[currentContext].title;                
-        mainText.innerText = locations[currentContext].description;    
+        mainTitleText.innerText = locationsModified[currentContext].title;                
+        mainText.innerText = locationsModified[currentContext].description;    
     }
     // If currentLocationType != 0 - We are currently in a secondary context
     else if (currentContextType != 0) {
         
-        mainTitleText.innerText = locations[storedLocation].title;
+        mainTitleText.innerText = locationsModified[storedLocation].title;
         mainTitleText.style.color = secondaryTitleActive;
         secondaryTitle.style.display = "flex";
         
         // Change the array of actions we are looking at depending on the context type
         switch (currentContextType) {
             case 1:
-                secondaryTitleText.innerText = monstersUpdated[currentContext].title;
-                mainText.innerText = monstersUpdated[currentContext].description;
+                secondaryTitleText.innerText = monstersModified[currentContext].title;
+                mainText.innerText = monstersModified[currentContext].description;
 
                 monsterHpSection.style.display = "block";
                 updateMonsterUI();
 
-                actions = monstersUpdated[currentContext].actions;
+                actions = monstersModified[currentContext].actions;
                 break;
             case 2:                
                 break;
@@ -332,7 +343,7 @@ function changeContext(keyword, contextType) {
     // If it's not a secondary context, we look for the new location within locations
     if (contextType === 0) {
 
-        locations.forEach((element, index) => {
+        locationsModified.forEach((element, index) => {
             if (element.keyword == keyword) {
                 currentContext = index;
                 currentContextType = 0;
@@ -344,7 +355,7 @@ function changeContext(keyword, contextType) {
     else if (contextType > 0) {        
 
         // Search for the context we linked within the monsters group
-        monstersUpdated.forEach((element, index) => {
+        monstersModified.forEach((element, index) => {
             if (element.keyword == keyword) {
                 storedLocation = currentContext;
                 currentContext = index;            
@@ -378,8 +389,8 @@ function changeContext(keyword, contextType) {
 
 function updateMonsterUI() {
 
-    monsterHpText.innerText = monstersUpdated[currentContext].hpCurrent + "/" + monstersUpdated[currentContext].hpMax;
-    let monsterHpCurrentPercent = monstersUpdated[currentContext].hpCurrent / monstersUpdated[currentContext].hpMax * 100;
+    monsterHpText.innerText = monstersModified[currentContext].hpCurrent + "/" + monstersModified[currentContext].hpMax;
+    let monsterHpCurrentPercent = monstersModified[currentContext].hpCurrent / monstersModified[currentContext].hpMax * 100;
     // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
     monsterHpBar.style.width = monsterHpCurrentPercent * 2 + 'px';
 }
@@ -413,13 +424,33 @@ function doAction(actionString) {
 function attack() {
 
     console.log("attack() - Attack Power: " + attackPower);
-    monstersUpdated[currentContext].hpCurrent -= attackPower;
+    monstersModified[currentContext].hpCurrent -= attackPower;
     updateMonsterUI();
-    hp -= monstersUpdated[currentContext].attack;
+    hp -= monstersModified[currentContext].attackPower;
     updateStats();
+    save();
 
-    let updateString = "You do " + attackPower + " damage to the " + monstersUpdated[currentContext].shortTitle + ".\nThe " + monstersUpdated[currentContext].shortTitle + " does " + monstersUpdated[currentContext].attack + " damage to you."
+    if (hp <= 0) {
+        console.log("PLAYER DEAD");
+    }
+    // Check if the monster is dead
+    else if (monstersModified[currentContext].hpCurrent <= 0) {
+
+        let monsterIndex = returnMonsterIndex(locationsModified[storedLocation].actions, monstersModified[currentContext].keyword);        
+        locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the array                
+        let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
+
+        xp += monstersModified[currentContext].xp;
+
+        returnToPrimaryContext();
+        addUpdateText(storedMonsterString);
+    }    
+    // Add update text that provides info about attack damages
+    else {
+
+    let updateString = "You do " + attackPower + " damage to the " + monstersModified[currentContext].shortTitle + ".\nThe " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].attackPower + " damage to you."    
     addUpdateText(updateString);
+    }
 }
 
 function dodge() {
@@ -431,6 +462,7 @@ function returnToPrimaryContext() {
     currentContext = storedLocation;
     storedLocation = -1;
     currentContextType = 0;
+
     save();
     updateLocation();
 }
@@ -456,7 +488,8 @@ function save() {
     localStorage.setItem('gold', JSON.stringify(gold));
     localStorage.setItem('attackPower', JSON.stringify(attackPower));
 
-    localStorage.setItem('monstersUpdated', JSON.stringify(monstersUpdated));
+    localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
+    localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
   }
   
   function load() {
@@ -473,7 +506,8 @@ function save() {
     gold = JSON.parse(localStorage.getItem('gold'));
     attackPower = JSON.parse(localStorage.getItem('attackPower'));
 
-    monstersUpdated = JSON.parse(localStorage.getItem('monstersUpdated'));
+    locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
+    monstersModified = JSON.parse(localStorage.getItem('monstersUpdated'));
   }
 
   function versionCheck() {
@@ -487,6 +521,20 @@ function save() {
 
     localStorage.clear();
     initializeGame();
+  }
+
+  // Within a locations actions array, search for a given monster and return it's index within that array
+  function returnMonsterIndex(ar, key) {
+    
+    let monsterIndex = -1;
+    ar.forEach((element, i) => {        
+        if (element.keyword === key) {
+            
+            monsterIndex = i;            
+        }
+    });
+
+    return monsterIndex;
   }
 
   // DEBUG
