@@ -8,22 +8,26 @@ locations = [
             {
                 type: 5,
                 title: "North",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "West",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "East",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 0,
                 title: "South towards a gaping crevasse",
-                keyword: "canyon_edge"
+                keyword: "canyon_edge",
+                blocked: ""
             }
         ]
     },    
@@ -36,22 +40,26 @@ locations = [
             {
                 type: 0,
                 title: "North up a grassy hill",
-                keyword: "grassy_hill"
+                keyword: "grassy_hill",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "West",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 0,
                 title: "East into the tall grass at the canyon's edge",
-                keyword: "thicket"
+                keyword: "thicket",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "South",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             }            
         ]
     },
@@ -64,22 +72,26 @@ locations = [
             {
                 type: 5,
                 title: "North",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 0,
                 title: "West to the canyon's edge",
-                keyword: "canyon_edge"
+                keyword: "canyon_edge",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "East",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 0,
                 title: "South down a slippery slope",
-                keyword: "slippery_slope"
+                keyword: "slippery_slope",
+                blocked: ""
             }
         ]
     },
@@ -92,27 +104,32 @@ locations = [
             {
                 type: 0,
                 title: "North into the tall grass at the canyon's edge",
-                keyword: "thicket"
+                keyword: "thicket",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "West",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "East",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "South",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 0,
                 title: "Climb down the slippery slope",
-                keyword: "canyon_bottom"
+                keyword: "canyon_bottom",
+                blocked: ""
             },
         ]
     },
@@ -125,22 +142,26 @@ locations = [
             {
                 type: 5,
                 title: "North",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "West",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 0,
                 title: "East to the canyon's end",
-                keyword: "canyon_gate"
+                keyword: "canyon_gate",
+                blocked: ""
             },
             {
                 type: 5,
                 title: "South",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
         ]
     },
@@ -154,27 +175,32 @@ locations = [
             {
                 type: 5,
                 title: "North",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },
             {
                 type: 0,
-                title: "Travel west deeper into the canyon",
-                keyword: "canyon_bottom"
+                title: "West to travel deeper into the canyon",
+                keyword: "canyon_bottom",
+                blocked: ""
             },
             {
                 type: 0,
-                title: "Travel east through the ancient gateway",
-                keyword: "canyon_bottom"
+                title: "East through the ancient gateway",
+                keyword: "canyon_bottom",
+                blocked: "dead_knight"
             },
             {
                 type: 5,
                 title: "South",
-                keyword: ""
+                keyword: "",
+                blocked: ""
             },            
             {
                 type: 1,
                 title: "A long dead knight in rusted armor stands in your path",
-                keyword: "dead_knight"
+                keyword: "dead_knight",
+                blocked: ""
             }
         ]
     }

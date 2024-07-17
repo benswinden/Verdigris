@@ -66,9 +66,10 @@ let locations = [{
     narration: "",
     actions: [
         {
-            type: 0,
-            title: "",
-            keyword: ""
+            type: 0,        // Determines what the button looks like, and what it does 0 = Location, 1 = Monster, 2 = Item, 3 = NPC, 4 = Misc Action, 5 = Locked
+            title: "",      // String used in the button
+            keyword: "",    // key used to search for the associated action
+            blocked: "",    // If this monster is present, this location is blocked
         }        
     ]
 }];
@@ -89,6 +90,9 @@ let monsters = [
         ]
     }
 ];
+// Stores information about monsters that changes as the player interacts with them
+let monstersUpdated = []
+
 let items = [];
 
 
@@ -112,6 +116,7 @@ function initializeGame() {
     }
     // No save game, so start a new game
     else {
+
         console.log("Save game doesn't exist");
         lvl = 1;
         xp = 0;
@@ -124,6 +129,8 @@ function initializeGame() {
         storedLocation = -1;
         currentContextType = 0;
         locationsVisited = [];
+
+        monstersUpdated = monsters;
 
         save();
     }
@@ -198,23 +205,26 @@ function updateLocation() {
         // Change the array of actions we are looking at depending on the context type
         switch (currentContextType) {
             case 1:
-                secondaryTitleText.innerText = monsters[currentContext].title;
-                mainText.innerText = monsters[currentContext].description;
+                secondaryTitleText.innerText = monstersUpdated[currentContext].title;
+                mainText.innerText = monstersUpdated[currentContext].description;
 
                 monsterHpSection.style.display = "block";
                 updateMonsterUI();
 
-                actions = monsters[currentContext].actions;
+                actions = monstersUpdated[currentContext].actions;
                 break;
             case 2:                
                 break;
         }
     }
 
-    if (actions.length > 0) {        
+    if (actions.length > 0) {    
+
         actions.forEach((element, index) => {
             
+            let additionalButtonString = "";        // If any additional text needs to be appended to a button
             let button = button1;
+            
             switch (index) {
                 case 0:
                     button = button1;
@@ -240,11 +250,29 @@ function updateLocation() {
                 
                 // Location
                 case 0:
-                    button.style.backgroundColor = buttonBackColorLocation;
-                    button.style.color = buttonTextColorDefault;
-                    button.classList.add("can-hover");
+                                        
+                    // Check whether this is a location that may be blocked by a monster
+                    if (element.blocked != "") {
+                        
+                        // Loop through all actions to see if there is a monster with a matching keyword
+                        actions.forEach((actionElement, index) => {                            
+                            if (element.blocked == actionElement.keyword) {
+                                
+                                button.style.backgroundColor = buttonBackcolorLocked;
+                                button.style.color = buttonTextColorLocked;
+                                button.classList.remove("can-hover");
+                                additionalButtonString += " [Blocked]";
+                            }
+                        });
+                    }
+                    else {
+                
+                        button.style.backgroundColor = buttonBackColorLocation;
+                        button.style.color = buttonTextColorDefault;
+                        button.classList.add("can-hover");
 
-                    button.onclick = function() {changeContext(element.keyword, 0)};
+                        button.onclick = function() {changeContext(element.keyword, 0)};
+                    }
                     break;
                 // Monster
                 case 1:
@@ -281,9 +309,9 @@ function updateLocation() {
                     button.style.color = buttonTextColorLocked;
                     button.classList.remove("can-hover");
                     break;
-            }
-        
-            button.innerText = element.title;
+            }        
+
+            button.innerText = element.title + additionalButtonString;            
             button.style.display = "block";
         });
     }        
@@ -311,7 +339,7 @@ function changeContext(keyword, contextType) {
     else if (contextType > 0) {        
 
         // Search for the context we linked within the monsters group
-        monsters.forEach((element, index) => {
+        monstersUpdated.forEach((element, index) => {
             if (element.keyword == keyword) {
                 storedLocation = currentContext;
                 currentContext = index;            
@@ -345,8 +373,8 @@ function changeContext(keyword, contextType) {
 
 function updateMonsterUI() {
 
-    monsterHpText.innerText = monsters[currentContext].hpCurrent + "/" + monsters[currentContext].hpMax;
-    let monsterHpCurrentPercent = monsters[currentContext].hpCurrent / monsters[currentContext].hpMax * 100;
+    monsterHpText.innerText = monstersUpdated[currentContext].hpCurrent + "/" + monstersUpdated[currentContext].hpMax;
+    let monsterHpCurrentPercent = monstersUpdated[currentContext].hpCurrent / monstersUpdated[currentContext].hpMax * 100;
     // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
     monsterHpBar.style.width = monsterHpCurrentPercent * 2 + 'px';
 }
@@ -380,12 +408,12 @@ function doAction(actionString) {
 function attack() {
 
     console.log("attack() - Attack Power: " + attackPower);
-    monsters[currentContext].hpCurrent -= attackPower;
+    monstersUpdated[currentContext].hpCurrent -= attackPower;
     updateMonsterUI();
-    hp -= monsters[currentContext].attack;
+    hp -= monstersUpdated[currentContext].attack;
     updateStats();
 
-    let updateString = "You do " + attackPower + " damage to the " + monsters[currentContext].shortTitle + ".\nThe " + monsters[currentContext].shortTitle + " does " + monsters[currentContext].attack + " damage to you."
+    let updateString = "You do " + attackPower + " damage to the " + monstersUpdated[currentContext].shortTitle + ".\nThe " + monstersUpdated[currentContext].shortTitle + " does " + monstersUpdated[currentContext].attack + " damage to you."
     addUpdateText(updateString);
 }
 
@@ -423,7 +451,7 @@ function save() {
     localStorage.setItem('gold', JSON.stringify(gold));
     localStorage.setItem('attackPower', JSON.stringify(attackPower));
 
-    localStorage.setItem('monsters', JSON.stringify(monsters));
+    localStorage.setItem('monstersUpdated', JSON.stringify(monstersUpdated));
   }
   
   function load() {
@@ -440,7 +468,7 @@ function save() {
     gold = JSON.parse(localStorage.getItem('gold'));
     attackPower = JSON.parse(localStorage.getItem('attackPower'));
 
-    monsters = JSON.parse(localStorage.getItem('monsters'));
+    monstersUpdated = JSON.parse(localStorage.getItem('monstersUpdated'));
   }
 
   function versionCheck() {
