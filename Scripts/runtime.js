@@ -1,10 +1,7 @@
 // This script holds code that runs immediately at runtime
 
-
-initializeGame();
-
 document.addEventListener('keydown', function(event) {
-    if (event.code == 'Tab') {
+    if (event.code == 'Escape') {
         if (!debugActive) {
             debugWindow.style.display = "block";
             debugActive = true;
@@ -15,3 +12,37 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+
+// DEBUG
+debugButton1.onclick = function() { resetGame()};
+debugButton2.onclick = function() { lvl++; save(); updateStats();};  
+debugButton3.onclick = function() { xp++; save(); updateStats();};
+debugButton4.onclick = function() { hp++; save(); updateStats();};
+debugButton5.onclick = function() { gold++; save(); updateStats();};
+
+if (localStorage.getItem('resetLocations')) {
+    resetLocations = JSON.parse(localStorage.getItem('resetLocations'));
+}
+
+if (resetLocations)
+    resetLocationsCheckbox.checked = true;
+else
+    resetLocationsCheckbox.checked = false;
+
+
+resetLocationsCheckbox.onclick = function() {
+
+    if (resetLocationsCheckbox.checked == true){
+        resetLocations = true;
+    }
+    else {
+        resetLocations = false;
+    }
+    
+    localStorage.setItem('resetLocations', JSON.stringify(resetLocations));
+};
+
+
+
+initializeGame();

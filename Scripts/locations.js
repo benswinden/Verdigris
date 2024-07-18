@@ -1,236 +1,237 @@
 locations = [
     {
-        keyword: "grassy_hill",
-        title: "A Grassy Hill",        
-        description: "The top of a tall hill covered with tall yellow grass and orange clover. From here, you can see down the long slope before you, into the Valley below.",
-        narration: "You awaken atop a gentle sloping grass covered hill. Strange.",
+        keyword: "narration_01_01",
+        title: "",        
+        description: "",
+        narration: "In the misty lands stands an ancient tower. The space inside that tower is shaped and twisted. The tower's innards have far outgrown it's worldly boundaries.",
         actions: [
-            {
-                type: 5,
-                title: "North",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "West",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "East",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "South towards a gaping crevasse",
-                keyword: "canyon_edge",
-                blocked: ""
-            }
-        ]
-    },    
-    {
-        keyword: "canyon_edge",
-        title: "At the Canyon's Edge",
-        description: "The rocks and earth have torn themselves apart here, leaving a wide chasm in your path. Reaching out of it’s darkness are masses of twisting grass and vines that had obscured it from your view until you were right up on it.",
-        narration: "",
-        actions: [
-            {
-                type: 0,
-                title: "North up a grassy hill",
-                keyword: "grassy_hill",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "West",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "East into the tall grass at the canyon's edge",
-                keyword: "thicket",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "South",
-                keyword: "",
-                blocked: ""
-            }            
-        ]
-    },
-    {
-        keyword: "thicket",
-        title: "Into the Thicket",        
-        description: "Masses of tangled grasses grow right up to the canyon edge but a trickle of water from a wide leaf above you has created a thin passageway. The sweet smell of blossoms over you head filters down into this tangled thicket.",
-        narration: "",
-        actions: [
-            {
-                type: 5,
-                title: "North",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "West to the canyon's edge",
-                keyword: "canyon_edge",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "East",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "South down a slippery slope",
-                keyword: "slippery_slope",
-                blocked: ""
-            }
-        ]
-    },
-    {
-        keyword: "slippery_slope",
-        title: "A Slippery Slope",        
-        description: "Earth and stone angle downwards, gently at first then sharply. The rock has broken apart, forming several natural ledges that lead downwards into the canyon. \n\nTrickling water has made the stone here slick and there’s little to grab on to for balance.",
-        narration: "",
-        actions: [   
-            {
-                type: 0,
-                title: "North into the tall grass at the canyon's edge",
-                keyword: "thicket",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "West",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "East",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "South",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "Climb down the slippery slope",
-                keyword: "canyon_bottom",
-                blocked: ""
-            },
-        ]
-    },
-    {
-        keyword: "canyon_bottom",
-        title: "Bottom of the Canyon",        
-        description: "Surrounded by earth and rock, the bottom of the canyon is cool and damp.",
-        narration: "You move close to the edge of the rock shelf, looking for a way down. The wet stone has become a perfect bed for a thin layer of slime that coats the rock and when your weight falls on a particularly slimy patch, your foot comes out from under you.\n\nYour body hits the rock and you lose control, rolling over the side. Your fingers catch the rock edge for exactly one second of sheer panic before you lose grip and fall. Down, down, down until you stop with a bone shattering impact followed quickly by a surrender to darkness.",
-        actions: [
-            {
-                type: 5,
-                title: "North",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "West",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "East to the canyon's end",
-                keyword: "canyon_gate",
-                blocked: ""
-            },
-            {
-                type: 5,
-                title: "South",
-                keyword: "",
-                blocked: ""
-            },
-        ]
-    },
-    {
-        keyword: "canyon_gate",
-        title: "Ruined Canyon Gate",
-        description: "Before you towers the remains of a massive gate that may have once ushered travellers from afar into the Lowland Provinces. Now only the carved stone remains, though much has erroded and fallen away.",
-        narration: "The canyon's quiet is broken by the sound of metal on metal as a dark figure slowly raises itself from a shadow in the rock where it had been sitting lifelessly.",
-        actions: [
-
-            {
-                type: 5,
-                title: "North",
-                keyword: "",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "West to travel deeper into the canyon",
-                keyword: "canyon_bottom",
-                blocked: ""
-            },
-            {
-                type: 0,
-                title: "East through the ancient gateway",
-                keyword: "gatefront_camp",
-                blocked: "dead_knight"
-            },
-            {
-                type: 5,
-                title: "South",
-                keyword: "",
-                blocked: ""
-            },            
             {
                 type: 1,
-                title: "A long dead knight in rusted armor stands in your path",
-                keyword: "dead_knight",
+                title: "Next",
+                keyword: "narration_01_02",
                 blocked: ""
             }
         ]
-    },    
+    },
     {
-        keyword: "gatefront_camp",
-        title: "Ragged Encampment Before the Canyon Gate",
-        description: "Before you towers the remains of a massive gate that may have once ushered travellers from afar into the Lowland Provinces. Now only the carved stone remains, though much has erroded and fallen away.",
-        narration: "",
+        keyword: "narration_01_02",
+        title: "",        
+        description: "",
+        narration: "High up in the upper most reaches of the towers many floors lives something very old and dead. A presence so evil that it's influence continues to seep throughout the mortal realms.",
         actions: [
-
             {
-                type: 5,
+                type: 1,
+                title: "Next",
+                keyword: "narration_01_03",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "narration_01_03",
+        title: "",        
+        description: "",
+        narration: "A curse has spread through the surrounding lands. A calling curse. To the tower it calls.",
+        actions: [
+            {
+                type: 1,
+                title: "Next",
+                keyword: "edge_wood",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "edge_wood",
+        title: "Edge of the Woods",        
+        description: "The darkened woods have slowly made way to shrubs and saplings where the forest meets the fields. The well-worn trail leads below to the ruins of an old village, and at it's center a black tower reaches up into the mist.",
+        narration: "You awaken as if from a stupor. The last weeks and months blur together in your mind and where they've lead you is not entirely clear.",
+        actions: [
+            {
+                type: 2,
                 title: "North",
                 keyword: "",
                 blocked: ""
             },
             {
-                type: 0,
-                title: "West through the ancient gateway",
-                keyword: "canyon_gate",
+                type: 2,
+                title: "West",
+                keyword: "",
                 blocked: ""
             },
             {
-                type: 5,
+                type: 1,
+                title: "East to the Ruined Settlement",
+                keyword: "village_outskirts",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: "",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "village_outskirts",
+        title: "Village Outskirts",
+        description: "An old cobbled road leads you in among the ruined structures. The buildings are skeletal as only the moss-covered stones remain.",
+        narration: "A cool mist sifts through the gray clouds above.",
+        actions: [
+            {
+                type: 1,
+                title: "North into a ruined structure lit by a dull light",
+                keyword: "lamplit_ruin",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "East towards the Town Square",
+                keyword: "town_square",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: "",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "lamplit_ruin",
+        title: "Inside a Firelit Ruin",
+        description: "A damp, mucky interior with some broken wood and debris doing a poor job at sheltering it from the elements. A greasy lamp swings gently from a rafter.",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
                 title: "East",
                 keyword: "",
                 blocked: ""
             },
             {
-                type: 5,
+                type: 1,
+                title: "South to the Village Outskirts",
+                keyword: "village_outskirts",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "town_square",
+        title: "The Town Square",        
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "West to the Village Outskirts",
+                keyword: "village_outskirts",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "South to the Old Market",
+                keyword: "temple_market",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "temple_market",
+        title: "The Temple Market",        
+        description: "A winding street, that once lead to a place of worship. The stones here are covered in rich green and purple mosses. Propped up inside a ruined wall is a makeshift tent, providing some respite from the dripping rain. From within, a small campfire is flickering away.",
+        narration: "",
+        actions: [
+            {
+                type: 1,
+                title: "North to the Town Square",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: "",
+                blocked: ""
+            }
+        ]
+    }
+
+
+
+
+    ,
+    {
+        keyword: "temp",
+        title: "Template",        
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
                 title: "South",
                 keyword: "",
                 blocked: ""

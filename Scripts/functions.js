@@ -8,7 +8,7 @@ let gold = 0;
 let attackPower = 0;
 
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
-let currentContextType = 0;     // 0 = Location, 1 = Monster, 2 = Item, 3 = NPC
+let currentContextType = 0;     // 1 = Location, 2 = Monster, 3 = Item, 4 = NPC
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
 
@@ -24,6 +24,7 @@ const hpText = document.querySelector('#hp-text');
 const goldText = document.querySelector('#gold-text');
 // Main Content
 const mainTitleText =  document.querySelector('#main-title-text');
+const mainTitleIcon =  document.querySelector('#main-title-icon');
 const secondaryTitle =  document.querySelector('#secondary-title');
 const secondaryTitleText =  document.querySelector('#secondary-title-text');
 const mainText =  document.querySelector('#main-text');
@@ -46,6 +47,9 @@ const debugButton2 = document.querySelector('#debug-button2');
 const debugButton3 = document.querySelector('#debug-button3');
 const debugButton4 = document.querySelector('#debug-button4');
 const debugButton5 = document.querySelector('#debug-button5');
+const resetLocationsCheckbox = document.querySelector('#resetLocations');
+let resetLocations = false;     // We use this for debug, when selected on reload we will always re-write locationsModified from locations so that updates to the games content can be tested immediately without needing to reset the whole game
+
 //Colors
 const buttonBackColorLocation = '#EAEAEA';
 const buttonBackcolorEnemy = '#FFAFAF';
@@ -66,7 +70,7 @@ let locations = [{
     narration: "",
     actions: [
         {
-            type: 0,        // Determines what the button looks like, and what it does 0 = Location, 1 = Monster, 2 = Item, 3 = NPC, 4 = Misc Action, 5 = Locked
+            type: 0,        // Determines what the button looks like, and what it does 1 = Location, 2 = Monster, 3 = Item, 4 = NPC, 5 = Misc Action, 6 = Locked
             title: "",      // String used in the button
             keyword: "",    // key used to search for the associated action
             blocked: "",    // If this monster is present, this location is blocked
@@ -171,6 +175,7 @@ function updateLocation() {
     narrationText.style.display = "none";
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
+    mainTitleIcon.style.display = "block";    
 
     // By default, we'll be getting our action buttons from a location
     let actions = [];    
@@ -203,13 +208,15 @@ function updateLocation() {
         mainTitleText.style.color = mainTitleActive;
         secondaryTitle.style.display = "none";
         
-        mainTitleText.innerText = locationsModified[currentContext].title;                
+        mainTitleText.innerText = locationsModified[currentContext].title;
+        if (locationsModified[currentContext].title == "") mainTitleIcon.style.display = "none";
         mainText.innerText = locationsModified[currentContext].description;    
     }
     // If currentLocationType != 0 - We are currently in a secondary context
     else if (currentContextType != 0) {
         
         mainTitleText.innerText = locationsModified[storedLocation].title;
+        if (locationsModified[storedLocation].title == "") mainTitleIcon.style.display = "none";
         mainTitleText.style.color = secondaryTitleActive;
         secondaryTitle.style.display = "flex";
         
@@ -259,8 +266,12 @@ function updateLocation() {
             
             switch (element.type) {
                 
-                // Location
+                // There is no type 0
                 case 0:
+                    console.error("updateLocation() - Error " + element.title + " action[ "+ index + "] has type 0");
+                    break;
+                // Location
+                case 1:
                                         
                     // Check whether this is a location that may be blocked by a monster
                     let monsterFound = false;
@@ -290,8 +301,14 @@ function updateLocation() {
                     }
 
                     break;
+                // Locked Action
+                case 2:                    
+                    button.style.backgroundColor = buttonBackcolorLocked;
+                    button.style.color = buttonTextColorLocked;
+                    button.classList.remove("can-hover");
+                    break;
                 // Monster
-                case 1:
+                case 3:
                     button.style.backgroundColor = buttonBackcolorEnemy;
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
@@ -299,32 +316,25 @@ function updateLocation() {
                     button.onclick = function() {changeContext(element.keyword, 1)};
                     break;
                 // ITEM
-                case 2:
+                case 4:
                     button.style.backgroundColor = buttonBackcolorItem;
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
                     break;
                 // NPC
-                case 3:
+                case 5:
                     button.style.backgroundColor = buttonBackcolorNPC;
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
                     break;
                 // Misc Action
-                case 4:
+                case 6:
                     button.style.backgroundColor = buttonBackColorLocation;                    
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
 
                     button.onclick = function() {doAction(element.func)};                    
-                    break;
-                // Locked Action
-                case 5:
-                    
-                    button.style.backgroundColor = buttonBackcolorLocked;
-                    button.style.color = buttonTextColorLocked;
-                    button.classList.remove("can-hover");
-                    break;
+                    break;                
             }        
 
             button.innerText = element.title + additionalButtonString;            
@@ -506,7 +516,10 @@ function save() {
     gold = JSON.parse(localStorage.getItem('gold'));
     attackPower = JSON.parse(localStorage.getItem('attackPower'));
 
-    locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
+    if (!resetLocations)
+        locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
+    else
+        locationsModified = locations;
     monstersModified = JSON.parse(localStorage.getItem('monstersUpdated'));
   }
 
@@ -536,11 +549,3 @@ function save() {
 
     return monsterIndex;
   }
-
-  // DEBUG
-
-  debugButton1.onclick = function() { resetGame()};
-  debugButton2.onclick = function() { lvl++; save(); updateStats();};  
-  debugButton3.onclick = function() { xp++; save(); updateStats();};
-  debugButton4.onclick = function() { hp++; save(); updateStats();};
-  debugButton5.onclick = function() { gold++; save(); updateStats();};
