@@ -1,3 +1,5 @@
+// 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
+
 monsters = [
     {
         keyword: "slime",
@@ -10,17 +12,17 @@ monsters = [
         gold: 10,
         actions: [
             {
-                type: 4,
+                type: 6,
                 title: "Attack with your sword",
                 func: "attack"
             },
             {
-                type: 4,
+                type: 6,
                 title: "Dodge the incoming attack",
                 func: "dodge"
             },
             {
-                type: 4,
+                type: 6,
                 title: "Run away",
                 func: "returnToPrimaryContext"
             }            
@@ -38,12 +40,12 @@ monsters = [
         gold: 10,
         actions: [
             {
-                type: 4,
+                type: 6,
                 title: "Attack with your sword",
                 func: "attack"
             },
             {
-                type: 4,
+                type: 6,
                 title: "Run away",
                 func: "returnToPrimaryContext"
             }            

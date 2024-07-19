@@ -1,6 +1,7 @@
+// #region VARIABLES
+
 let version = 0.009;
 
-let lvl = 0;
 let xp = 0;
 let hp = 0;
 let gold = 0;
@@ -8,7 +9,7 @@ let gold = 0;
 let attackPower = 0;
 
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
-let currentContextType = 0;     // 1 = Location, 2 = Monster, 3 = Item, 4 = NPC
+let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
 
@@ -18,13 +19,11 @@ let updateTextString = "";
 let debugActive = false;
 
 // Stats
-const lvlText = document.querySelector('#lvl-text');
 const xpText = document.querySelector('#xp-text');
 const hpText = document.querySelector('#hp-text');
 const goldText = document.querySelector('#gold-text');
 // Main Content
 const mainTitleText =  document.querySelector('#main-title-text');
-const mainTitleIcon =  document.querySelector('#main-title-icon');
 const secondaryTitle =  document.querySelector('#secondary-title');
 const secondaryTitleText =  document.querySelector('#secondary-title-text');
 const mainText =  document.querySelector('#main-text');
@@ -62,7 +61,7 @@ const buttonTextColorLocked = '#989898';
 const mainTitleActive = '#101010';
 const secondaryTitleActive = '#757575';
 
-// Containers
+// #region Containers
 let locations = [{
     keyword: "",
     title: "",        
@@ -70,13 +69,14 @@ let locations = [{
     narration: "",
     actions: [
         {
-            type: 0,        // Determines what the button looks like, and what it does 1 = Location, 2 = Monster, 3 = Item, 4 = NPC, 5 = Misc Action, 6 = Locked
+            type: 0,        // Determines what the button looks like, and what it does // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
             title: "",      // String used in the button
             keyword: "",    // key used to search for the associated action
             blocked: "",    // If this monster is present, this location is blocked
         }        
     ]
 }];
+
 let monsters = [
     {
         keyword: "",
@@ -102,7 +102,11 @@ let locationsModified = [];
 
 let items = [];
 
+// #endregion
 
+//#endregion
+
+// #region GAME CORE
 
 function initializeGame() {
 
@@ -124,8 +128,7 @@ function initializeGame() {
     // No save game, so start a new game
     else {
 
-        console.log("Save game doesn't exist");
-        lvl = 1;
+        console.log("Save game doesn't exist");        
         xp = 0;
         hp = 100;
         gold = 20;    
@@ -147,14 +150,62 @@ function initializeGame() {
     updateLocation();
 }
 
-function updateStats() {
+// Change our current context - 
+// Finds the index of the context we want to go to using the keyword and context type pair as different context types will pull data from different arrays
+// We use a keyword instead of relying only on index for human readibility
+function changeContext(keyword, contextType) {
 
-    lvlText.innerText = lvl;
-    xpText.innerText = xp;
-    hpText.innerText = hp;
-    goldText.innerText = gold;
+    console.log("changeLocation - keyword:" + keyword + "   contextType:" + contextType);
+
+    let entryFound = false;
+    // If it's not a secondary context, we look for the new location within locations
+    if (contextType === 0) {
+
+        locationsModified.forEach((element, index) => {
+            if (element.keyword == keyword) {
+                currentContext = index;
+                currentContextType = 0;
+                storedLocation = -1;
+                entryFound = true;
+            }
+        });    
+    }
+    else if (contextType > 0) {        
+
+        // Search for the context we linked within the monsters group
+        monstersModified.forEach((element, index) => {
+            if (element.keyword == keyword) {
+                storedLocation = currentContext;
+                currentContext = index;            
+                currentContextType = 1;
+                entryFound = true;
+            }
+        });
+
+        // If we didn't find the entry as a monster we search for it in items
+        if (!entryFound) {
+
+            items.forEach((element, index) => {
+                if (element.keyword == keyword) {
+                    storedLocation = currentContext
+                    currentContext = index;                    
+                    currentContextType = 2;
+                    entryFound = true;
+                }
+            });
+        }
+    }
+
+    if (entryFound) {
+        save();
+        updateLocation();
+    }
+    else if (!entryFound) {
+        console.error("ChangeContext() - Couldn't find the keyword [" + keyword + "] as contextType: " + contextType);
+    }
 }
 
+// Update the UI to reflect a change in context, or other significant changes in the gameplay state
 function updateLocation() {    
     
     console.log("updateLocation - currentLocation: " + currentContext + "   currentLocationType: " + currentContextType + "    storedLocation: " + storedLocation);
@@ -174,8 +225,7 @@ function updateLocation() {
 
     narrationText.style.display = "none";
     updateText.style.display = "none";
-    monsterHpSection.style.display = "none";
-    mainTitleIcon.style.display = "block";    
+    monsterHpSection.style.display = "none";    
 
     // By default, we'll be getting our action buttons from a location
     let actions = [];    
@@ -208,15 +258,13 @@ function updateLocation() {
         mainTitleText.style.color = mainTitleActive;
         secondaryTitle.style.display = "none";
         
-        mainTitleText.innerText = locationsModified[currentContext].title;
-        if (locationsModified[currentContext].title == "") mainTitleIcon.style.display = "none";
+        mainTitleText.innerText = locationsModified[currentContext].title;        
         mainText.innerText = locationsModified[currentContext].description;    
     }
     // If currentLocationType != 0 - We are currently in a secondary context
     else if (currentContextType != 0) {
         
-        mainTitleText.innerText = locationsModified[storedLocation].title;
-        if (locationsModified[storedLocation].title == "") mainTitleIcon.style.display = "none";
+        mainTitleText.innerText = locationsModified[storedLocation].title;        
         mainTitleText.style.color = secondaryTitleActive;
         secondaryTitle.style.display = "flex";
         
@@ -343,58 +391,12 @@ function updateLocation() {
     }        
 }
 
-// Finds the index of the context we want to go to using the keyword
-// We use a keyword instead of relying only on index for human readibility
-function changeContext(keyword, contextType) {
-
-    console.log("changeLocation - keyword:" + keyword + "   contextType:" + contextType);
-
-    let entryFound = false;
-    // If it's not a secondary context, we look for the new location within locations
-    if (contextType === 0) {
-
-        locationsModified.forEach((element, index) => {
-            if (element.keyword == keyword) {
-                currentContext = index;
-                currentContextType = 0;
-                storedLocation = -1;
-                entryFound = true;
-            }
-        });    
-    }
-    else if (contextType > 0) {        
-
-        // Search for the context we linked within the monsters group
-        monstersModified.forEach((element, index) => {
-            if (element.keyword == keyword) {
-                storedLocation = currentContext;
-                currentContext = index;            
-                currentContextType = 1;
-                entryFound = true;
-            }
-        });
-
-        // If we didn't find the entry as a monster we search for it in items
-        if (!entryFound) {
-
-            items.forEach((element, index) => {
-                if (element.keyword == keyword) {
-                    storedLocation = currentContext
-                    currentContext = index;                    
-                    currentContextType = 2;
-                    entryFound = true;
-                }
-            });
-        }
-    }
-
-    if (entryFound) {
-        save();
-        updateLocation();
-    }
-    else if (!entryFound) {
-        console.error("ChangeContext() - Couldn't find the keyword [" + keyword + "] as contextType: " + contextType);
-    }
+// Update the header with current stat values
+function updateStats() {
+    
+    xpText.innerText = xp;
+    hpText.innerText = hp;
+    goldText.innerText = gold;
 }
 
 function updateMonsterUI() {
@@ -411,9 +413,9 @@ function addUpdateText(text) {
     updateText.innerText = text;
 }
 
+// #endregion
 
-
-// ACTIONS
+// #region ACTIONS
 
 // Translate a string provided in through the context data into an action
 function doAction(actionString) {
@@ -451,6 +453,9 @@ function attack() {
         let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
 
         xp += monstersModified[currentContext].xp;
+        gold += monstersModified[currentContext].gold;
+        updateStats();
+        save();
 
         returnToPrimaryContext();
         addUpdateText(storedMonsterString);
@@ -477,11 +482,10 @@ function returnToPrimaryContext() {
     updateLocation();
 }
 
+// #endregion
 
 
-
-
-// UTILITIES
+// #region UTILITIES
 
 function save() {
 
@@ -491,8 +495,7 @@ function save() {
     localStorage.setItem('currentLocation', JSON.stringify(currentContext));
     localStorage.setItem('storedLocation', JSON.stringify(storedLocation));
     localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
-    localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));
-    localStorage.setItem('lvl', JSON.stringify(lvl));
+    localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));    
     localStorage.setItem('xp', JSON.stringify(xp));
     localStorage.setItem('hp', JSON.stringify(hp));
     localStorage.setItem('gold', JSON.stringify(gold));
@@ -509,8 +512,7 @@ function save() {
     currentContext = JSON.parse(localStorage.getItem('currentLocation'));
     storedLocation = JSON.parse(localStorage.getItem('storedLocation'));    
     currentContextType = JSON.parse(localStorage.getItem('currentLocationType'));
-    locationsVisited = JSON.parse(localStorage.getItem('locationsVisited'));
-    lvl = JSON.parse(localStorage.getItem('lvl'));
+    locationsVisited = JSON.parse(localStorage.getItem('locationsVisited'));    
     xp = JSON.parse(localStorage.getItem('xp'));
     hp = JSON.parse(localStorage.getItem('hp'));
     gold = JSON.parse(localStorage.getItem('gold'));
@@ -549,3 +551,5 @@ function save() {
 
     return monsterIndex;
   }
+
+  // #endregion

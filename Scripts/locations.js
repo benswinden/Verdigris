@@ -1,3 +1,5 @@
+// 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
+
 locations = [
     {
         keyword: "narration_01_01",
@@ -140,7 +142,7 @@ locations = [
     {
         keyword: "town_square",
         title: "The Town Square",        
-        description: "",
+        description: "At the center of the ruined village is the square. Standing in the center is a large stone statue. From here pathways spread throughout the settlement.",
         narration: "",
         actions: [
             {
@@ -165,6 +167,12 @@ locations = [
                 type: 1,
                 title: "South to the Old Market",
                 keyword: "temple_market",
+                blocked: ""
+            },
+            {
+                type: 3,
+                title: "A Long Dead Knight",
+                keyword: "dead_knight",
                 blocked: ""
             }
         ]
