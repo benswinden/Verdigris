@@ -111,7 +111,7 @@ locations = [
         keyword: "lamplit_ruin",
         title: "Inside a Firelit Ruin",
         description: "A damp, mucky interior with some broken wood and debris doing a poor job at sheltering it from the elements. A greasy lamp swings gently from a rafter.",
-        narration: "",
+        narration: "Your greeted by a thin man, squatting amongst the debris. \"Welcome friend, name's Jorrid.\"",
         actions: [
             {
                 type: 2,
@@ -135,6 +135,12 @@ locations = [
                 type: 1,
                 title: "South to the Village Outskirts",
                 keyword: "village_outskirts",
+                blocked: ""
+            },
+            {
+                type: 5,
+                title: "Jorrid squats here amongst the ruins", 
+                keyword: "jorrid",
                 blocked: ""
             }
         ]
@@ -186,7 +192,7 @@ locations = [
             {
                 type: 1,
                 title: "North to the Town Square",
-                keyword: "",
+                keyword: "town_square",
                 blocked: ""
             },
             {

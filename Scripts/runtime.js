@@ -16,7 +16,7 @@ document.addEventListener('keydown', function(event) {
 
 // DEBUG
 debugButton1.onclick = function() { resetGame()};
-debugButton2.onclick = function() { lvl++; save(); updateStats();};  
+debugButton2.onclick = function() { let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame(); changeContextDirect(x,y); storedLocation = z; };  
 debugButton3.onclick = function() { xp++; save(); updateStats();};
 debugButton4.onclick = function() { hp++; save(); updateStats();};
 debugButton5.onclick = function() { gold++; save(); updateStats();};

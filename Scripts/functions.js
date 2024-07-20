@@ -1,9 +1,10 @@
 // #region VARIABLES
 
-let version = 0.009;
+let version = 0.010;
 
 let xp = 0;
-let hp = 0;
+let hpCurrent = 0;
+let hpMax = 0;
 let gold = 0;
 
 let attackPower = 0;
@@ -87,6 +88,7 @@ let monsters = [
         attackPower: 0,
         xp: 0,
         gold: 0,
+        deathFunc: "",      // Called on monster death
         actions: [
             {
                 type: 0,
@@ -96,9 +98,35 @@ let monsters = [
         ]
     }
 ];
+
+let npcs = [
+    {
+        keyword: "",
+        title: "",
+        shortTitle: "",
+        description: "",
+        dialogueAvailable: true,
+        currentDialogue: 0,
+        actions: [
+            {
+                type: 0,
+                title: "",
+                func: ""
+            }            
+        ],
+        dialogue: [
+            {                                            
+                text: "",                
+                func: ""
+            }
+        ]
+    }
+];
+
 // Store these containers at runtime because they will be modified as the player plays
-let monstersModified = [];
 let locationsModified = [];
+let monstersModified = []
+let npcsModified = []
 
 let items = [];
 
@@ -130,18 +158,21 @@ function initializeGame() {
 
         console.log("Save game doesn't exist");        
         xp = 0;
-        hp = 100;
+        hpCurrent = 100;
+        hpMax = 100;
         gold = 20;    
 
         attackPower = 10;
 
         currentContext = 0;
         storedLocation = -1;
-        currentContextType = 0;
+        currentContextType = 1;
         locationsVisited = [];
 
-        monstersModified = monsters;
-        locationsModified = locations;
+        // Using JSON to create deep clones of our starting data arrays
+        locationsModified = JSON.parse(JSON.stringify(locations));
+        monstersModified = JSON.parse(JSON.stringify(monsters));
+        npcsModified = JSON.parse(JSON.stringify(npcs));
 
         save();
     }
@@ -159,25 +190,25 @@ function changeContext(keyword, contextType) {
 
     let entryFound = false;
     // If it's not a secondary context, we look for the new location within locations
-    if (contextType === 0) {
+    if (contextType === 1) {
 
         locationsModified.forEach((element, index) => {
             if (element.keyword == keyword) {
                 currentContext = index;
-                currentContextType = 0;
+                currentContextType = 1;
                 storedLocation = -1;
                 entryFound = true;
             }
         });    
     }
-    else if (contextType > 0) {        
+    else if (contextType > 1) {        
 
-        // Search for the context we linked within the monsters group
+        // Search for the context we linked within the monsters group        
         monstersModified.forEach((element, index) => {
             if (element.keyword == keyword) {
                 storedLocation = currentContext;
                 currentContext = index;            
-                currentContextType = 1;
+                currentContextType = 3;
                 entryFound = true;
             }
         });
@@ -189,7 +220,21 @@ function changeContext(keyword, contextType) {
                 if (element.keyword == keyword) {
                     storedLocation = currentContext
                     currentContext = index;                    
-                    currentContextType = 2;
+                    currentContextType = 4;
+                    entryFound = true;
+                }
+            });
+        }
+
+        // If we didn't find the entry as a monster we search for it in npcs
+        if (!entryFound) {
+            
+            npcs.forEach((element, index) => {
+
+                if (element.keyword == keyword) {
+                    storedLocation = currentContext
+                    currentContext = index;                    
+                    currentContextType = 5;
                     entryFound = true;
                 }
             });
@@ -205,10 +250,32 @@ function changeContext(keyword, contextType) {
     }
 }
 
+// Used to go directly to a known context
+function changeContextDirect(contextIndex, contextType) {
+    
+    let keyword = "";
+    switch (contextType) {
+        case 1://Location
+            keyword = locationsModified[contextIndex].keyword;
+            break;
+        case 3://Monster
+            keyword = monstersModified[contextIndex].keyword;
+            break;
+        case 4://Item
+            //keyword = monstersModified[contextIndex].keyword;
+            break;
+        case 5://NPC
+            keyword = npcsModified[contextIndex].keyword;
+            break;                
+    }
+
+    changeContext(keyword, contextType);
+}
+
 // Update the UI to reflect a change in context, or other significant changes in the gameplay state
 function updateLocation() {    
     
-    console.log("updateLocation - currentLocation: " + currentContext + "   currentLocationType: " + currentContextType + "    storedLocation: " + storedLocation);
+    console.log("updateLocation - currentLocation: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
     
     button1.style.display = "none";
     button2.style.display = "none";
@@ -225,13 +292,13 @@ function updateLocation() {
 
     narrationText.style.display = "none";
     updateText.style.display = "none";
-    monsterHpSection.style.display = "none";    
+    monsterHpSection.style.display = "none";
 
     // By default, we'll be getting our action buttons from a location
     let actions = [];    
 
     // If we are updating to a location type - 
-    if (currentContextType === 0) {    
+    if (currentContextType === 1) {    
 
         // Check if we've already visited this location
         let locationVisited = false;
@@ -261,16 +328,17 @@ function updateLocation() {
         mainTitleText.innerText = locationsModified[currentContext].title;        
         mainText.innerText = locationsModified[currentContext].description;    
     }
-    // If currentLocationType != 0 - We are currently in a secondary context
-    else if (currentContextType != 0) {
+    // If currentLocationType != 1 - We are currently in a secondary context
+    else if (currentContextType != 1) {
         
-        mainTitleText.innerText = locationsModified[storedLocation].title;        
+        mainTitleText.innerText = locationsModified[storedLocation].title;
         mainTitleText.style.color = secondaryTitleActive;
         secondaryTitle.style.display = "flex";
         
         // Change the array of actions we are looking at depending on the context type
         switch (currentContextType) {
-            case 1:
+            // 3 = Monster
+            case 3:
                 secondaryTitleText.innerText = monstersModified[currentContext].title;
                 mainText.innerText = monstersModified[currentContext].description;
 
@@ -279,11 +347,24 @@ function updateLocation() {
 
                 actions = monstersModified[currentContext].actions;
                 break;
-            case 2:                
+            // 4 = Item
+            case 4:
+                break;
+            // 4 = NPC
+            case 5:
+                secondaryTitleText.innerText = npcsModified[currentContext].title;
+                mainText.innerText = npcsModified[currentContext].description;                
+
+                actions = npcsModified[currentContext].actions;
                 break;
         }
     }
 
+    updateButtons(actions);
+}
+
+function updateButtons(actions)  {
+    
     if (actions.length > 0) {    
 
         actions.forEach((element, index) => {
@@ -345,7 +426,7 @@ function updateLocation() {
                         button.style.color = buttonTextColorDefault;
                         button.classList.add("can-hover");
 
-                        button.onclick = function() {changeContext(element.keyword, 0)};
+                        button.onclick = function() {changeContext(element.keyword, 1)};
                     }
 
                     break;
@@ -361,7 +442,7 @@ function updateLocation() {
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
 
-                    button.onclick = function() {changeContext(element.keyword, 1)};
+                    button.onclick = function() {changeContext(element.keyword, 3)};
                     break;
                 // ITEM
                 case 4:
@@ -374,6 +455,8 @@ function updateLocation() {
                     button.style.backgroundColor = buttonBackcolorNPC;
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
+
+                    button.onclick = function() {changeContext(element.keyword, 5)};
                     break;
                 // Misc Action
                 case 6:
@@ -381,7 +464,17 @@ function updateLocation() {
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
 
-                    button.onclick = function() {doAction(element.func)};                    
+                    button.onclick = function() {doAction(element.func)};
+
+                    // Let's check for an edge cases where this is a talk button, because talk buttons should actually be locked, if there isn't a dialogue available
+                    if (element.func === "talk") {
+                        
+                        if (!npcsModified[currentContext].dialogueAvailable) {
+                            button.style.backgroundColor = buttonBackcolorLocked;
+                            button.style.color = buttonTextColorLocked;
+                            button.classList.remove("can-hover");
+                        }
+                    }
                     break;                
             }        
 
@@ -395,7 +488,7 @@ function updateLocation() {
 function updateStats() {
     
     xpText.innerText = xp;
-    hpText.innerText = hp;
+    hpText.innerText = hpCurrent + " / " + hpMax;
     goldText.innerText = gold;
 }
 
@@ -420,7 +513,25 @@ function addUpdateText(text) {
 // Translate a string provided in through the context data into an action
 function doAction(actionString) {
     
-    switch (actionString) {
+    if (actionString === undefined) {
+        console.error("doAction() - actionString is undefined");
+        return;
+    }
+
+    let functionName = actionString;
+    let argument1 = "";
+
+    if (actionString.indexOf(',') > -1) {
+
+        // Action string can contain the function name, followed by arguments    
+        const f = actionString.split(",");
+        
+        functionName = f[0];
+        if (f.length > 1)
+            argument1 = f[1];        
+    }
+
+    switch (functionName) {
         case "attack":
             attack();
             break;
@@ -430,23 +541,33 @@ function doAction(actionString) {
         case "returnToPrimaryContext":
             returnToPrimaryContext();
             break;
+        case "talk":
+            talk();
+            break;
+        case "advanceDialogue":
+            if (argument1 != "")
+                advanceDialogue(argument1);
+            else
+                console.error("doAction - Called advanceDialogue without an additional argument");
+            break;
     }
+}
+
+function playerDeath() {
+    console.log("PLAYER DEAD");
+    resetGame();    
 }
 
 function attack() {
 
-    console.log("attack() - Attack Power: " + attackPower);
+    console.log("attack() - Attack Power: " + attackPower);         // Unhelpful console log imo
+    
+    // PLAYER ATTACK
     monstersModified[currentContext].hpCurrent -= attackPower;
     updateMonsterUI();
-    hp -= monstersModified[currentContext].attackPower;
-    updateStats();
-    save();
-
-    if (hp <= 0) {
-        console.log("PLAYER DEAD");
-    }
-    // Check if the monster is dead
-    else if (monstersModified[currentContext].hpCurrent <= 0) {
+    
+    // CHECK FOR MONSTER DEATH
+    if (monstersModified[currentContext].hpCurrent <= 0) {
 
         let monsterIndex = returnMonsterIndex(locationsModified[storedLocation].actions, monstersModified[currentContext].keyword);        
         locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the array                
@@ -455,17 +576,36 @@ function attack() {
         xp += monstersModified[currentContext].xp;
         gold += monstersModified[currentContext].gold;
         updateStats();
+        
+        if (monstersModified[currentContext].deathFunc != "") {
+            doAction(monstersModified[currentContext].deathFunc);
+        }
+        
         save();
 
         returnToPrimaryContext();
         addUpdateText(storedMonsterString);
-    }    
-    // Add update text that provides info about attack damages
+    }   
+    // Monster is still alive 
     else {
+        
+        hpCurrent -= monstersModified[currentContext].attackPower;
+        updateStats();
 
-    let updateString = "You do " + attackPower + " damage to the " + monstersModified[currentContext].shortTitle + ".\nThe " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].attackPower + " damage to you."    
-    addUpdateText(updateString);
+        // Check for Player Deaath
+        if (hpCurrent <= 0) {
+            playerDeath();
+        }
+        else {
+            
+            // Add update text that provides info about attack damages    
+
+            let updateString = "You do " + attackPower + " damage to the " + monstersModified[currentContext].shortTitle + ".\nThe " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].attackPower + " damage to you."    
+            addUpdateText(updateString);  
+        }    
     }
+    
+    save();
 }
 
 function dodge() {
@@ -476,14 +616,50 @@ function returnToPrimaryContext() {
 
     currentContext = storedLocation;
     storedLocation = -1;
-    currentContextType = 0;
+    currentContextType = 1;
 
     save();
     updateLocation();
 }
 
-// #endregion
+function talk() {
+    
+    if (currentContextType == 5) {
 
+        // Check to make sure there is a dialogue to play
+        if (npcsModified[currentContext].dialogue.length > npcsModified[currentContext].currentDialogue) {
+            
+            addUpdateText(npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].text);
+            npcsModified[currentContext].dialogueAvailable = false;
+            
+            // Check if there is a function call attached to this dialogue
+            if (npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].func != "") {
+                doAction(npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].func);
+            }
+
+            save();
+            updateButtons(npcsModified[currentContext].actions);
+        }
+    }
+    else
+        console.error("talk - Somehow this was called but the current context is not an NPC")
+}
+
+function advanceDialogue(npcName) {
+    
+    npcsModified.forEach((element, index) => {
+
+        if (element.keyword == npcName) {
+            element.currentDialogue++;
+
+            if (element.dialogue.length > element.currentDialogue) {
+                element.dialogueAvailable = true;
+            }
+        }
+    });
+}
+
+// #endregion
 
 // #region UTILITIES
 
@@ -497,12 +673,14 @@ function save() {
     localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
     localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));    
     localStorage.setItem('xp', JSON.stringify(xp));
-    localStorage.setItem('hp', JSON.stringify(hp));
+    localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
+    localStorage.setItem('hpMax', JSON.stringify(hpMax));
     localStorage.setItem('gold', JSON.stringify(gold));
     localStorage.setItem('attackPower', JSON.stringify(attackPower));
 
     localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
+    localStorage.setItem('npcsModified', JSON.stringify(npcsModified));
   }
   
   function load() {
@@ -522,7 +700,9 @@ function save() {
         locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
     else
         locationsModified = locations;
-    monstersModified = JSON.parse(localStorage.getItem('monstersUpdated'));
+    
+    if (localStorage.getItem('monstersModified')) monstersModified = JSON.parse(localStorage.getItem('monstersModified')); else console.error("load - monstersModified entry doesn't exist");
+    if (localStorage.getItem('npcsModified')) npcsModified = JSON.parse(localStorage.getItem('npcsModified')); else console.error("load - npcsModified entry doesn't exist");
   }
 
   function versionCheck() {

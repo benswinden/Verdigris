@@ -38,6 +38,7 @@ monsters = [
         attackPower: 5,
         xp: 50,
         gold: 10,
+        deathFunc: "",
         actions: [
             {
                 type: 6,
