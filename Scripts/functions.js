@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.010;
+let version = 0.011;
 
 let xp = 0;
 let hpCurrent = 0;
