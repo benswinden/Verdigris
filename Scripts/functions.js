@@ -324,19 +324,6 @@ function changeContextDirect(contextIndex, contextType) {
 function updateContext() {    
     
     console.log("updateContext - currentContext: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
-    
-    button1.style.display = "none";
-    button2.style.display = "none";
-    button3.style.display = "none";
-    button4.style.display = "none";
-    button5.style.display = "none";
-    button6.style.display = "none";
-    button1.onclick = '';
-    button2.onclick = '';
-    button3.onclick = '';
-    button4.onclick = '';
-    button5.onclick = '';
-    button6.onclick = '';
 
     narrationText.style.display = "none";
     updateText.style.display = "none";
@@ -346,7 +333,7 @@ function updateContext() {
     document.querySelector("#inventory-title").style.display = "none";
 
     // By default, we'll be getting our action buttons from a location
-    let actions = [];    
+    let actions = [];
 
     // If we are updating to a location type - 
     if (currentContextType === 1) {    
@@ -418,9 +405,22 @@ function updateContext() {
     updateButtons(actions);
 }
 
-function updateButtons(actions)  {
-    
-    if (actions.length > 0) {    
+function updateButtons(actions)  {        
+        
+    button1.style.display = "none";
+    button2.style.display = "none";
+    button3.style.display = "none";
+    button4.style.display = "none";
+    button5.style.display = "none";
+    button6.style.display = "none";
+    button1.onclick = '';
+    button2.onclick = '';
+    button3.onclick = '';
+    button4.onclick = '';
+    button5.onclick = '';
+    button6.onclick = '';
+
+    if (actions.length > 0) {
 
         actions.forEach((element, index) => {
             
@@ -504,6 +504,8 @@ function updateButtons(actions)  {
                     button.style.backgroundColor = buttonBackcolorItem;
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
+
+                    button.onclick = function() {addToInventory(element.keyword)};
                     break;
                 // NPC
                 case 5:
@@ -596,12 +598,17 @@ function exitInventory() {
 
     console.log("exitInventory() - ");
 
+    clearInventory();
+    
+    changeContextDirect(currentContext, currentContextType);
+}
+
+function clearInventory() {
+
     inventoryIcon.src = "Assets/InventoryIcon.svg";
     inventoryIcon.onclick = displayInventory;
 
     inventoryStatsSection.style.display = "none";
-    changeContextDirect(currentContext, currentContextType);
-
     document.querySelector("#inventory-title").style.display = "none";
 
     createdInventoryButtons.forEach((element) => {        
@@ -718,7 +725,7 @@ function attack() {
     // CHECK FOR MONSTER DEATH
     if (monstersModified[currentContext].hpCurrent <= 0) {
 
-        let monsterIndex = returnMonsterIndex(locationsModified[storedLocation].actions, monstersModified[currentContext].keyword);        
+        let monsterIndex = returnIndexFromKeyword(locationsModified[storedLocation].actions, monstersModified[currentContext].keyword);        
         locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the location array that it was contained in
         let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
 
@@ -809,6 +816,30 @@ function advanceDialogue(npcName) {
     });
 }
 
+function addToInventory(keyword) {
+    
+    let itemFound = false;
+    itemsModified.forEach((element,index) => {
+        
+        if (element.keyword == keyword) {
+
+            itemFound = true;
+            inventory.push(index);
+            
+            // Remove item from current location - will need to be modified if we receive items in other ways
+            let itemIndex = returnIndexFromKeyword(locationsModified[currentContext].actions, keyword);
+            locationsModified[currentContext].actions.splice(itemIndex, 1);   // Remove the monster from the location array that it was contained in
+        }    
+    });
+
+    if (itemFound) {
+        updateButtons(locationsModified[currentContext].actions);
+        save();
+    }
+    else
+        console.error("addToInventory() - keyword:" + keyword + " not found in items array");
+}
+
 function toggleEquipped(index, button) {
 
     if (index < itemsModified.length) {
@@ -893,22 +924,22 @@ function save() {
   function resetGame() {
 
     localStorage.clear();
-    exitInventory();
+    clearInventory();
     initializeGame();
   }
 
   // Within a locations actions array, search for a given monster and return it's index within that array
-  function returnMonsterIndex(ar, key) {
+  function returnIndexFromKeyword(ar, keyword) {
     
-    let monsterIndex = -1;
+    let index = -1;
     ar.forEach((element, i) => {        
-        if (element.keyword === key) {
+        if (element.keyword === keyword) {
             
-            monsterIndex = i;            
+            index = i;            
         }
     });
 
-    return monsterIndex;
+    return index;
   }
 
   // #endregion

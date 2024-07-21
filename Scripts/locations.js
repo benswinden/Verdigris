@@ -180,6 +180,11 @@ locations = [
                 title: "A Long Dead Knight",
                 keyword: "dead_knight",
                 blocked: ""
+            },
+            {
+                type: 4,
+                title: "A simple silver locket lies here in the dirt",
+                keyword: "silver_locket"
             }
         ]
     },

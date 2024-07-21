@@ -7,11 +7,7 @@ items = [
         power: 0,
         stamina: 0,
         evasion: 0,
-        actions: [          // Item actions will be added while in a monster sub-context
-            {                
-                title: "",
-                func: ""
-            }            
+        actions: [          // Item actions will be added while in a monster sub-context           
         ],
     },
     {
@@ -27,6 +23,17 @@ items = [
                 title: "Attack with piercing strike",
                 func: "attack"
             }            
+        ],
+    },    
+    {
+        keyword: "silver_locket",
+        title: "A simple silver locket",
+        canEquip: true,
+        equipped: false,
+        power: 0,
+        stamina: 10,
+        evasion: 0,
+        actions: [          // Item actions will be added while in a monster sub-context            
         ],
     }
 ];
