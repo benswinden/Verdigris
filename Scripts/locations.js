@@ -63,7 +63,7 @@ locations = [
             },
             {
                 type: 1,
-                title: "East to the Ruined Settlement",
+                title: "East to the Village Outskirts",
                 keyword: "village_outskirts",
                 blocked: ""
             },
@@ -83,14 +83,14 @@ locations = [
         actions: [
             {
                 type: 1,
-                title: "North into a ruined structure lit by a dull light",
+                title: "North into a Lamplit Ruin",
                 keyword: "lamplit_ruin",
                 blocked: ""
             },
             {
-                type: 2,
-                title: "West",
-                keyword: "",
+                type: 1,
+                title: "West to the Edge of the Woods",
+                keyword: "edge_wood",
                 blocked: ""
             },
             {
@@ -109,7 +109,7 @@ locations = [
     },
     {
         keyword: "lamplit_ruin",
-        title: "Inside a Firelit Ruin",
+        title: "A Lamplit Ruin",
         description: "A damp, mucky interior with some broken wood and debris doing a poor job at sheltering it from the elements. A greasy lamp swings gently from a rafter.",
         narration: "Your greeted by a thin man, squatting amongst the debris. \"Welcome friend, name's Jorrid.\"",
         actions: [
@@ -171,7 +171,7 @@ locations = [
             },
             {
                 type: 1,
-                title: "South to the Old Market",
+                title: "South to the Temple Market",
                 keyword: "temple_market",
                 blocked: ""
             },
