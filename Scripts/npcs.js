@@ -40,19 +40,31 @@ npcs = [
                         
         ],
     },
-
-
     {
-        keyword: "",
-        title: "",
-        shortTitle: "",
-        description: "",
+        keyword: "default_camp",
+        title: "Camp",
+        shortTitle: "camp",
+        description: "You take out your bedroll and make a small cookfire. This is as good a place as any to take stock of your situation, and prepare for the journey ahead.",
+        dialogueAvailable: null,
+        currentDialogue: 0,
         actions: [
             {
-                type: 0,
-                title: "",
-                func: ""
+                type: 6,
+                title: "Train",
+                func: "train"
+            },
+            {
+                type: 6,
+                title: "Rest",
+                func: "rest"
+            },
+            {
+                type: 6,
+                title: "Leave",
+                func: "returnToPrimaryContext"
             }            
+        ],
+        dialogue: [
         ]
     }
 ];

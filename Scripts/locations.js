@@ -104,6 +104,11 @@ locations = [
                 title: "South",
                 keyword: "",
                 blocked: ""
+            },
+            {
+                type: 4,
+                title: "A simple silver locket lies here in the dirt",
+                keyword: "silver_locket"
             }
         ]
     },
@@ -152,9 +157,9 @@ locations = [
         narration: "",
         actions: [
             {
-                type: 2,
-                title: "North",
-                keyword: "",
+                type: 1,
+                title: "North to the King's Road",
+                keyword: "kings_road",
                 blocked: ""
             },
             {
@@ -176,15 +181,9 @@ locations = [
                 blocked: ""
             },
             {
-                type: 3,
-                title: "A Long Dead Knight",
-                keyword: "dead_knight",
-                blocked: ""
-            },
-            {
-                type: 4,
-                title: "A simple silver locket lies here in the dirt",
-                keyword: "silver_locket"
+                type: 6,
+                title: "Make Camp",
+                func: "goToNPC,default_camp"
             }
         ]
     },
@@ -219,16 +218,11 @@ locations = [
                 blocked: ""
             }
         ]
-    }
-
-
-
-
-    ,
+    },
     {
-        keyword: "temp",
-        title: "Template",        
-        description: "",
+        keyword: "kings_road",
+        title: "The King's Road",        
+        description: "Once a wide causeway for traders heading to the Temple Market has become home to the fallen remains the tall stone buildings that once lined it.",
         narration: "",
         actions: [
             {
@@ -241,6 +235,44 @@ locations = [
                 type: 2,
                 title: "West",
                 keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "East to a Shelterd Nook",
+                keyword: "sheltered_nook",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "South to the Town Square",
+                keyword: "town_square",
+                blocked: ""
+            },
+            {
+                type: 3,
+                title: "A Long Dead Knight",
+                keyword: "dead_knight",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "sheltered_nook",
+        title: "A Sheltered Nook",        
+        description: "You managed to find a cranny amongst the ruins with four walls and some degree of shelter from the rain.",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "West to the King's Road",
+                keyword: "kings_road",
                 blocked: ""
             },
             {

@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.011;
+let version = 0.012;
 
 let xp = 0;
 let hpCurrent = 0;
@@ -22,6 +22,12 @@ let storedLocation = 0;         // Anytime we change to a secondary context, sto
 let locationsVisited = [];      // A list of locations we have already visited
 
 let inventory = [];             // Inventory contains index numbers for items in the items array
+
+let respawnLocation = {
+    context: 0,
+    contextType: 0,
+    storedLocation: 0
+}
 
 // Debug
 let debugStartContext = 0;
@@ -55,6 +61,8 @@ const button3 = document.querySelector('#button3');
 const button4 = document.querySelector('#button4');
 const button5 = document.querySelector('#button5');
 const button6 = document.querySelector('#button6');
+const button7 = document.querySelector('#button7');
+const button8 = document.querySelector('#button8');
 //Misc
 const debugWindow = document.querySelector('#debug');
 const debugButton1 = document.querySelector('#debug-button1');
@@ -91,6 +99,7 @@ let locations = [{
             title: "",      // String used in the button
             keyword: "",    // key used to search for the associated action
             blocked: "",    // If this monster is present, this location is blocked
+            func: "",       // When this is a misc action button
         }        
     ]
 }];
@@ -213,6 +222,12 @@ function initializeGame() {
         storedLocation = -1;
         locationsVisited = [];
 
+        respawnLocation = {
+            context: 0,
+            contextType: 1,
+            storedLocation: -1
+        }
+
         // Using JSON to create deep clones of our starting data arrays
         locationsModified = JSON.parse(JSON.stringify(locations));
         monstersModified = JSON.parse(JSON.stringify(monsters));
@@ -230,7 +245,7 @@ function initializeGame() {
 // We use a keyword instead of relying only on index for human readibility
 function changeContext(keyword, contextType) {
 
-    console.log("changeLocation - keyword:" + keyword + "   contextType:" + contextType);
+    console.log("changeContext - keyword:" + keyword + "   contextType:" + contextType + "   storedLocation:" + storedLocation);
 
     let entryFound = false;
     // If it's not a secondary context, we look for the new location within locations
@@ -310,7 +325,7 @@ function changeContextDirect(contextIndex, contextType) {
             keyword = monstersModified[contextIndex].keyword;
             break;
         case 4://Item
-            //keyword = monstersModified[contextIndex].keyword;
+            //Items aren't contexts
             break;
         case 5://NPC
             keyword = npcsModified[contextIndex].keyword;
@@ -405,20 +420,30 @@ function updateContext() {
     updateButtons(actions);
 }
 
-function updateButtons(actions)  {        
-        
+function hideAllButtons() {
+
     button1.style.display = "none";
     button2.style.display = "none";
     button3.style.display = "none";
     button4.style.display = "none";
     button5.style.display = "none";
     button6.style.display = "none";
+    button7.style.display = "none";
+    button8.style.display = "none";    
+}
+
+function updateButtons(actions)  {        
+        
+    hideAllButtons();
+
     button1.onclick = '';
     button2.onclick = '';
     button3.onclick = '';
     button4.onclick = '';
     button5.onclick = '';
     button6.onclick = '';
+    button7.onclick = '';
+    button8.onclick = '';
 
     if (actions.length > 0) {
 
@@ -445,6 +470,12 @@ function updateButtons(actions)  {
                     break;
                 case 5:
                     button = button6;
+                    break; 
+                case 6:
+                    button = button7;
+                    break;
+                case 7:
+                    button = button8;
                     break; 
             }
             
@@ -550,17 +581,11 @@ function displayInventory() {
 
     inventoryStatsSection.style.display = "block";
 
-    button1.style.display = "none";
-    button2.style.display = "none";
-    button3.style.display = "none";
-    button4.style.display = "none";
-    button5.style.display = "none";
-    button6.style.display = "none";
+    hideAllButtons();
 
     narrationText.style.display = "none";
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
-
     mainTitleText.style.color = mainTitleActive;
     secondaryTitle.style.display = "none";
 
@@ -598,8 +623,7 @@ function exitInventory() {
 
     console.log("exitInventory() - ");
 
-    clearInventory();
-    
+    clearInventory();    
     changeContextDirect(currentContext, currentContextType);
 }
 
@@ -615,6 +639,99 @@ function clearInventory() {
         element.remove();
     });
     createdInventoryButtons = [];
+}
+
+function displayTrain() {
+
+    console.log("dispdisplayTrainlayInventory() - ");
+    button5.style.display = "none";
+    button6.style.display = "none";
+    narrationText.style.display = "none";
+    updateText.style.display = "none";
+    monsterHpSection.style.display = "none";
+    mainTitleText.style.color = mainTitleActive;
+    secondaryTitle.style.display = "none";
+    inventoryStatsSection.style.display = "block";
+    mainTitleText.innerText = "Training";        
+    mainText.innerText = "Put your hard won experience towards bettering yourself.";
+
+    
+    button1.querySelector('.button-text').innerText = "Train your Power (10 xp)";
+    button1.style.display = "block";
+    if (xp >= 10) {        
+        button1.style.backgroundColor = buttonBackColorLocation;
+        button1.style.color = buttonTextColorDefault;
+        button1.classList.add("can-hover");
+        button1.onclick = function() {train(1)};
+    }
+    else {        
+        button1.style.backgroundColor = buttonBackcolorLocked;
+        button1.style.color = buttonTextColorLocked;
+        button1.classList.remove("can-hover");
+        button1.onclick = "";        
+    }
+
+    button2.querySelector('.button-text').innerText = "Train your Stamina (20 xp)";
+    button2.style.display = "block";
+    if (xp >= 20) {        
+        button2.style.backgroundColor = buttonBackColorLocation;
+        button2.style.color = buttonTextColorDefault;
+        button2.classList.add("can-hover");
+        button2.onclick = function() {train(2)};
+    }
+    else {        
+        button2.style.backgroundColor = buttonBackcolorLocked;
+        button2.style.color = buttonTextColorLocked;
+        button2.classList.remove("can-hover");
+        button2.onclick = "";        
+    }
+
+    button3.querySelector('.button-text').innerText = "Train your Evasion (30 xp)";
+    button3.style.display = "block";
+    if (xp >= 30) {        
+        button3.style.backgroundColor = buttonBackColorLocation;
+        button3.style.color = buttonTextColorDefault;
+        button3.classList.add("can-hover");
+        button3.onclick = function() {train(3)};
+    }
+    else {        
+        button3.style.backgroundColor = buttonBackcolorLocked;
+        button3.style.color = buttonTextColorLocked;
+        button3.classList.remove("can-hover");
+        button3.onclick = "";        
+    }
+
+    button4.querySelector('.button-text').innerText = "Exit";
+    button4.style.display = "block";
+    button4.style.backgroundColor = buttonBackColorLocation;
+    button4.style.color = buttonTextColorDefault;
+    button4.classList.add("can-hover");
+    button4.onclick = function() { changeContextDirect(currentContext, currentContextType); };    
+}
+
+function train(trainType) {
+
+    switch (trainType) {
+        //POWER
+        case 1:
+            xp -= 10;
+            basePower += 1;        
+            break;
+        //STAMINA
+        case 2:
+            xp -= 20;
+            baseStamina += 1;
+            break;
+        //EVASION
+        case 3:
+            xp -= 30;
+            baseEvasion  += 1;
+            break;
+    }
+
+    save();
+    updateStats();
+    displayTrain();
 }
 
 // Update the header with current stat values
@@ -700,18 +817,68 @@ function doAction(actionString) {
         case "talk":
             talk();
             break;
+        case "train":
+            displayTrain();
+            break;
+        case "rest":
+            rest();
+            break;
         case "advanceDialogue":
             if (argument1 != "")
                 advanceDialogue(argument1);
             else
                 console.error("doAction - Called advanceDialogue without an additional argument");
             break;
+        case "goToNPC":
+            if (argument1 != "")
+                changeContext(argument1, 5);                
+            else
+                console.error("doAction - Called goToNPC without an additional argument");
+            break;
     }
 }
 
 function playerDeath() {
-    console.log("PLAYER DEAD");
-    resetGame();    
+    
+    hideAllButtons();
+
+    narrationText.style.display = "block";
+    updateText.style.display = "none";
+    monsterHpSection.style.display = "none";
+    mainTitleText.style.color = mainTitleActive;
+    secondaryTitle.style.display = "none";    
+    mainTitleText.innerText = "";        
+    mainText.innerText = "";
+    narrationText.innerText = "Life leaves your body as it's torn apart.";
+
+    button1.querySelector('.button-text').innerText = "Awaken";
+    button1.style.display = "block";
+    button1.style.backgroundColor = buttonBackColorLocation;
+    button1.style.color = buttonTextColorDefault;
+    button1.classList.add("can-hover");
+    button1.onclick = function() {respawn();};    
+}
+
+function respawn() {    
+
+    if (respawnLocation != {}) {
+
+        hpCurrent = hpMax;    
+
+        // Monsters all heal when you rest
+        monstersModified.forEach((element) => {
+            element.hpCurrent = element.hpMax;
+        });
+
+        updateStats();
+        storedLocation = respawnLocation.storedLocation;
+        changeContextDirect(respawnLocation.context, respawnLocation.contextType); 
+        save();
+
+        addUpdateText("You wake soaked in sweat and trembling. The terrors of the foglands haunting your mind.");
+    }
+    else
+        console.error("respawn() - Trying to respawn with an empty respawnLocation");
 }
 
 function attack() {
@@ -802,6 +969,27 @@ function talk() {
         console.error("talk - Somehow this was called but the current context is not an NPC")
 }
 
+function rest() {
+    console.log("rest() - ");
+
+    hpCurrent = hpMax;
+    addUpdateText("You kneel for a moment and say a prayer to the Quiet. You feel your soul anchored to this place.\n\nYou lay down on your bedroll and before you know it sleep takes you.");
+
+    // Monsters all heal when you rest
+    monstersModified.forEach((element) => {
+        element.hpCurrent = element.hpMax;
+    });
+
+    respawnLocation = {
+        context: currentContext,
+        contextType: currentContextType,
+        storedLocation: storedLocation
+    }
+
+    save();
+    updateStats();
+}
+
 function advanceDialogue(npcName) {
     
     npcsModified.forEach((element, index) => {
@@ -880,6 +1068,7 @@ function save() {
     localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
     localStorage.setItem('baseEvasion', JSON.stringify(baseEvasion));    
     localStorage.setItem('inventory', JSON.stringify(inventory));
+    localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
 
     localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
@@ -903,6 +1092,7 @@ function save() {
     baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
     baseEvasion = JSON.parse(localStorage.getItem('baseEvasion'));
     inventory = JSON.parse(localStorage.getItem('inventory'));
+    respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'));
 
     if (!resetLocations)
         locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
