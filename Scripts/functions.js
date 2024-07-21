@@ -21,7 +21,7 @@ let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = It
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
 
-let updateTextString = "";
+let inventory = [];             // Inventory contains index numbers for items in the items array
 
 // Debug
 let debugStartContext = 0;
@@ -64,6 +64,8 @@ const debugButton4 = document.querySelector('#debug-button4');
 const debugButton5 = document.querySelector('#debug-button5');
 const resetLocationsCheckbox = document.querySelector('#resetLocations');
 let resetLocations = false;     // We use this for debug, when selected on reload we will always re-write locationsModified from locations so that updates to the games content can be tested immediately without needing to reset the whole game
+
+let createdInventoryButtons = [];
 
 //Colors
 const buttonBackColorLocation = '#EAEAEA';
@@ -138,12 +140,30 @@ let npcs = [
     }
 ];
 
+let items = [
+    {
+        keyword: "",
+        title: "",
+        canEquip: false,
+        equipped: false,
+        power: 0,
+        stamina: 0,
+        evasion: 0,
+        actions: [          // Item actions will be added while in a monster sub-context
+            {                
+                title: "",
+                func: ""
+            }            
+        ],
+    }
+];
+
 // Store these containers at runtime because they will be modified as the player plays
 let locationsModified = [];
 let monstersModified = []
 let npcsModified = []
+let itemsModified = []
 
-let items = [];
 
 // #endregion
 
@@ -168,8 +188,7 @@ function initializeGame() {
             resetGame();
             return;
         }
-        
-        calculateStats();
+                
         updateStats();
         save();
         changeContextDirect(currentContext, currentContextType);
@@ -178,16 +197,18 @@ function initializeGame() {
     else {
 
         console.log("Save game doesn't exist");
+        
         xp = 0;
         hpCurrent = 100;
         hpMax = 100;
         gold = 20;
 
         basePower = 10;
-        baseStamina = 10;
-        baseEvasion = 10;
+        baseStamina = 5;
+        baseEvasion = 0;
 
-        calculateStats();
+        inventory = [];
+        inventory.push(0,1);        
 
         storedLocation = -1;
         locationsVisited = [];
@@ -195,7 +216,8 @@ function initializeGame() {
         // Using JSON to create deep clones of our starting data arrays
         locationsModified = JSON.parse(JSON.stringify(locations));
         monstersModified = JSON.parse(JSON.stringify(monsters));
-        npcsModified = JSON.parse(JSON.stringify(npcs));    
+        npcsModified = JSON.parse(JSON.stringify(npcs));
+        itemsModified = JSON.parse(JSON.stringify(items));    
         
         updateStats();
         save();
@@ -239,7 +261,7 @@ function changeContext(keyword, contextType) {
         // If we didn't find the entry as a monster we search for it in items
         if (!entryFound) {
 
-            items.forEach((element, index) => {
+            itemsModified.forEach((element, index) => {
                 if (element.keyword == keyword) {
                  
                     if (storedLocation === -1) storedLocation = currentContext;     // Check for null storedLocation, if there is already a value then we are loading directly into this location. The better solution this this issue would be storing the parent context within the child
@@ -321,6 +343,7 @@ function updateContext() {
     monsterHpSection.style.display = "none";
 
     inventoryStatsSection.style.display = "none";
+    document.querySelector("#inventory-title").style.display = "none";
 
     // By default, we'll be getting our action buttons from a location
     let actions = [];    
@@ -510,8 +533,8 @@ function updateButtons(actions)  {
                     break;                
             }        
 
-            button.innerText = element.title + additionalButtonString;            
-            button.style.display = "block";
+            button.querySelector('.button-text').innerText = element.title + additionalButtonString;
+            button.style.display = "flex";
         });
     }        
 }
@@ -519,6 +542,9 @@ function updateButtons(actions)  {
 function displayInventory() {
 
     console.log("displayInventory() - ");
+
+    inventoryIcon.src = "Assets/ExitIcon.svg";
+    inventoryIcon.onclick = exitInventory;
 
     inventoryStatsSection.style.display = "block";
 
@@ -528,12 +554,6 @@ function displayInventory() {
     button4.style.display = "none";
     button5.style.display = "none";
     button6.style.display = "none";
-    button1.onclick = '';
-    button2.onclick = '';
-    button3.onclick = '';
-    button4.onclick = '';
-    button5.onclick = '';
-    button6.onclick = '';
 
     narrationText.style.display = "none";
     updateText.style.display = "none";
@@ -545,33 +565,56 @@ function displayInventory() {
     mainTitleText.innerText = "Traveler";        
     mainText.innerText = "A worn traveler come from a foreign land. Stricken by a mysterious curse. Unable to resist the call which has lead them to the ruined settlement at the base of a Black Tower.";
 
-    button1.style.display = "block";
-    button1.innerText = "Exit";
-    button1.style.backgroundColor = buttonBackColorLocation;
-    button1.style.color = buttonTextColorDefault;
-    button1.classList.add("can-hover");
-    button1.onclick = exitInventory;
+    document.querySelector("#inventory-title").style.display = "block";
+
+    const itemButton = document.querySelector("#equip-button");    
+    inventory.forEach((element,index) => {
+                
+        const clone = itemButton.cloneNode(true);        
+        clone.querySelector('.button-text').innerText = itemsModified[element].title;
+        clone.style.display = "flex";    
+        //clone.onclick = function() {doAction(itemsModified[element].func)};       // This is what we will do when create actions in a combat context
+        clone.onclick =  function(){ toggleEquipped(element, clone); };
+        document.querySelector("nav").appendChild(clone);
+        createdInventoryButtons.push(clone);
+
+        if ((itemsModified[element].canEquip)) {
+            clone.querySelector('.button-text').innerText += " [ P:" + itemsModified[element].power + " S:" + itemsModified[element].stamina + " E:" + evasion + " ]";
+            clone.querySelector(".button-equip-icon").style.display = "block";
+            clone.classList.add("can-hover");
+            if (itemsModified[element].equipped) clone.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
+        }
+        else
+            clone.classList.remove("can-hover");
+
+        clone.style.backgroundColor = buttonBackcolorItem;
+        clone.style.color = buttonTextColorDefault;        
+    });
 }
 
 function exitInventory() {
 
     console.log("exitInventory() - ");
 
+    inventoryIcon.src = "Assets/InventoryIcon.svg";
+    inventoryIcon.onclick = displayInventory;
+
     inventoryStatsSection.style.display = "none";
     changeContextDirect(currentContext, currentContextType);
-}
 
-// Calculates stats that are based on multiple factors
-function calculateStats() {
+    document.querySelector("#inventory-title").style.display = "none";
 
-    power = basePower + 10;
-    stamina = baseStamina + 10;
-    evasion = baseEvasion + 10;
+    createdInventoryButtons.forEach((element) => {        
+        element.remove();
+    });
+    createdInventoryButtons = [];
 }
 
 // Update the header with current stat values
 function updateStats() {
     
+    calculateStats();
+
     xpText.innerText = xp;
     hpText.innerText = hpCurrent + " / " + hpMax;
     goldText.innerText = gold;
@@ -579,6 +622,23 @@ function updateStats() {
     powerText.innerText = "POWER: " + power;
     staminaText.innerText = "STAMINA: " + stamina;
     evasionText.innerText = "EVASION: " + evasion;
+}
+
+// Calculates stats that are based on multiple factors
+function calculateStats() {
+
+    power = basePower;
+    stamina = baseStamina;
+    evasion = baseEvasion;
+
+    inventory.forEach((element) => {
+        
+        if (itemsModified[element].equipped) {
+            power += itemsModified[element].power;
+            stamina += itemsModified[element].stamina;
+            evasion += itemsModified[element].evasion;
+        }
+    });
 }
 
 function updateMonsterUI() {
@@ -749,6 +809,25 @@ function advanceDialogue(npcName) {
     });
 }
 
+function toggleEquipped(index, button) {
+
+    if (index < itemsModified.length) {
+
+        if (itemsModified[index].equipped) {
+            itemsModified[index].equipped = false;
+            button.querySelector(".button-equip-icon").src = "Assets/ItemUnequipped.svg";
+        }
+        else {
+            itemsModified[index].equipped = true;
+            button.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
+        }
+    
+        updateStats();
+    }
+    else
+        console.error("toggleEquipped() - Trying to toggle but the index of this element is outside the bounds of the items array");    
+}
+
 // #endregion
 
 // #region UTILITIES
@@ -769,10 +848,12 @@ function save() {
     localStorage.setItem('basePower', JSON.stringify(basePower));
     localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
     localStorage.setItem('baseEvasion', JSON.stringify(baseEvasion));    
+    localStorage.setItem('inventory', JSON.stringify(inventory));
 
     localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
     localStorage.setItem('npcsModified', JSON.stringify(npcsModified));
+    localStorage.setItem('itemsModified', JSON.stringify(itemsModified));
   }
   
   function load() {
@@ -790,6 +871,7 @@ function save() {
     basePower = JSON.parse(localStorage.getItem('basePower'));
     baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
     baseEvasion = JSON.parse(localStorage.getItem('baseEvasion'));
+    inventory = JSON.parse(localStorage.getItem('inventory'));
 
     if (!resetLocations)
         locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
@@ -798,6 +880,7 @@ function save() {
     
     if (localStorage.getItem('monstersModified')) monstersModified = JSON.parse(localStorage.getItem('monstersModified')); else console.error("load - monstersModified entry doesn't exist");
     if (localStorage.getItem('npcsModified')) npcsModified = JSON.parse(localStorage.getItem('npcsModified')); else console.error("load - npcsModified entry doesn't exist");
+    if (localStorage.getItem('itemsModified')) itemsModified = JSON.parse(localStorage.getItem('itemsModified')); else console.error("load - itemsModified entry doesn't exist");
   }
 
   function versionCheck() {
@@ -810,6 +893,7 @@ function save() {
   function resetGame() {
 
     localStorage.clear();
+    exitInventory();
     initializeGame();
   }
 
