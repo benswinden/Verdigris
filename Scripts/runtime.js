@@ -1,5 +1,7 @@
 // This script holds code that runs immediately at runtime
 
+inventoryIcon.onclick = displayInventory;
+
 document.addEventListener('keydown', function(event) {
     if (event.code == 'Escape') {
         if (!debugActive) {

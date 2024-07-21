@@ -7,7 +7,14 @@ let hpCurrent = 0;
 let hpMax = 0;
 let gold = 0;
 
-let attackPower = 0;
+// Base stats are the players raw stats
+let basePower = 0;
+let baseStamina = 0;
+let baseEvasion = 0;
+// These are the calculated stats based on other factors like equipped items
+let power = 0;
+let stamina = 0;
+let evasion = 0;
 
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
 let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
@@ -17,12 +24,15 @@ let locationsVisited = [];      // A list of locations we have already visited
 let updateTextString = "";
 
 // Debug
+let debugStartContext = 0;
+let debugStartType = 1;
 let debugActive = false;
 
 // Stats
 const xpText = document.querySelector('#xp-text');
 const hpText = document.querySelector('#hp-text');
 const goldText = document.querySelector('#gold-text');
+const inventoryIcon = document.querySelector('#inventory-icon');
 // Main Content
 const mainTitleText =  document.querySelector('#main-title-text');
 const secondaryTitle =  document.querySelector('#secondary-title');
@@ -33,6 +43,11 @@ const updateText =  document.querySelector('#update-text');
 const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
 const monsterHpText =  document.querySelector('#monster-hp-text');
+
+const powerText = document.querySelector('#power-text');
+const staminaText = document.querySelector('#stamina-text');
+const evasionText = document.querySelector('#evasion-text');
+const inventoryStatsSection =  document.querySelector('#inventory-stats');
 // Buttons
 const button1 = document.querySelector('#button1');
 const button2 = document.querySelector('#button2');
@@ -85,7 +100,7 @@ let monsters = [
         shortTitle: "",
         description: "",
         hp: 0,
-        attackPower: 0,
+        power: 0,
         xp: 0,
         gold: 0,
         deathFunc: "",      // Called on monster death
@@ -151,34 +166,41 @@ function initializeGame() {
         else {
             console.log("Invalid save found - resetting game");
             resetGame();
+            return;
         }
+        
+        calculateStats();
+        updateStats();
+        save();
+        changeContextDirect(currentContext, currentContextType);
     }
     // No save game, so start a new game
     else {
 
-        console.log("Save game doesn't exist");        
+        console.log("Save game doesn't exist");
         xp = 0;
         hpCurrent = 100;
         hpMax = 100;
-        gold = 20;    
+        gold = 20;
 
-        attackPower = 10;
+        basePower = 10;
+        baseStamina = 10;
+        baseEvasion = 10;
 
-        currentContext = 0;
+        calculateStats();
+
         storedLocation = -1;
-        currentContextType = 1;
         locationsVisited = [];
 
         // Using JSON to create deep clones of our starting data arrays
         locationsModified = JSON.parse(JSON.stringify(locations));
         monstersModified = JSON.parse(JSON.stringify(monsters));
-        npcsModified = JSON.parse(JSON.stringify(npcs));
-
+        npcsModified = JSON.parse(JSON.stringify(npcs));    
+        
+        updateStats();
         save();
+        changeContextDirect(debugStartContext, debugStartType);
     }
-
-    updateStats();
-    updateLocation();
 }
 
 // Change our current context - 
@@ -202,12 +224,13 @@ function changeContext(keyword, contextType) {
         });    
     }
     else if (contextType > 1) {        
-
+                
         // Search for the context we linked within the monsters group        
         monstersModified.forEach((element, index) => {
             if (element.keyword == keyword) {
-                storedLocation = currentContext;
-                currentContext = index;            
+                
+                if (storedLocation === -1) storedLocation = currentContext;     // Check for null storedLocation, if there is already a value then we are loading directly into this location. The better solution this this issue would be storing the parent context within the child
+                currentContext = index;
                 currentContextType = 3;
                 entryFound = true;
             }
@@ -218,8 +241,9 @@ function changeContext(keyword, contextType) {
 
             items.forEach((element, index) => {
                 if (element.keyword == keyword) {
-                    storedLocation = currentContext
-                    currentContext = index;                    
+                 
+                    if (storedLocation === -1) storedLocation = currentContext;     // Check for null storedLocation, if there is already a value then we are loading directly into this location. The better solution this this issue would be storing the parent context within the child
+                    currentContext = index;
                     currentContextType = 4;
                     entryFound = true;
                 }
@@ -232,8 +256,9 @@ function changeContext(keyword, contextType) {
             npcs.forEach((element, index) => {
 
                 if (element.keyword == keyword) {
-                    storedLocation = currentContext
-                    currentContext = index;                    
+                    
+                    if (storedLocation === -1) storedLocation = currentContext;     // Check for null storedLocation, if there is already a value then we are loading directly into this location. The better solution this this issue would be storing the parent context within the child
+                    currentContext = index;
                     currentContextType = 5;
                     entryFound = true;
                 }
@@ -242,8 +267,9 @@ function changeContext(keyword, contextType) {
     }
 
     if (entryFound) {
+
         save();
-        updateLocation();
+        updateContext();
     }
     else if (!entryFound) {
         console.error("ChangeContext() - Couldn't find the keyword [" + keyword + "] as contextType: " + contextType);
@@ -273,9 +299,9 @@ function changeContextDirect(contextIndex, contextType) {
 }
 
 // Update the UI to reflect a change in context, or other significant changes in the gameplay state
-function updateLocation() {    
+function updateContext() {    
     
-    console.log("updateLocation - currentLocation: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
+    console.log("updateContext - currentContext: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
     
     button1.style.display = "none";
     button2.style.display = "none";
@@ -294,6 +320,8 @@ function updateLocation() {
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
 
+    inventoryStatsSection.style.display = "none";
+
     // By default, we'll be getting our action buttons from a location
     let actions = [];    
 
@@ -311,9 +339,13 @@ function updateLocation() {
         // First time visiting this location, check whether there is a narration to play first
         if (!locationVisited) {
             
-            locationsVisited.push(currentContext);
-            save();
+            // If the description for this context is empty, that means it's only narration and we shouldn't add it to visited. If we did, players could get linked back to it and it would be empty as narration doesn't appear the second time visiting
+            if (locationsModified[currentContext].description != "") {
+                locationsVisited.push(currentContext);
+                save();
+            }
             
+            // Check if there is narration text, then show it as this is the first time visiting
             if (locationsModified[currentContext].narration != "") {
                 narrationText.style.display = "block";
                 narrationText.innerText = locationsModified[currentContext].narration;  // Add the narration text so it appears before the main text for the locat                
@@ -484,12 +516,69 @@ function updateButtons(actions)  {
     }        
 }
 
+function displayInventory() {
+
+    console.log("displayInventory() - ");
+
+    inventoryStatsSection.style.display = "block";
+
+    button1.style.display = "none";
+    button2.style.display = "none";
+    button3.style.display = "none";
+    button4.style.display = "none";
+    button5.style.display = "none";
+    button6.style.display = "none";
+    button1.onclick = '';
+    button2.onclick = '';
+    button3.onclick = '';
+    button4.onclick = '';
+    button5.onclick = '';
+    button6.onclick = '';
+
+    narrationText.style.display = "none";
+    updateText.style.display = "none";
+    monsterHpSection.style.display = "none";
+
+    mainTitleText.style.color = mainTitleActive;
+    secondaryTitle.style.display = "none";
+
+    mainTitleText.innerText = "Traveler";        
+    mainText.innerText = "A worn traveler come from a foreign land. Stricken by a mysterious curse. Unable to resist the call which has lead them to the ruined settlement at the base of a Black Tower.";
+
+    button1.style.display = "block";
+    button1.innerText = "Exit";
+    button1.style.backgroundColor = buttonBackColorLocation;
+    button1.style.color = buttonTextColorDefault;
+    button1.classList.add("can-hover");
+    button1.onclick = exitInventory;
+}
+
+function exitInventory() {
+
+    console.log("exitInventory() - ");
+
+    inventoryStatsSection.style.display = "none";
+    changeContextDirect(currentContext, currentContextType);
+}
+
+// Calculates stats that are based on multiple factors
+function calculateStats() {
+
+    power = basePower + 10;
+    stamina = baseStamina + 10;
+    evasion = baseEvasion + 10;
+}
+
 // Update the header with current stat values
 function updateStats() {
     
     xpText.innerText = xp;
     hpText.innerText = hpCurrent + " / " + hpMax;
     goldText.innerText = gold;
+
+    powerText.innerText = "POWER: " + power;
+    staminaText.innerText = "STAMINA: " + stamina;
+    evasionText.innerText = "EVASION: " + evasion;
 }
 
 function updateMonsterUI() {
@@ -560,17 +649,17 @@ function playerDeath() {
 
 function attack() {
 
-    console.log("attack() - Attack Power: " + attackPower);         // Unhelpful console log imo
+    console.log("attack() - Attack Power: " + power);         // Unhelpful console log imo
     
     // PLAYER ATTACK
-    monstersModified[currentContext].hpCurrent -= attackPower;
+    monstersModified[currentContext].hpCurrent -= power;
     updateMonsterUI();
     
     // CHECK FOR MONSTER DEATH
     if (monstersModified[currentContext].hpCurrent <= 0) {
 
         let monsterIndex = returnMonsterIndex(locationsModified[storedLocation].actions, monstersModified[currentContext].keyword);        
-        locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the array                
+        locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the location array that it was contained in
         let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
 
         xp += monstersModified[currentContext].xp;
@@ -589,7 +678,7 @@ function attack() {
     // Monster is still alive 
     else {
         
-        hpCurrent -= monstersModified[currentContext].attackPower;
+        hpCurrent -= monstersModified[currentContext].power;
         updateStats();
 
         // Check for Player Deaath
@@ -600,7 +689,7 @@ function attack() {
             
             // Add update text that provides info about attack damages    
 
-            let updateString = "You do " + attackPower + " damage to the " + monstersModified[currentContext].shortTitle + ".\nThe " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].attackPower + " damage to you."    
+            let updateString = "You do " + power + " damage to the " + monstersModified[currentContext].shortTitle + ".\nThe " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].power + " damage to you."    
             addUpdateText(updateString);  
         }    
     }
@@ -614,12 +703,13 @@ function dodge() {
 
 function returnToPrimaryContext() {
 
+    console.log("returnToPrimaryContext() - ");
     currentContext = storedLocation;
     storedLocation = -1;
     currentContextType = 1;
 
     save();
-    updateLocation();
+    updateContext();
 }
 
 function talk() {
@@ -676,7 +766,9 @@ function save() {
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
     localStorage.setItem('hpMax', JSON.stringify(hpMax));
     localStorage.setItem('gold', JSON.stringify(gold));
-    localStorage.setItem('attackPower', JSON.stringify(attackPower));
+    localStorage.setItem('basePower', JSON.stringify(basePower));
+    localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
+    localStorage.setItem('baseEvasion', JSON.stringify(baseEvasion));    
 
     localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
@@ -688,13 +780,16 @@ function save() {
     console.log("Load");
 
     currentContext = JSON.parse(localStorage.getItem('currentLocation'));
-    storedLocation = JSON.parse(localStorage.getItem('storedLocation'));    
+    storedLocation = JSON.parse(localStorage.getItem('storedLocation'));       
     currentContextType = JSON.parse(localStorage.getItem('currentLocationType'));
     locationsVisited = JSON.parse(localStorage.getItem('locationsVisited'));    
     xp = JSON.parse(localStorage.getItem('xp'));
-    hp = JSON.parse(localStorage.getItem('hp'));
+    hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
+    hpMax = JSON.parse(localStorage.getItem('hpMax'));
     gold = JSON.parse(localStorage.getItem('gold'));
-    attackPower = JSON.parse(localStorage.getItem('attackPower'));
+    basePower = JSON.parse(localStorage.getItem('basePower'));
+    baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
+    baseEvasion = JSON.parse(localStorage.getItem('baseEvasion'));
 
     if (!resetLocations)
         locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
