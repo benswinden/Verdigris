@@ -20,6 +20,7 @@ items = [
         evasion: 3,
         actions: [          // Item actions will be added while in a monster sub-context
             {                
+                type: 6,
                 title: "Attack with piercing strike",
                 func: "attack"
             }            

@@ -41,6 +41,32 @@ npcs = [
         ],
     },
     {
+        keyword: "messenger",
+        title: "The Messenger",
+        shortTitle: "messenger",        
+        description: "A well dressed scholar from the easten isles sits crossed legged on a floor of colorful layered rugs. They nod to you in acknowledgement. ",
+        dialogueAvailable: true,
+        currentDialogue: 0,
+        actions: [
+            {
+                type: 6,
+                title: "Talk",
+                func: "talk"
+            },
+            {
+                type: 6,
+                title: "Leave",
+                func: "returnToPrimaryContext"
+            }          
+        ],
+        dialogue: [
+            {                                            
+                text: "\"Come to me if you need something delivered, or if your waiting for something to come your way.\" They say to you in a steady voice.",                
+                func: ""
+            }
+        ],
+    },
+    {
         keyword: "default_camp",
         title: "Camp",
         shortTitle: "camp",

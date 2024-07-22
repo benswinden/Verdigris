@@ -11,21 +11,6 @@ monsters = [
         xp: 50,
         gold: 10,
         actions: [
-            {
-                type: 6,
-                title: "Attack with your sword",
-                func: "attack"
-            },
-            {
-                type: 6,
-                title: "Dodge the incoming attack",
-                func: "dodge"
-            },
-            {
-                type: 6,
-                title: "Run away",
-                func: "returnToPrimaryContext"
-            }            
         ]
     },
     {
@@ -35,21 +20,39 @@ monsters = [
         description: "A battered corpse filling a rusted old suit of armor. You can make out the owl-head crest of the Sehran Royal Guard on it's chest.\n\n The creature ambles forward in laboured movements. It's rusted longsword held low.",
         hpCurrent: 100,
         hpMax: 100,
-        power: 522,
+        power: 5,
         xp: 50,
         gold: 10,
         deathFunc: "",
         actions: [
-            {
-                type: 6,
-                title: "Attack with your sword",
-                func: "attack"
-            },
-            {
-                type: 6,
-                title: "Run away",
-                func: "returnToPrimaryContext"
-            }            
+        ]
+    },
+    {
+        keyword: "temple_golem",
+        title: "A Temple Golem",
+        shortTitle: "golem",        
+        description: "Built of stone, woven with threads of magical filament. It's movements are unexpectedly fluid as it holds a carved sword in salute.",
+        hpCurrent: 500,
+        hpMax: 500,
+        power: 100,
+        xp: 200,
+        gold: 0,
+        deathFunc: "",
+        actions: [
+        ]
+    },
+    {
+        keyword: "large_rat",
+        title: "A Large Rat",
+        shortTitle: "rat",        
+        description: "Bigger than most dogs you've seen, this creature looks at you without a trace of fear.",
+        hpCurrent: 30,
+        hpMax: 30,
+        power: 3,
+        xp: 5,
+        gold: 1,
+        deathFunc: "",
+        actions: [
         ]
     }
 ];

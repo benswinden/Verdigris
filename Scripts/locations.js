@@ -153,7 +153,7 @@ locations = [
     {
         keyword: "town_square",
         title: "The Town Square",        
-        description: "At the center of the ruined village is the square. Standing in the center is a large stone statue. From here pathways spread throughout the settlement.",
+        description: "At the center of the ruined village is the square. Standing in the center is a large stone statue. From here pathways spread throughout the settlement.\n\nLooming large to the east is dark sillouette of the Tower.",
         narration: "",
         actions: [
             {
@@ -169,9 +169,9 @@ locations = [
                 blocked: ""
             },
             {
-                type: 2,
-                title: "East",
-                keyword: "",
+                type: 1,
+                title: "East to the Blackened Road",
+                keyword: "black_road",
                 blocked: ""
             },
             {
@@ -181,9 +181,9 @@ locations = [
                 blocked: ""
             },
             {
-                type: 6,
+                type: 5,
                 title: "Make Camp",
-                func: "goToNPC,default_camp"
+                keyword: "default_camp"
             }
         ]
     },
@@ -197,6 +197,76 @@ locations = [
                 type: 1,
                 title: "North to the Town Square",
                 keyword: "town_square",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 5,
+                title: "East to the Messenger's Tent",
+                keyword: "messenger",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "South to the Templefront",
+                keyword: "templefront",
+                blocked: ""
+            }
+        ]
+    },    
+    {
+        keyword: "templefront",
+        title: "The Templefront",        
+        description: "A narrow road leads east, down a long hill. Everything on this road is covered in a black fungus, giving it the look of having sustained an intense flame.",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "West to the Town Square",
+                keyword: "town_square",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "South to the Temple Arcades",
+                keyword: "temple_arcades",
+                blocked: "temple_golem"
+            },
+            {
+                type: 3,
+                title: "A Temple Golem is standing here",
+                keyword: "temple_golem",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "temple_arcades",
+        title: "The Temple Arcades",        
+        description: "TO DO",
+        narration: "",
+        actions: [
+            {
+                type: 1,
+                title: "North to the Templefront",
+                keyword: "templefront",
                 blocked: ""
             },
             {
@@ -248,12 +318,6 @@ locations = [
                 title: "South to the Town Square",
                 keyword: "town_square",
                 blocked: ""
-            },
-            {
-                type: 3,
-                title: "A Long Dead Knight",
-                keyword: "dead_knight",
-                blocked: ""
             }
         ]
     },
@@ -273,6 +337,44 @@ locations = [
                 type: 1,
                 title: "West to the King's Road",
                 keyword: "kings_road",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 3,
+                title: "A hungry rat is here gnashing on a bone",
+                keyword: "large_rat",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "black_road",
+        title: "The Blackened Road",        
+        description: "A narrow road leads east, down a long hill. Everything on this road is covered in a black fungus, giving it the look of having sustained an intense flame.",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "West to the Town Square",
+                keyword: "town_square",
                 blocked: ""
             },
             {
