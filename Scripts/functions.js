@@ -577,6 +577,49 @@ function updateButtons(actions)  {
     }        
 }
 
+function addActionToContext(context, contextType, action, index) {
+    
+
+    let actions = [];
+    switch (contextType) {
+        case 1://Location
+            if (index == -1)
+                locationsModified[context].actions.push(action);
+            else
+                locationsModified[context].actions.splice(index, 0, action);
+
+            actions = locationsModified[currentContext].actions;
+            break;
+        case 3://Monster
+            if (index == -1)
+                monstersModified[context].actions.push(action);
+            else
+                monstersModified[context].actions.splice(index, 0, action);
+
+            actions = generateItemActions(monstersModified[currentContext].actions);
+            break;
+        case 4://Item
+            if (index == -1)
+                itemsModified[context].actions.push(action);
+            else
+                itemsModified[context].actions.splice(index, 0, action);
+            break;
+        case 5://NPC
+            if (index == -1)
+                npcsModified[context].actions.push(action);
+            else
+                npcsModified[context].actions.splice(index, 0, action);
+
+                actions = npcsModified[currentContext].actions;
+            break; 
+        }
+        
+        save();
+        // If this is our current context, we need to update the buttons immediately. Will never be an item
+        if (context == currentContext && contextType == currentContextType)
+            updateButtons(actions);
+}
+
 function displayInventory() {
 
     console.log("displayInventory() - ");
