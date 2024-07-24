@@ -5,7 +5,7 @@ locations = [
         keyword: "narration_01_01",
         title: "",        
         description: "",
-        narration: "In the misty lands stands an ancient tower. The space inside that tower is shaped and twisted. The tower's innards have far outgrown it's worldly boundaries.",
+        narration: "There in the misty lands, lies an ancient tower. The space inside that tower is twisted and strange. The tower's innards have far outgrown it's worldly boundaries.",
         actions: [
             {
                 type: 1,
