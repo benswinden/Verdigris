@@ -171,7 +171,7 @@ locations = [
             {
                 type: 1,
                 title: "East to the Blackened Road",
-                keyword: "black_road",
+                keyword: "narration_02_01",
                 blocked: ""
             },
             {
@@ -226,15 +226,15 @@ locations = [
         narration: "",
         actions: [
             {
-                type: 2,
-                title: "North",
-                keyword: "",
+                type: 1,
+                title: "North to the Temple Market",
+                keyword: "temple_market",
                 blocked: ""
             },
             {
-                type: 1,
-                title: "West to the Town Square",
-                keyword: "town_square",
+                type: 2,
+                title: "West",
+                keyword: "",
                 blocked: ""
             },
             {
@@ -360,9 +360,52 @@ locations = [
         ]
     },
     {
+        keyword: "narration_02_01",
+        title: "",        
+        description: "",
+        narration: "You make your way through the winding streets of the ruined settlement making a serpentine path eastwards towards the tower.",
+        actions: [
+            {
+                type: 1,
+                title: "Next",
+                keyword: "narration_02_02",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "narration_02_02",
+        title: "",        
+        description: "",
+        narration: "As you crest a final hill, you see before you the eastern half of the village has been overtaken completely in ink black overgrowth.",
+        actions: [
+            {
+                type: 1,
+                title: "Next",
+                keyword: "narration_02_03",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "narration_02_03",
+        title: "",        
+        description: "",
+        narration: "Vines and leaves and moss as black as night reaching forth from the tower whose bottom half has dissapeared in the same foliage.",
+        actions: [
+            {
+                type: 1,
+                title: "Next",
+                keyword: "black_road",
+                blocked: "",
+                func: "replaceAction|town_square|1|{\"type\": 1,\"title\": \"East to the Blackened Road\",\"keyword\": \"black_road\",\"blocked\": \"\"}|2"
+            }
+        ]
+    },
+    {
         keyword: "black_road",
-        title: "The Blackened Road",        
-        description: "A narrow road leads east, down a long hill. Everything on this road is covered in a black fungus, giving it the look of having sustained an intense flame.",
+        title: "The Black Leaf Road",        
+        description: "A narrow road leads east, down a long hill. Thorny vines from reaching plants search for a sleeve to catch themselves on but the path to the tower is worn well enough for you to make your way without too much trouble.",
         narration: "",
         actions: [
             {
@@ -379,7 +422,7 @@ locations = [
             },
             {
                 type: 2,
-                title: "East",
+                title: "East to the Tower (COMING SOON)",
                 keyword: "",
                 blocked: ""
             },

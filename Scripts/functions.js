@@ -221,7 +221,7 @@ function initializeGame() {
         baseEvasion = 0;
 
         inventory = [];
-        inventory.push(0,1);        
+        inventory.push(0,1,3);        
 
         storedLocation = -1;
         locationsVisited = [];
@@ -517,7 +517,7 @@ function updateButtons(actions)  {
                         button.style.color = buttonTextColorDefault;
                         button.classList.add("can-hover");
 
-                        button.onclick = function() {changeContext(element.keyword, 1)};
+                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func);};
                     }
 
                     break;
@@ -577,38 +577,51 @@ function updateButtons(actions)  {
     }        
 }
 
+// Add an action to a specified context at the index, index -1 = append to the end of the list
 function addActionToContext(context, contextType, action, index) {
-    
+    console.log(action);
+    // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
+    let contextInt = 0;
+    if (!Number.isInteger(parseInt(context))) {
+
+        contextInt = returnIndexFromKeyword(context, contextType);
+        if (contextInt === -1) {
+            console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
+            return;
+        }
+    }
+    else
+        contextInt = parseInt(context);
 
     let actions = [];
     switch (contextType) {
         case 1://Location
             if (index == -1)
-                locationsModified[context].actions.push(action);
+                locationsModified[contextInt].actions.push(action);
             else
-                locationsModified[context].actions.splice(index, 0, action);
+                locationsModified[contextInt].actions.splice(index, 0, action);
 
-            actions = locationsModified[currentContext].actions;
+            actions = locationsModified[currentContext].actions;            // Store this in case this is our current context
             break;
         case 3://Monster
             if (index == -1)
-                monstersModified[context].actions.push(action);
+                monstersModified[contextInt].actions.push(action);
             else
-                monstersModified[context].actions.splice(index, 0, action);
+                monstersModified[contextInt].actions.splice(index, 0, action);
 
-            actions = generateItemActions(monstersModified[currentContext].actions);
+            actions = generateItemActions(monstersModified[currentContext].actions);            // Store this in case this is our current context
             break;
         case 4://Item
             if (index == -1)
-                itemsModified[context].actions.push(action);
+                itemsModified[contextInt].actions.push(action);
             else
-                itemsModified[context].actions.splice(index, 0, action);
+                itemsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
             break;
         case 5://NPC
             if (index == -1)
-                npcsModified[context].actions.push(action);
+                npcsModified[contextInt].actions.push(action);
             else
-                npcsModified[context].actions.splice(index, 0, action);
+                npcsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
 
                 actions = npcsModified[currentContext].actions;
             break; 
@@ -618,6 +631,58 @@ function addActionToContext(context, contextType, action, index) {
         // If this is our current context, we need to update the buttons immediately. Will never be an item
         if (context == currentContext && contextType == currentContextType)
             updateButtons(actions);
+}
+
+// Remove an action in a given context at the specified index
+function removeActionFromContext(context, contextType, index) {
+
+    // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
+    let contextInt = 0;
+    if (!Number.isInteger(parseInt(context))) {
+
+        contextInt = returnIndexFromKeyword(context, contextType);
+        if (contextInt === -1) {
+            console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
+            return;
+        }
+    }
+    else
+        contextInt = parseInt(context);
+
+    let actions = [];
+    switch (contextType) {
+        case 1://Location            
+
+            locationsModified[contextInt].actions.splice(index, 1);
+            actions = locationsModified[currentContext].actions;
+            break;
+        case 3://Monster            
+
+            monstersModified[contextInt].actions.splice(index, 1);
+            actions = generateItemActions(monstersModified[currentContext].actions);
+            break;
+        case 4://Item            
+
+            itemsModified[contextInt].actions.splice(index, 1);
+            break;
+        case 5://NPC            
+
+            npcsModified[contextInt].actions.splice(index, 1);
+            actions = npcsModified[currentContext].actions;
+            break;
+        }
+        
+        save();
+        // If this is our current context, we need to update the buttons immediately. Will never be an item
+        if (contextInt == currentContext && contextType == currentContextType)
+            updateButtons(actions);
+}
+
+// Remove action at index, add new one in it's place
+function replaceAction(context, contextType, action, index) {
+
+    removeActionFromContext(context, contextType, index);
+    addActionToContext(context, contextType, action, index);
 }
 
 function displayInventory() {
@@ -654,7 +719,7 @@ function displayInventory() {
         createdInventoryButtons.push(clone);
 
         if ((itemsModified[element].canEquip)) {
-            clone.querySelector('.button-text').innerText += " [ P:" + itemsModified[element].power + " S:" + itemsModified[element].stamina + " E:" + evasion + " ]";
+            clone.querySelector('.button-text').innerText += " [ P:" + itemsModified[element].power + " S:" + itemsModified[element].stamina + " E:" + itemsModified[element].evasion + " ]";
             clone.querySelector(".button-equip-icon").style.display = "block";
             clone.classList.add("can-hover");
             if (itemsModified[element].equipped) clone.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
@@ -858,20 +923,19 @@ function doAction(actionString) {
         return;
     }
 
-    let functionName = actionString;
-    let argument1 = "";
+    let functionString = actionString;
+    let functionArray = [];
 
-    if (actionString.indexOf(',') > -1) {
+    if (actionString.indexOf('|') > -1) {
 
         // Action string can contain the function name, followed by arguments    
-        const f = actionString.split(",");
-        
-        functionName = f[0];
-        if (f.length > 1)
-            argument1 = f[1];        
+        functionArray = actionString.split("|");
+        functionString = functionArray[0];
     }
 
-    switch (functionName) {
+    console.log(functionString);
+
+    switch (functionString) {
         case "attack":
             attack();
             break;
@@ -891,16 +955,41 @@ function doAction(actionString) {
             rest();
             break;
         case "advanceDialogue":
-            if (argument1 != "")
-                advanceDialogue(argument1);
+            if (functionArray.length > 1)
+                advanceDialogue(functionArray[1]);
             else
                 console.error("doAction - Called advanceDialogue without an additional argument");
             break;
         case "goToNPC":
-            if (argument1 != "")
-                changeContext(argument1, 5);                
+            if (functionArray.length > 1)
+                changeContext(functionArray[1], 5);                
             else
                 console.error("doAction - Called goToNPC without an additional argument");
+            break;
+        case "addAction":   // addAction() context (keyword or index), contextType, action, index
+            if (functionArray.length > 4) {
+                
+                addActionToContext(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
+            }
+            else
+                console.error("doAction - Called addAction without the correct number of arguments");
+            break;
+        case "removeAction":  // removeAction() context(keyword or index), contextType, index        
+            if (functionArray.length > 3)
+
+                removeActionFromContext(functionArray[1],parseInt(functionArray[2]),parseInt(functionArray[3]));
+            else
+                console.error("doAction - Called addAction without the correct number of arguments");
+            break;
+        case "replaceAction":   // replaceAction() context(keyword or index), contextType, action, index
+            if (functionArray.length > 4)
+
+                replaceAction(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
+            else
+                console.error("doAction - Called addAction without the correct number of arguments");
+            break;
+        case "consoleLog":  // For debug
+            console.log("!!!");
             break;
     }
 }
@@ -985,23 +1074,24 @@ function attack() {
 }
 
 function monsterDeath() {
+    
+    let monsterIndex = returnActionIndexFromKeyword(monstersModified[currentContext].keyword, storedLocation, 1); // We're looking for the index of the monster, it will always be in the storedLocation which will always be type 1, storedLocation is the primary context, and the monster we are fighting is the secondary context
 
-    let monsterIndex = returnIndexFromKeyword(locationsModified[storedLocation].actions, monstersModified[currentContext].keyword);        
-        locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the location array that it was contained in
-        let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
+    locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the location array that it was contained in
+    let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
 
-        xp += monstersModified[currentContext].xp;
-        gold += monstersModified[currentContext].gold;
-        updateStats();
-        
-        if (monstersModified[currentContext].deathFunc != "") {
-            doAction(monstersModified[currentContext].deathFunc);
-        }
-        
-        save();
+    xp += monstersModified[currentContext].xp;
+    gold += monstersModified[currentContext].gold;
+    updateStats();
+    
+    if (monstersModified[currentContext].deathFunc != "") {
+        doAction(monstersModified[currentContext].deathFunc);
+    }
+    
+    save();
 
-        returnToPrimaryContext();
-        addUpdateText(storedMonsterString);
+    returnToPrimaryContext();
+    addUpdateText(storedMonsterString);
 }
 
 function dodge() {
@@ -1087,8 +1177,8 @@ function addToInventory(keyword) {
             itemFound = true;
             inventory.push(index);
             
-            // Remove item from current location - will need to be modified if we receive items in other ways
-            let itemIndex = returnIndexFromKeyword(locationsModified[currentContext].actions, keyword);
+            // Remove item from current location - will need to be modified if we receive items in other ways            
+            let itemIndex = returnActionIndexFromKeyword(keyword, currentContext, currentContextType);
             locationsModified[currentContext].actions.splice(itemIndex, 1);   // Remove the monster from the location array that it was contained in
         }    
     });
@@ -1191,9 +1281,25 @@ function save() {
     initializeGame();
   }
 
-  // Within a locations actions array, search for a given monster and return it's index within that array
-  function returnIndexFromKeyword(ar, keyword) {
+  // Within a given context, search it's actions for the given keyword
+  function returnActionIndexFromKeyword(keyword, context, contextType) {
     
+    ar = [];
+    switch (contextType) {
+        case 1://Location
+            ar = locationsModified[context].actions;
+            break;
+        case 3://Monster
+        ar = monstersModified[context].actions;
+            break;
+        case 4://Item
+        ar = itemsModified[context].actions;
+            break;
+        case 5://NPC
+        ar = npcsModified[context].actions;
+            break;
+    }
+
     let index = -1;
     ar.forEach((element, i) => {        
         if (element.keyword === keyword) {
@@ -1202,6 +1308,38 @@ function save() {
         }
     });
 
+    return index;
+  }
+
+  // Within a given context, search for a context of a given type
+  function returnIndexFromKeyword(keyword, contextType) {
+    
+    ar = [];
+    switch (contextType) {
+        case 1://Location
+        
+            ar = locationsModified;
+            break;
+        case 3://Monster
+            ar = monstersModified;
+            break;
+        case 4://Item
+            ar = itemsModified;
+            break;
+        case 5://NPC
+            ar = npcsModified;
+            break;
+    }
+
+    let index = -1;
+    
+    ar.forEach((element, i) => {        
+        if (element.keyword === keyword) {
+            
+            index = i;            
+        }
+    });
+    console.log("i:"+index);
     return index;
   }
 

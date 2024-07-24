@@ -17,7 +17,7 @@ document.addEventListener('keydown', function(event) {
 
 document.addEventListener('keydown', function(event) {
     if (event.code == 'KeyQ') {
-        addActionToContext(currentContext, currentContextType, { type: 1, title: "forest", keyword: "edge_wood", blocked: "" }, 1);        
+        console.log("Debug - Q");
     }
 });
 
