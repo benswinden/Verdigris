@@ -1,8 +1,6 @@
 // #region VARIABLES
 
-let version = 0.012;
-
-let debugStartLocation = 10;
+let version = 0.013;
 
 let xp = 0;
 let hpCurrent = 0;
@@ -32,7 +30,7 @@ let respawnLocation = {
 }
 
 // Debug
-let debugStartContext = 10;
+let debugStartContext = 0;
 let debugStartType = 1;
 let debugActive = false;
 
