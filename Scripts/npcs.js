@@ -22,11 +22,11 @@ npcs = [
         ],
         dialogue: [
             {                                            
-                text: "Jorrid beckons you closer. \"Come on now, I won't bite. \" he says with a feverish laugh. \"I've been hoping for an honest adventurer to come along and help me with the important work I'm doing here.\"",                
+                text: "Jorrid beckons you closer. \"Come on now, I won't bite. \" he says with a feverish laugh. \"I've got something going here with the adventuresome folk round here. You look like you could play the part.\"",                
                 func: "advanceDialogue|jorrid"
             },
             {                                            
-                text: "\"You look like the type who's headed to the tower. You find anything unusual, bring it here and I'll be sure to reward you well.\" He gestures at the random assortment of trash laying about to drive home his point.",                
+                text: "\"No doubt you'll end up at the Tower sooner or later. You find anything interesting, bring it here and I'll be sure to reward you well.\" He gestures at the random assortment of things laying about to drive home his point.",                
                 func: ""
             }                        
         ],
@@ -35,7 +35,7 @@ npcs = [
         keyword: "messenger",
         title: "The Messenger",
         shortTitle: "messenger",        
-        description: "A well dressed scholar from the easten isles sits crossed legged on a floor of colorful layered rugs. They nod to you in acknowledgement. ",
+        description: "A well dressed scholar from the easten isles sits crossed legged on a floor of colorful layered rugs.",
         dialogueAvailable: true,
         currentDialogue: 0,
         actions: [
@@ -52,7 +52,11 @@ npcs = [
         ],
         dialogue: [
             {                                            
-                text: "\"Come to me if you need something delivered, or if your waiting for something to come your way.\" They say to you in a steady voice.",                
+                text: "\"I came here with a very important message for my lord, but I have reason to believe he's gone into the Tower to the east.\"",
+                func: "advanceDialogue|messenger"
+            },
+            {                                            
+                text: "\"If it wouldn't be too much trouble, could you keep your eyes out for him?\"",
                 func: ""
             }
         ],

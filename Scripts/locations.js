@@ -5,7 +5,7 @@ locations = [
         keyword: "narration_01_01",
         title: "",        
         description: "",
-        narration: "There in the misty lands, lies an ancient tower. The space inside that tower is twisted and strange. The tower's innards have far outgrown it's worldly boundaries.",
+        narration: "Far off in the misty lands, lies an ancient tower.",
         actions: [
             {
                 type: 1,
@@ -19,7 +19,7 @@ locations = [
         keyword: "narration_01_02",
         title: "",        
         description: "",
-        narration: "High up in the upper most reaches of the towers many floors lives something very old and dead. A presence so evil that it's influence continues to seep throughout the mortal realms.",
+        narration: "High up in the upper most reaches of the tower's many floors lives something old and long dead.\n\nA presence so evil that it's influence seeps into the soil and spreads through the earth. Across the mortal realms.",
         actions: [
             {
                 type: 1,
@@ -33,7 +33,7 @@ locations = [
         keyword: "narration_01_03",
         title: "",        
         description: "",
-        narration: "A curse has spread through the surrounding lands. A calling curse. To the tower it calls.",
+        narration: "With it came a curse. A calling curse. To the tower it calls.",
         actions: [
             {
                 type: 1,
@@ -46,7 +46,7 @@ locations = [
     {
         keyword: "edge_wood",
         title: "Edge of the Woods",        
-        description: "The darkened woods have slowly made way to shrubs and saplings where the forest meets the fields. The well-worn trail leads below to the ruins of an old village, and at it's center a black tower reaches up into the mist.",
+        description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an old village.",
         narration: "You awaken as if from a stupor. The last weeks and months blur together in your mind and where they've lead you is not entirely clear.",
         actions: [
             {
@@ -64,7 +64,7 @@ locations = [
             {
                 type: 1,
                 title: "East to the Village Outskirts",
-                keyword: "village_outskirts",
+                keyword: "narration_03_01",
                 blocked: ""
             },
             {
@@ -76,10 +76,24 @@ locations = [
         ]
     },
     {
+        keyword: "narration_03_01",
+        title: "",        
+        description: "",
+        narration: "Following the meandering forest trail, you're unable to ignore a looming shadow to the east. A black tower, reaching high into the surrounding mist.",
+        actions: [
+            {
+                type: 1,
+                title: "Next",                
+                keyword: "village_outskirts",
+                blocked: ""
+            }
+        ]
+    },
+    {
         keyword: "village_outskirts",
         title: "Village Outskirts",
-        description: "An old cobbled road leads you in among the ruined structures. The buildings are skeletal as only the moss-covered stones remain.",
-        narration: "A cool mist sifts through the gray clouds above.",
+        description: "An old cobbled road leads you in among the ruined settlement. The buildings here are nothing more than cadaverous moss-covered remains.",
+        narration: "A soft rain sifts through the gray clouds above.",
         actions: [
             {
                 type: 1,
@@ -153,7 +167,7 @@ locations = [
     {
         keyword: "town_square",
         title: "The Town Square",        
-        description: "At the center of the ruined village is the square. Standing in the center is a large stone statue. From here pathways spread throughout the settlement.\n\nLooming large to the east is dark sillouette of the Tower.",
+        description: "Standing in the town square is a lonely stone statue. A woman in a long robe, head held high defiantly. From here pathways spread throughout the settlement.\n\nTo the east is dark sillouette of the Tower.",
         narration: "",
         actions: [
             {
@@ -190,7 +204,7 @@ locations = [
     {
         keyword: "temple_market",
         title: "The Temple Market",        
-        description: "A winding street, that once lead to a place of worship. The stones here are covered in rich green and purple mosses. Propped up inside a ruined wall is a makeshift tent, providing some respite from the dripping rain. From within, a small campfire is flickering away.",
+        description: "A winding street, that once lead to a place of worship. The stones here are covered in rich green and purple mosses.\n\nPropped up inside a ruined wall is a makeshift tent, providing some respite from the dripping rain. From within, a small campfire is flickering away.",
         narration: "",
         actions: [
             {
@@ -222,8 +236,8 @@ locations = [
     {
         keyword: "templefront",
         title: "The Templefront",        
-        description: "A narrow road leads east, down a long hill. Everything on this road is covered in a black fungus, giving it the look of having sustained an intense flame.",
-        narration: "",
+        description: "A great temple stands before, it's walls have stood the test of time much better than most of this place.\n\nIt's made of a white stone that gleams under the moistness in the air.",
+        narration: "Standing imposingly to the south is an ancient stone golem. It's head turns to face you.",
         actions: [
             {
                 type: 1,
@@ -296,9 +310,9 @@ locations = [
         narration: "",
         actions: [
             {
-                type: 2,
-                title: "North",
-                keyword: "",
+                type: 1,
+                title: "North to the King's Gate",
+                keyword: "kings_gate",
                 blocked: ""
             },
             {
@@ -317,6 +331,38 @@ locations = [
                 type: 1,
                 title: "South to the Town Square",
                 keyword: "town_square",
+                blocked: ""
+            }
+        ]
+    },
+    {
+        keyword: "kings_gate",
+        title: "King's Gate",        
+        description: "The memory of a beautifully arching gate can be felt in the stone remains here. A tall spire still stands, one half of what once was.",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North through a doorway to the Bottom Stairway (Locked)",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: "",
+                blocked: ""
+            },
+            {
+                type: 1,
+                title: "South to the King's Road",
+                keyword: "kings_road",
                 blocked: ""
             }
         ]
@@ -363,7 +409,7 @@ locations = [
         keyword: "narration_02_01",
         title: "",        
         description: "",
-        narration: "You make your way through the winding streets of the ruined settlement making a serpentine path eastwards towards the tower.",
+        narration: "You make your way through the winding streets of the ruined settlement.\n\nMarking a serpentine path eastwards.",
         actions: [
             {
                 type: 1,
@@ -377,7 +423,7 @@ locations = [
         keyword: "narration_02_02",
         title: "",        
         description: "",
-        narration: "As you crest a final hill, you see before you the eastern half of the village has been overtaken completely in ink black overgrowth.",
+        narration: "As you crest a final hill, you see before you the eastern half of the village has been overtaken entirely in ink black overgrowth.",
         actions: [
             {
                 type: 1,
@@ -391,7 +437,7 @@ locations = [
         keyword: "narration_02_03",
         title: "",        
         description: "",
-        narration: "Vines and leaves and moss as black as night reaching forth from the tower whose bottom half has dissapeared in the same foliage.",
+        narration: "An undulating sea of leaves and thorn bramble as dark as night reaching forth and at the center of it all, the obelisk.\n\nThe great Black Tower.",
         actions: [
             {
                 type: 1,
@@ -405,8 +451,8 @@ locations = [
     {
         keyword: "black_road",
         title: "The Black Leaf Road",        
-        description: "A narrow road leads east, down a long hill. Thorny vines from reaching plants search for a sleeve to catch themselves on but the path to the tower is worn well enough for you to make your way without too much trouble.",
-        narration: "",
+        description: "A narrow road leads east, down a long hill. Thorny vines from reaching plants search for a sleeve to catch themselves on.\n\nThe path is oddly well worn.",
+        narration: "You hear the sound of a creature calling out. A mix of crow call and hyena laugh.",
         actions: [
             {
                 type: 2,

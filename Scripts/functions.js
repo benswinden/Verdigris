@@ -701,7 +701,7 @@ function displayInventory() {
     secondaryTitle.style.display = "none";
 
     mainTitleText.innerText = "Traveler";        
-    mainText.innerText = "A worn traveler come from a foreign land. Stricken by a mysterious curse. Unable to resist the call which has lead them to the ruined settlement at the base of a Black Tower.";
+    mainText.innerText = "A worn traveler come from a foreign land. Stricken by a mysterious curse. Unable to resist the call.";
 
     document.querySelector("#inventory-title").style.display = "block";
 
@@ -1255,14 +1255,20 @@ function save() {
     inventory = JSON.parse(localStorage.getItem('inventory'));
     respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'));
 
-    if (!resetLocations)
-        locationsModified = JSON.parse(localStorage.getItem('locationsModified'));
-    else
+    if (!resetLocations) { 
+        
+        locationsModified = JSON.parse(localStorage.getItem('locationsModified'));       
+        if (localStorage.getItem('monstersModified')) monstersModified = JSON.parse(localStorage.getItem('monstersModified')); else console.error("load - monstersModified entry doesn't exist");
+        if (localStorage.getItem('npcsModified')) npcsModified = JSON.parse(localStorage.getItem('npcsModified')); else console.error("load - npcsModified entry doesn't exist");
+        if (localStorage.getItem('itemsModified')) itemsModified = JSON.parse(localStorage.getItem('itemsModified')); else console.error("load - itemsModified entry doesn't exist");
+    }
+    else {
         locationsModified = locations;
-    
-    if (localStorage.getItem('monstersModified')) monstersModified = JSON.parse(localStorage.getItem('monstersModified')); else console.error("load - monstersModified entry doesn't exist");
-    if (localStorage.getItem('npcsModified')) npcsModified = JSON.parse(localStorage.getItem('npcsModified')); else console.error("load - npcsModified entry doesn't exist");
-    if (localStorage.getItem('itemsModified')) itemsModified = JSON.parse(localStorage.getItem('itemsModified')); else console.error("load - itemsModified entry doesn't exist");
+        locationsVisited = [];
+        monstersModified = monsters;
+        npcsModified = npcs;
+        itemsModified = items;
+    }
   }
 
   function versionCheck() {
