@@ -21,6 +21,8 @@ let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = It
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
 
+let activeDirections = [];      // Array that contains which directions (0=north, 1=west, 2=east, 3=south ) have active buttons currently
+
 let inventory = [];             // Inventory contains index numbers for items in the items array
 
 let respawnLocation = {
@@ -438,6 +440,7 @@ function hideAllButtons() {
 function updateButtons(actions)  {        
         
     hideAllButtons();
+    activeDirections = [];
 
     button1.onclick = '';
     button2.onclick = '';
@@ -510,7 +513,8 @@ function updateButtons(actions)  {
                     
                     // If there is no value for blocked, or else we didn't find a monster at this location with the matching keyword
                     if (element.blocked === "" || !monsterFound) {
-                
+                        
+                        activeDirections.push(index);
                         button.style.backgroundColor = buttonBackColorLocation;
                         button.style.color = buttonTextColorDefault;
                         button.classList.add("can-hover");
@@ -575,14 +579,33 @@ function updateButtons(actions)  {
     }        
 }
 
+function go(direction) {
+
+    // This function only works while in a location context
+    if (currentContextType === 1) {
+
+        // Check for 'next' button
+        if (direction === 4) {
+            if (locationsModified[currentContext].actions.length > 0 && locationsModified[currentContext].actions[0].title === "Next") {                
+                changeContextDirect(getContextIndexFromKeyword(locationsModified[currentContext].actions[0].keyword, 1), locationsModified[currentContext].actions[0].type);
+                return;
+            }
+        }
+
+        if (activeDirections.indexOf(direction) === -1) { console.log("go - [" + direction + "] is not an active direction."); return; }
+                
+        changeContextDirect(getContextIndexFromKeyword(locationsModified[currentContext].actions[direction].keyword, 1), locationsModified[currentContext].actions[direction].type);
+    }
+}
+
 // Add an action to a specified context at the index, index -1 = append to the end of the list
 function addActionToContext(context, contextType, action, index) {
-    console.log(action);
+    
     // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
     let contextInt = 0;
     if (!Number.isInteger(parseInt(context))) {
 
-        contextInt = returnIndexFromKeyword(context, contextType);
+        contextInt = getContextIndexFromKeyword(context, contextType);
         if (contextInt === -1) {
             console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
             return;
@@ -638,7 +661,7 @@ function removeActionFromContext(context, contextType, index) {
     let contextInt = 0;
     if (!Number.isInteger(parseInt(context))) {
 
-        contextInt = returnIndexFromKeyword(context, contextType);
+        contextInt = getContextIndexFromKeyword(context, contextType);
         if (contextInt === -1) {
             console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
             return;
@@ -684,7 +707,7 @@ function replaceAction(context, contextType, action, index) {
 }
 
 function displayInventory() {
-
+    
     console.log("displayInventory() - ");
 
     inventoryIcon.src = "Assets/ExitIcon.svg";
@@ -1073,7 +1096,7 @@ function attack() {
 
 function monsterDeath() {
     
-    let monsterIndex = returnActionIndexFromKeyword(monstersModified[currentContext].keyword, storedLocation, 1); // We're looking for the index of the monster, it will always be in the storedLocation which will always be type 1, storedLocation is the primary context, and the monster we are fighting is the secondary context
+    let monsterIndex = getActionIndexFromKeyword(monstersModified[currentContext].keyword, storedLocation, 1); // We're looking for the index of the monster, it will always be in the storedLocation which will always be type 1, storedLocation is the primary context, and the monster we are fighting is the secondary context
 
     locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the location array that it was contained in
     let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
@@ -1176,7 +1199,7 @@ function addToInventory(keyword) {
             inventory.push(index);
             
             // Remove item from current location - will need to be modified if we receive items in other ways            
-            let itemIndex = returnActionIndexFromKeyword(keyword, currentContext, currentContextType);
+            let itemIndex = getActionIndexFromKeyword(keyword, currentContext, currentContextType);
             locationsModified[currentContext].actions.splice(itemIndex, 1);   // Remove the monster from the location array that it was contained in
         }    
     });
@@ -1285,8 +1308,9 @@ function save() {
     initializeGame();
   }
 
-  // Within a given context, search it's actions for the given keyword
-  function returnActionIndexFromKeyword(keyword, context, contextType) {
+  // Get a specific action within a given context
+  // i.e. I want to find the "Leave" action within "dark_grotto"
+  function getActionIndexFromKeyword(keyword, context, contextType) {
     
     ar = [];
     switch (contextType) {
@@ -1312,11 +1336,13 @@ function save() {
         }
     });
 
+    if (index === -1) console.error("getActionIndexFromKeyword() - Failed to find keyword [" + keyword + "] in context [" + context + "] of context type [" + contextType + "]");
     return index;
   }
 
-  // Within a given context, search for a context of a given type
-  function returnIndexFromKeyword(keyword, contextType) {
+  // Get a specific context of the given type.
+  // i.e. I want to find a location named "keyword"
+  function getContextIndexFromKeyword(keyword, contextType) {
     
     ar = [];
     switch (contextType) {
@@ -1343,7 +1369,8 @@ function save() {
             index = i;            
         }
     });
-    console.log("i:"+index);
+    
+    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] of context type [" + contextType + "]");
     return index;
   }
 

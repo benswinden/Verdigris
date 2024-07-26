@@ -52,5 +52,21 @@ items = [
                 func: "block"
             }   
         ],
+    },    
+    {
+        keyword: "small_chest",
+        title: "A simple wooden chest with a rusted latch",
+        canEquip: true,
+        equipped: false,
+        power: 0,
+        stamina: 0,
+        evasion: 5,
+        actions: [          // Item actions will be added while in a monster sub-context
+            {                
+                type: 6,
+                title: "Block with your shield",
+                func: "block"
+            }   
+        ],
     }
 ];

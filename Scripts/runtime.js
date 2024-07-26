@@ -15,6 +15,12 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
+document.addEventListener('keydown', function(event) { if (event.code == 'ArrowUp') go(0); });          // North
+document.addEventListener('keydown', function(event) { if (event.code == 'ArrowLeft') go(1); });        // West
+document.addEventListener('keydown', function(event) { if (event.code == 'ArrowRight') go(2); });       // East
+document.addEventListener('keydown', function(event) { if (event.code == 'ArrowDown') go(3); });        // South
+document.addEventListener('keydown', function(event) { if (event.code == 'Enter') go(4); });            // For "Next" buttons
+
 document.addEventListener('keydown', function(event) {
     if (event.code == 'KeyQ') {
         console.log("Debug - Q");
