@@ -543,7 +543,16 @@ function updateButtons(actions)  {
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
 
-                    button.onclick = function() {addToInventory(element.keyword)};
+                    button.onclick = function() {
+                        
+                        if (element.keyword === "destroy")
+                            removeActionFromContext(currentContext, currentContextType, index);
+                        else
+                            addToInventory(element.keyword); 
+
+                        if (element.func != undefined) 
+                            doAction(element.func);
+                    };
                     break;
                 // NPC
                 case 5:
@@ -954,7 +963,7 @@ function doAction(actionString) {
         functionString = functionArray[0];
     }
 
-    console.log(functionString);
+    console.log("doAction() - functionString: " + functionString);
 
     switch (functionString) {
         case "attack":
@@ -976,19 +985,19 @@ function doAction(actionString) {
             rest();
             break;
         case "advanceDialogue":
-            if (functionArray.length > 1)
+            if (functionArray.length === 2)         // advanceDialogue|npcKeyword
                 advanceDialogue(functionArray[1]);
             else
                 console.error("doAction - Called advanceDialogue without an additional argument");
             break;
         case "goToNPC":
-            if (functionArray.length > 1)
+            if (functionArray.length === 2)     // goToNPC|npcKeyword
                 changeContext(functionArray[1], 5);                
             else
                 console.error("doAction - Called goToNPC without an additional argument");
             break;
         case "addAction":   // addAction() context (keyword or index), contextType, action, index
-            if (functionArray.length > 4) {
+            if (functionArray.length === 5) {
                 
                 addActionToContext(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
             }
@@ -996,18 +1005,25 @@ function doAction(actionString) {
                 console.error("doAction - Called addAction without the correct number of arguments");
             break;
         case "removeAction":  // removeAction() context(keyword or index), contextType, index        
-            if (functionArray.length > 3)
+            if (functionArray.length === 4)
 
                 removeActionFromContext(functionArray[1],parseInt(functionArray[2]),parseInt(functionArray[3]));
             else
                 console.error("doAction - Called addAction without the correct number of arguments");
             break;
         case "replaceAction":   // replaceAction() context(keyword or index), contextType, action, index
-            if (functionArray.length > 4)
+            if (functionArray.length === 5)
 
                 replaceAction(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
             else
                 console.error("doAction - Called addAction without the correct number of arguments");
+            break;
+        case "addGold":  
+            if (functionArray.length === 3) // addGold|amount|updateString
+
+                addGold(parseInt(functionArray[1]),functionArray[2]);
+            else
+                console.error("doAction - Called addGold without the correct number of arguments");
             break;
         case "consoleLog":  // For debug
             console.log("!!!");
@@ -1190,6 +1206,12 @@ function advanceDialogue(npcName) {
 
 function addToInventory(keyword) {
     
+    if (keyword === "") {
+
+        console.log("addToInventory() - keyword is empty");
+        return;
+    }
+
     let itemFound = false;
     itemsModified.forEach((element,index) => {
         
@@ -1210,6 +1232,13 @@ function addToInventory(keyword) {
     }
     else
         console.error("addToInventory() - keyword:" + keyword + " not found in items array");
+}
+
+function addGold(amount, updateString) {
+
+    gold += amount;
+    if (updateString != "") addUpdateText(updateString);
+    updateStats();
 }
 
 function toggleEquipped(index, button) {

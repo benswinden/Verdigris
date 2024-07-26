@@ -402,7 +402,14 @@ locations = [
                 title: "A hungry rat is here gnashing on a bone",
                 keyword: "large_rat",
                 blocked: ""
-            }
+            },
+            {
+                type: 4,
+                title: "A small handful of gold pieces",
+                keyword: "destroy",
+                blocked: "",
+                func: "addGold|10|You pick up the handful of coins"
+            }            
         ]
     },
     {
