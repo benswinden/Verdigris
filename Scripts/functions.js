@@ -102,6 +102,7 @@ let locations = [{
             title: "",      // String used in the button
             keyword: "",    // key used to search for the associated action
             blocked: "",    // If this monster is present, this location is blocked
+            locked: "",
             func: "",       // When this is a misc action button
         }        
     ]
@@ -224,7 +225,7 @@ function initializeGame() {
         baseEvasion = 0;
 
         inventory = [];
-        inventory.push(0,1,3);        
+        inventory.push(0,1,3,4);        
 
         storedLocation = -1;
         locationsVisited = [];
@@ -498,24 +499,35 @@ function updateButtons(actions)  {
                 case 1:
                                         
                     // Check whether this is a location that may be blocked by a monster
-                    let monsterFound = false;
-                    if (element.blocked != "") {
+                    let exitBlocked = false;
+                    if (element.blocked != undefined && element.blocked != "") {
                         
                         // Loop through all actions to see if there is a monster with a matching keyword
                         actions.forEach((actionElement, index) => {                            
                             if (element.blocked == actionElement.keyword) {
                                 
-                                monsterFound = true;
-                                button.style.backgroundColor = buttonBackcolorLocked;
-                                button.style.color = buttonTextColorLocked;
-                                button.classList.remove("can-hover");
+                                exitBlocked = true;                            
                                 additionalButtonString += " [Blocked]";
                             }
                         });
                     }
                     
-                    // If there is no value for blocked, or else we didn't find a monster at this location with the matching keyword
-                    if (element.blocked === "" || !monsterFound) {
+                    // Locked locations, need to check the player's inventory for the key
+                    let doorLocked = false;
+                    if (element.locked != undefined && element.locked != "") {
+                                            
+                        if (inventoryIndexOf(element.locked) != -1) {
+                            doorLocked = false;
+                            additionalButtonString += " [Unlocked]";
+                        }
+                        else {                            
+                            doorLocked = true;
+                            additionalButtonString += " [Locked]";
+                        }
+                    }
+                    
+                    // Active location action button
+                    if (!doorLocked && !exitBlocked) {
                         
                         activeDirections.push(index);
                         button.style.backgroundColor = buttonBackColorLocation;
@@ -523,6 +535,13 @@ function updateButtons(actions)  {
                         button.classList.add("can-hover");
 
                         button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func);};
+                    }
+                    // If door is locked, or blocked by a monster then disable it
+                    else if (doorLocked || exitBlocked) {
+
+                        button.style.backgroundColor = buttonBackcolorLocked;
+                        button.style.color = buttonTextColorLocked;
+                        button.classList.remove("can-hover");
                     }
 
                     break;
@@ -803,6 +822,19 @@ function clearInventory() {
         element.remove();
     });
     createdInventoryButtons = [];
+}
+
+function inventoryIndexOf(keyword) {
+
+    let i = -1;
+    inventory.forEach((element,index) => {
+        
+        if (itemsModified[element].keyword === keyword) {            
+            i = index;
+        }
+    });
+
+    return i;
 }
 
 function displayTrain() {

@@ -10,8 +10,7 @@ locations = [
             {
                 type: 1,
                 title: "Next",
-                keyword: "narration_01_02",
-                blocked: ""
+                keyword: "narration_01_02"
             }
         ]
     },
@@ -24,8 +23,7 @@ locations = [
             {
                 type: 1,
                 title: "Next",
-                keyword: "narration_01_03",
-                blocked: ""
+                keyword: "narration_01_03"
             }
         ]
     },
@@ -38,8 +36,7 @@ locations = [
             {
                 type: 1,
                 title: "Next",
-                keyword: "edge_wood",
-                blocked: ""
+                keyword: "edge_wood"
             }
         ]
     },
@@ -52,26 +49,22 @@ locations = [
             {
                 type: 2,
                 title: "North",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "West",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 1,
                 title: "East to the Village Outskirts",
-                keyword: "narration_03_01",
-                blocked: ""
+                keyword: "narration_03_01"
             },
             {
                 type: 2,
                 title: "South",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             }
         ]
     },
@@ -84,8 +77,7 @@ locations = [
             {
                 type: 1,
                 title: "Next",                
-                keyword: "village_outskirts",
-                blocked: ""
+                keyword: "village_outskirts"
             }
         ]
     },
@@ -98,26 +90,22 @@ locations = [
             {
                 type: 1,
                 title: "North into a Lamplit Ruin",
-                keyword: "lamplit_ruin",
-                blocked: ""
+                keyword: "lamplit_ruin"
             },
             {
                 type: 1,
                 title: "West to the Edge of the Woods",
-                keyword: "edge_wood",
-                blocked: ""
+                keyword: "edge_wood"
             },
             {
                 type: 1,
                 title: "East towards the Town Square",
-                keyword: "town_square",
-                blocked: ""
+                keyword: "town_square"
             },
             {
                 type: 2,
                 title: "South",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },            
             {
                 type: 5,
@@ -135,32 +123,27 @@ locations = [
             {
                 type: 2,
                 title: "North",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "West",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "East",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 1,
                 title: "South to the Village Outskirts",
-                keyword: "village_outskirts",
-                blocked: ""
+                keyword: "village_outskirts"
             },
             {
                 type: 5,
                 title: "Jorrid squats here amongst the ruins", 
-                keyword: "jorrid",
-                blocked: ""
+                keyword: "jorrid"
             }
         ]
     },
@@ -173,36 +156,27 @@ locations = [
             {
                 type: 1,
                 title: "North to the King's Road",
-                keyword: "kings_road",
-                blocked: ""
+                keyword: "kings_road"
             },
             {
                 type: 1,
                 title: "West to the Village Outskirts",
-                keyword: "village_outskirts",
-                blocked: ""
+                keyword: "village_outskirts"
             },
             {
                 type: 1,
                 title: "East to the Blackened Road",
-                keyword: "narration_02_01",
-                blocked: ""
+                keyword: "narration_02_01"
             },
             {
                 type: 1,
                 title: "South to the Temple Market",
-                keyword: "temple_market",
-                blocked: ""
+                keyword: "temple_market"
             },
             {
                 type: 5,
                 title: "Make Camp",
                 keyword: "default_camp"
-            },
-            {
-                type: 5,
-                title: "Thornhood Soja, the merchant",
-                keyword: "thornhood_soja"
             }
         ]
     },
@@ -215,26 +189,22 @@ locations = [
             {
                 type: 1,
                 title: "North to the Town Square",
-                keyword: "town_square",
-                blocked: ""
+                keyword: "town_square"
             },
             {
                 type: 2,
                 title: "West",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 5,
                 title: "East to the Messenger's Tent",
-                keyword: "messenger",
-                blocked: ""
+                keyword: "messenger"
             },
             {
                 type: 1,
                 title: "South to the Templefront",
-                keyword: "templefront",
-                blocked: ""
+                keyword: "templefront"
             }
         ]
     },    
@@ -247,20 +217,17 @@ locations = [
             {
                 type: 1,
                 title: "North to the Temple Market",
-                keyword: "temple_market",
-                blocked: ""
+                keyword: "temple_market"
             },
             {
                 type: 2,
                 title: "West",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "East",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 1,
@@ -271,8 +238,7 @@ locations = [
             {
                 type: 3,
                 title: "A Temple Golem is standing here",
-                keyword: "temple_golem",
-                blocked: ""
+                keyword: "temple_golem"
             }
         ]
     },
@@ -285,26 +251,22 @@ locations = [
             {
                 type: 1,
                 title: "North to the Templefront",
-                keyword: "templefront",
-                blocked: ""
+                keyword: "templefront"
             },
             {
                 type: 2,
                 title: "West",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "East",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "South",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             }
         ]
     },
@@ -317,64 +279,84 @@ locations = [
             {
                 type: 1,
                 title: "North to the King's Gate",
-                keyword: "kings_gate",
-                blocked: ""
+                keyword: "kings_gate"
             },
             {
                 type: 2,
                 title: "West",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 1,
                 title: "East to a Shelterd Nook",
-                keyword: "sheltered_nook",
-                blocked: ""
+                keyword: "sheltered_nook"
             },
             {
                 type: 1,
                 title: "South to the Town Square",
-                keyword: "town_square",
-                blocked: ""
-            },
-            {
-                type: 4,
-                title: "locket",
-                keyword: "silver_locket",
-                blocked: ""
+                keyword: "town_square"
             }
         ]
     },
     {
         keyword: "kings_gate",
         title: "King's Gate",        
-        description: "The memory of a beautifully arching gate can be felt in the stone remains here. A tall spire still stands, one half of what once was.",
+        description: "A crumbling wall still stands holding the arch of the old King's Gate.",
         narration: "",
         actions: [
             {
-                type: 2,
-                title: "North through a doorway to the Bottom Stairway (Locked)",
-                keyword: "",
-                blocked: ""
+                type: 1,
+                title: "North through a doorway to the Gate Stairwell",
+                keyword: "gate_stairwell",
+                locked: "key"
             },
             {
                 type: 2,
                 title: "West",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "East",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 1,
                 title: "South to the King's Road",
-                keyword: "kings_road",
-                blocked: ""
+                keyword: "kings_road"
+            }
+        ]
+    },
+    {
+        keyword: "gate_stairwell",
+        title: "The Gate Stairwell",        
+        description: "The interior of the King's Gate foritifications hold a collapsed stone staircase that once lead up into the battlements.",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: "",
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "South to the King's Gate",
+                keyword: "kings_gate"
+            },
+            {
+                type: 5,
+                title: "Thornhood Soja",
+                keyword: "thornhood_soja"
             }
         ]
     },
@@ -387,38 +369,32 @@ locations = [
             {
                 type: 2,
                 title: "North",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 1,
                 title: "West to the King's Road",
-                keyword: "kings_road",
-                blocked: ""
+                keyword: "kings_road"
             },
             {
                 type: 2,
                 title: "East",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "South",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 3,
                 title: "A hungry rat is here gnashing on a bone",
-                keyword: "large_rat",
-                blocked: ""
+                keyword: "large_rat"
             },
             {
                 type: 4,
                 title: "A small handful of gold pieces",
                 keyword: "destroy",
-                blocked: "",
                 func: "addGold|10|You pick up the handful of coins"
             }            
         ]
@@ -432,8 +408,7 @@ locations = [
             {
                 type: 1,
                 title: "Next",
-                keyword: "narration_02_02",
-                blocked: ""
+                keyword: "narration_02_02"
             }
         ]
     },
@@ -446,8 +421,7 @@ locations = [
             {
                 type: 1,
                 title: "Next",
-                keyword: "narration_02_03",
-                blocked: ""
+                keyword: "narration_02_03"
             }
         ]
     },
@@ -461,7 +435,6 @@ locations = [
                 type: 1,
                 title: "Next",
                 keyword: "black_road",
-                blocked: "",
                 func: "replaceAction|town_square|1|{\"type\": 1,\"title\": \"East to the Blackened Road\",\"keyword\": \"black_road\",\"blocked\": \"\"}|2"
             }
         ]
@@ -475,26 +448,22 @@ locations = [
             {
                 type: 2,
                 title: "North",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 1,
                 title: "West to the Town Square",
-                keyword: "town_square",
-                blocked: ""
+                keyword: "town_square"
             },
             {
                 type: 2,
                 title: "East to the Tower (COMING SOON)",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             },
             {
                 type: 2,
                 title: "South",
-                keyword: "",
-                blocked: ""
+                keyword: ""
             }
         ]
     }

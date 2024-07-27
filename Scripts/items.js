@@ -56,5 +56,17 @@ items = [
                 func: "block"
             }   
         ],
-    }
+    },    
+    {
+        keyword: "key",
+        title: "A simple brass key",
+        shortTitle: "key",
+        canEquip: false,
+        equipped: false,
+        power: 0,
+        stamina: 0,
+        evasion: 0,        
+        actions: [          // Item actions will be added while in a monster sub-context            
+        ],
+    }    
 ];
