@@ -88,7 +88,7 @@ npcs = [
         actions: [  
             {
                 type: 4,
-                title: "silver_locket",
+                title: "An old silver locket",
                 func: "buy|silver_locket"
             },
             {
