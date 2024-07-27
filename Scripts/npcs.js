@@ -89,7 +89,8 @@ npcs = [
             {
                 type: 4,
                 title: "An old silver locket",
-                func: "buy|silver_locket"
+                keyword: "silver_locket",
+                func: "buy|silver_locket|5"
             },
             {
                 type: 6,
@@ -104,7 +105,7 @@ npcs = [
         ],
         dialogue: [
             {                                            
-                text: "\"What you need?\"",
+                text: "\"Need something?\"",
                 func: ""
             }
         ],

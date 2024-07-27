@@ -118,12 +118,7 @@ locations = [
                 title: "South",
                 keyword: "",
                 blocked: ""
-            },
-            {
-                type: 4,
-                title: "A simple silver locket lies here in the dirt",
-                keyword: "silver_locket"
-            },
+            },            
             {
                 type: 5,
                 title: "A cloaked man leans casually against a pillar.",
@@ -341,6 +336,12 @@ locations = [
                 type: 1,
                 title: "South to the Town Square",
                 keyword: "town_square",
+                blocked: ""
+            },
+            {
+                type: 4,
+                title: "locket",
+                keyword: "silver_locket",
                 blocked: ""
             }
         ]

@@ -140,6 +140,7 @@ let npcs = [
             {
                 type: 0,
                 title: "",
+                keyword: "",
                 func: ""
             }            
         ],
@@ -156,11 +157,13 @@ let items = [
     {
         keyword: "",
         title: "",
+        shortTitle: "",
         canEquip: false,
         equipped: false,
         power: 0,
         stamina: 0,
         evasion: 0,
+        cost: 0,
         actions: [          // Item actions will be added while in a monster sub-context
             {                
                 type: 0,
@@ -543,11 +546,30 @@ function updateButtons(actions)  {
                     button.style.color = buttonTextColorDefault;
                     button.classList.add("can-hover");
 
+                    // If this is marked as "buy", that means we are talking to a vendor NPC, and need to change the button according to whether or not we can afford this item
+                    let isBuy = false;
+                    let itemCost = 0;
+                    if (element.func != undefined && element.func.substr(0,3) == "buy") {
+                        isBuy = true;                        
+                        itemCost = element.func.split("|")[2];
+                        let item = itemsModified[getContextIndexFromKeyword(element.keyword, 4)];
+                        if (item === undefined) console.error("updateButtons() - Creating a purchasable item button, couldn't find the item");
+                        
+                        additionalButtonString += " [ " + itemCost + " Gold ]"
+
+                        if (itemCost > gold) {
+                            button.style.backgroundColor = buttonBackcolorLocked;
+                            button.style.color = buttonTextColorLocked;
+                            button.classList.remove("can-hover");
+                        }
+
+                    }
+
                     button.onclick = function() {
                         
                         if (element.keyword === "destroy")
-                            removeActionFromContext(currentContext, currentContextType, index);
-                        else
+                            removeActionFromContext(currentContext, currentContextType, index);                        
+                        else if (!isBuy)
                             addToInventory(element.keyword); 
 
                         if (element.func != undefined) 
@@ -1028,10 +1050,17 @@ function doAction(actionString) {
             break;
         case "addGold":  
             if (functionArray.length === 3) // addGold|amount|updateString
-
-                addGold(parseInt(functionArray[1]),functionArray[2]);
+                
+                addGold(parseInt(functionArray[1]),functionArray[2]);                            
             else
                 console.error("doAction - Called addGold without the correct number of arguments");
+            break;
+        case "buy":  
+            if (functionArray.length === 3) // buy|item keyword
+                                
+                buy(functionArray[1],parseInt(functionArray[2]));            
+            else
+                console.error("doAction - Called buy without the correct number of arguments");
             break;
         case "consoleLog":  // For debug
             console.log("!!!");
@@ -1246,27 +1275,49 @@ function addToInventory(keyword) {
         return;
     }
 
-    let itemFound = false;
-    itemsModified.forEach((element,index) => {
+    let item = itemsModified[getContextIndexFromKeyword(keyword, 4)];
+    if (item === undefined) {
+        console.error("addToInventory() - keyword:" + keyword + " not found in items array");
+        return;
+    }
+
+    inventory.push(getContextIndexFromKeyword(keyword, 4));
+    
+    // Find the index of the action that is linked to this item in this location, remove it
+    let actionIndex = getActionIndexFromKeyword(keyword, currentContext, currentContextType);
+    let actions = [];
+    if (currentContextType === 1)
+        actions = locationsModified[currentContext].actions;
+    else if (currentContextType === 3)
+        actions = monstersModified[currentContext].actions;
+    else if (currentContextType === 5)
+        actions = npcsModified[currentContext].actions;
         
-        if (element.keyword == keyword) {
+    actions.splice(actionIndex, 1);   // Remove the item from context it was contained in
+    updateButtons(actions);
 
-            itemFound = true;
-            inventory.push(index);
-            
-            // Remove item from current location - will need to be modified if we receive items in other ways            
-            let itemIndex = getActionIndexFromKeyword(keyword, currentContext, currentContextType);
-            locationsModified[currentContext].actions.splice(itemIndex, 1);   // Remove the monster from the location array that it was contained in
-        }    
-    });
+    save();
+    addUpdateText("The " + itemsModified[inventory[inventory.length - 1]].shortTitle + " has been added to your inventory.");
+    playerActionComplete();
+}
 
-    if (itemFound) {
-        updateButtons(locationsModified[currentContext].actions);
-        save();
-        playerActionComplete();
+function buy(keyword, cost) {
+
+    let item = itemsModified[getContextIndexFromKeyword(keyword, 4)];
+    if (item === undefined) {
+        console.error("buy() - keyword:" + keyword + " not found in items array");
+        return;
+    }
+
+    if (gold >= cost) {
+
+        gold -= cost;
+        addUpdateText("Your purchased the " + item.shortTitle + ".");
+        addToInventory(keyword);
+        updateStats();        
     }
     else
-        console.error("addToInventory() - keyword:" + keyword + " not found in items array");
+        console.error("buy() - cost greater than gold");
 }
 
 function addGold(amount, updateString) {
