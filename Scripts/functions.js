@@ -742,9 +742,8 @@ function displayInventory() {
                 
         const clone = itemButton.cloneNode(true);        
         clone.querySelector('.button-text').innerText = itemsModified[element].title;
-        clone.style.display = "flex";    
-        //clone.onclick = function() {doAction(itemsModified[element].func)};       // This is what we will do when create actions in a combat context
-        clone.onclick =  function(){ toggleEquipped(element, clone); };
+        clone.style.display = "flex";            
+        clone.onclick =  function(){ resetUpdateText(); toggleEquipped(element, clone); };
         document.querySelector("nav").appendChild(clone);
         createdInventoryButtons.push(clone);
 
@@ -935,10 +934,17 @@ function updateMonsterUI() {
     monsterHpBar.style.width = monsterHpCurrentPercent * 2 + 'px';
 }
 
+function resetUpdateText() {
+
+    updateText.innerText = "";
+    updateText.style.display = "none";
+}
+
 function addUpdateText(text) {
 
     updateText.style.display = "block";
-    updateText.innerText = text;
+    if (updateText.innerText != "") updateText.innerText += "\n";
+    updateText.innerText += text;
 }
 
 // #endregion
@@ -948,6 +954,8 @@ function addUpdateText(text) {
 // Translate a string provided in through the context data into an action
 function doAction(actionString) {
     
+    resetUpdateText();
+
     if (actionString === undefined) {
         console.error("doAction() - actionString is undefined");
         return;
@@ -1031,6 +1039,41 @@ function doAction(actionString) {
     }
 }
 
+function playerActionComplete() {
+
+    let monstersActionString = "";
+    // If current context is a location, search it's actions for monsters and tell them to attack
+    if (currentContextType === 1) {
+        
+        locationsModified[currentContext].actions.forEach((element, index) => {
+            
+            if (element.type === 3) {
+                
+                // We have a location action button referring to a monster
+                let index = getContextIndexFromKeyword(element.keyword, 3);                
+                hpCurrent -= monstersModified[index].power;
+                if (monstersActionString != "") monstersActionString += "\n";
+                monstersActionString += "The " + monstersModified[index].shortTitle + " does " + monstersModified[index].power + " damage to you.";
+            }
+        });
+    }
+    // Currently fighting a monster
+    if (currentContextType === 3) {
+
+        hpCurrent -= monstersModified[currentContext].power;
+        if (monstersActionString != "") monstersActionString += "\n";
+        monstersActionString += "The " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].power + " damage to you.";
+    }
+
+    updateStats();
+    save();    
+    addUpdateText(monstersActionString);
+
+    // Check for Player Deaath
+    if (hpCurrent <= 0)
+        playerDeath();        
+}
+
 function playerDeath() {
     
     hideAllButtons();
@@ -1078,36 +1121,23 @@ function respawn() {
 function attack() {
 
     console.log("attack() - Attack Power: " + power);         // Unhelpful console log imo
+    let monster = monstersModified[currentContext];
     
     // PLAYER ATTACK
-    monstersModified[currentContext].hpCurrent -= power;
+    monster.hpCurrent -= power;
     updateMonsterUI();
-    
+        
+    let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
+    addUpdateText(updateString);  
+
     // CHECK FOR MONSTER DEATH
-    if (monstersModified[currentContext].hpCurrent <= 0) {
+    if (monster.hpCurrent <= 0) {
 
         monsterDeath();
-    }   
-    // Monster is still alive 
-    else {
-        
-        hpCurrent -= monstersModified[currentContext].power;
-        updateStats();
-
-        // Check for Player Deaath
-        if (hpCurrent <= 0) {
-            playerDeath();
-        }
-        else {
-            
-            // Add update text that provides info about attack damages    
-
-            let updateString = "You do " + power + " damage to the " + monstersModified[currentContext].shortTitle + ".\nThe " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].power + " damage to you."    
-            addUpdateText(updateString);  
-        }    
     }
-    
+
     save();
+    playerActionComplete();
 }
 
 function monsterDeath() {
@@ -1133,6 +1163,7 @@ function monsterDeath() {
 
 function dodge() {
     console.log("didge() - ");
+    playerActionComplete();
 }
 
 function returnToPrimaryContext() {
@@ -1144,6 +1175,7 @@ function returnToPrimaryContext() {
 
     save();
     updateContext();
+    playerActionComplete();
 }
 
 function talk() {
@@ -1164,6 +1196,8 @@ function talk() {
             save();
             updateButtons(npcsModified[currentContext].actions);
         }
+
+        playerActionComplete();
     }
     else
         console.error("talk - Somehow this was called but the current context is not an NPC")
@@ -1229,6 +1263,7 @@ function addToInventory(keyword) {
     if (itemFound) {
         updateButtons(locationsModified[currentContext].actions);
         save();
+        playerActionComplete();
     }
     else
         console.error("addToInventory() - keyword:" + keyword + " not found in items array");
@@ -1239,6 +1274,8 @@ function addGold(amount, updateString) {
     gold += amount;
     if (updateString != "") addUpdateText(updateString);
     updateStats();
+    save();
+    playerActionComplete();
 }
 
 function toggleEquipped(index, button) {
@@ -1255,6 +1292,8 @@ function toggleEquipped(index, button) {
         }
     
         updateStats();
+        save();
+        playerActionComplete();
     }
     else
         console.error("toggleEquipped() - Trying to toggle but the index of this element is outside the bounds of the items array");    

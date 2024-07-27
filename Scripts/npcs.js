@@ -62,6 +62,54 @@ npcs = [
         ],
     },
     {
+        keyword: "thornhood_kijil",
+        title: "Thornhood Kijil",
+        shortTitle: "Kijil",        
+        description: "A black cloaked man leans casually against a pillar to the side of the road.",
+        dialogueAvailable: false,
+        currentDialogue: 0,
+        actions: [            
+            {
+                type: 6,
+                title: "Leave",
+                func: "returnToPrimaryContext"
+            }          
+        ],
+        dialogue: [            
+        ],
+    },
+    {
+        keyword: "thornhood_soja",
+        title: "Thornhood Soja",
+        shortTitle: "Soja",        
+        description: "Knife-cut Short cropped black hair peeks out from inside a dark green hood. They regard you steadily as you approach.",
+        dialogueAvailable: true,
+        currentDialogue: 0,
+        actions: [  
+            {
+                type: 4,
+                title: "silver_locket",
+                func: "buy|silver_locket"
+            },
+            {
+                type: 6,
+                title: "Talk",
+                func: "talk"
+            },        
+            {
+                type: 6,
+                title: "Leave",
+                func: "returnToPrimaryContext"
+            }          
+        ],
+        dialogue: [
+            {                                            
+                text: "\"What you need?\"",
+                func: ""
+            }
+        ],
+    },
+    {
         keyword: "default_camp",
         title: "Camp",
         shortTitle: "camp",

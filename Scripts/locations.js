@@ -93,7 +93,7 @@ locations = [
         keyword: "village_outskirts",
         title: "Village Outskirts",
         description: "An old cobbled road leads you in among the ruined settlement. The buildings here are nothing more than cadaverous moss-covered remains.",
-        narration: "A soft rain sifts through the gray clouds above.",
+        narration: "You feel watched.",
         actions: [
             {
                 type: 1,
@@ -123,6 +123,11 @@ locations = [
                 type: 4,
                 title: "A simple silver locket lies here in the dirt",
                 keyword: "silver_locket"
+            },
+            {
+                type: 5,
+                title: "A cloaked man leans casually against a pillar.",
+                keyword: "thornhood_kijil"
             }
         ]
     },
@@ -198,6 +203,11 @@ locations = [
                 type: 5,
                 title: "Make Camp",
                 keyword: "default_camp"
+            },
+            {
+                type: 5,
+                title: "Thornhood Soja, the merchant",
+                keyword: "thornhood_soja"
             }
         ]
     },
@@ -205,7 +215,7 @@ locations = [
         keyword: "temple_market",
         title: "The Temple Market",        
         description: "A winding street, that once lead to a place of worship. The stones here are covered in rich green and purple mosses.\n\nPropped up inside a ruined wall is a makeshift tent, providing some respite from the dripping rain. From within, a small campfire is flickering away.",
-        narration: "",
+        narration: "A soft rain sifts through the gray clouds above.",
         actions: [
             {
                 type: 1,
