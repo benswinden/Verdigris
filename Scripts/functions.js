@@ -549,7 +549,7 @@ function updateButtons(actions)  {
                         activeDirections.push(index);
                         button.classList = "nav-button can-hover location-button";
 
-                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func);};
+                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func); playClick();};
                     }
                     // If door is locked, or blocked by a monster then disable it
                     else if (doorLocked || exitBlocked) {
@@ -566,7 +566,7 @@ function updateButtons(actions)  {
                 case 3:                    
                     button.classList = "nav-button can-hover monster-button";
 
-                    button.onclick = function() {changeContext(element.keyword, 3)};
+                    button.onclick = function() {changeContext(element.keyword, 3); playClick();};
                     break;
                 // ITEM
                 case 4:                    
@@ -598,17 +598,19 @@ function updateButtons(actions)  {
 
                         if (element.func != undefined) 
                             doAction(element.func);
+
+                        playClick();
                     };
                     break;
                 // NPC
                 case 5:                    
                     button.classList = "nav-button can-hover npc-button";
-                    button.onclick = function() {changeContext(element.keyword, 5)};
+                    button.onclick = function() {changeContext(element.keyword, 5); playClick();};
                     break;
                 // Misc Action - Styled the same as a location, but will call a custom function instead of moving to another context
                 case 6:                    
                     button.classList = "nav-button can-hover location-button";
-                    button.onclick = function() {doAction(element.func)};
+                    button.onclick = function() {doAction(element.func); playClick();};
 
                     // Let's check for an edge cases where this is a talk button, because talk buttons should actually be locked, if there isn't a dialogue available
                     if (element.func === "talk") {
@@ -758,12 +760,13 @@ function displayInventory() {
     console.log("displayInventory() - ");
 
     inventoryIcon.classList = "close-inventory";    
-    inventoryIcon.onclick = exitInventory;
+    inventoryIcon.onclick = function() { exitInventory(); playClick(); };
 
     powerStat.style.display = "flex";
     staminaStat.style.display = "flex";
     defenceStat.style.display = "flex";    
 
+    resetUpdateText();
     hideAllButtons();
 
     narrationText.style.display = "none";
@@ -782,8 +785,9 @@ function displayInventory() {
                 
         const clone = itemButton.cloneNode(true);        
         clone.querySelector('.button-text').innerText = itemsModified[element].title;
-        clone.style.display = "flex";            
-        clone.onclick =  function(){ resetUpdateText(); toggleEquipped(element, clone); };
+        clone.style.display = "flex";
+        clone.onmouseover = (event) => { if (clone.classList.contains("can-hover"))  playClick(); };
+        clone.onclick =  function(){ resetUpdateText(); toggleEquipped(element, clone); playClick();};
         document.querySelector("nav").appendChild(clone);
         createdInventoryButtons.push(clone);
 
@@ -815,8 +819,8 @@ function exitInventory() {
 
 function clearInventory() {
 
-    inventoryIcon.classList = "open-inventory";    
-    inventoryIcon.onclick = displayInventory;
+    inventoryIcon.classList = "open-inventory";
+    inventoryIcon.onclick = function() { displayInventory(); playClick(); };        
 
     powerStat.style.display = "flex";
     staminaStat.style.display = "flex";
@@ -1126,7 +1130,7 @@ function playerActionComplete() {
 
     updateStats();
     save();    
-    addUpdateText(monstersActionString);
+     if (monstersActionString != "") addUpdateText(monstersActionString);
 
     // Check for Player Deaath
     if (hpCurrent <= 0)
@@ -1543,6 +1547,32 @@ function save() {
     array.push({type: 6, title: "Run away", func: "returnToPrimaryContext"});
 
     return array;
+  }
+
+  function playClick() {
+    
+    let audioClipIndex = Math.floor(Math.random() * 5);
+    let audioClip = '';
+    switch (audioClipIndex) {
+        case 0:
+            audioClip = 'Audio/clicks/Click_1.wav';
+            break;
+        case 1:
+            audioClip = 'Audio/clicks/Click_2.wav';
+            break;
+        case 2:
+            audioClip = 'Audio/clicks/Click_3.wav';
+            break;
+        case 3:
+            audioClip = 'Audio/clicks/Click_4.wav';
+            break;
+        case 4:
+            audioClip = 'Audio/clicks/Click_5.wav';
+            break;
+    }
+
+    var audio = new Audio(audioClip);
+    audio.play();      
   }
 
   // #endregion
