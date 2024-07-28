@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="wrapper">
@@ -24,22 +24,25 @@
         </div>
 
         <header>            
-            <div class="stats">
+            <div id="stats">
                 <ul>
                     <li><img src="Assets/HPIcon.svg" alt=""><div id="hp-text">999</div> </li>                                                    
                     <li><img src="Assets/GOLDIcon.svg" alt=""><div id="gold-text">999</div> </li>
                     <li><img src="Assets/XPIcon.svg" alt=""><div id="xp-text">999</div> </li>
-                    <li><img src="Assets/InventoryIcon.svg" alt="" id="inventory-icon"></li>
+                    <li id="power-stat"><img src="Assets/PowerIcon.svg" alt=""><div id="power-text">999</div> </li>                                                    
+                    <li id="stamina-stat"><img src="Assets/StaminaIcon.svg" alt=""><div id="stamina-text">999</div> </li>
+                    <li id="defence-stat"><img src="Assets/DefenceIcon.svg" alt=""><div id="defence-text">999</div> </li>
                 </ul>
             </div>
+            <div id="inventory-button-section"><img id="inventory-icon" class="open-inventory" ></div>
         </header>
         <main>
             <div class="title-section">
                 <div id="main-title">
-                    <h1 id="main-title-text"></h1>
+                    <div id="main-title-text"></div>
                 </div>
                 <div id="secondary-title">
-                    <img id="secondary-title-icon" src="Assets/SecondaryTitleIcon.svg" alt=""><h2 id="secondary-title-text">Lorem Placholderum</h1>
+                    <img id="secondary-title-icon" src="Assets/SecondaryIconMonster.svg" class="secondary-icon-monster" alt=""><div id="secondary-title-text"></div>
                 </div>
                 <div id="monster-hp-section">
                     <div id="monster-hp-bar-background">
@@ -61,27 +64,29 @@
                     
                 </p> 
             </div>
-
-            <div id="inventory-stats">
-                <ul>
-                    <li><div id="power-text">POWER: 999</div> </li>                                                    
-                    <li><div id="stamina-text">STAMINA: 999</div> </li>
-                    <li><div id="evasion-text">EVASION: 999</div> </li>                    
-                </ul>
-            </div>
-            <div id="inventory-title"><h2>Inventory:</h2></div>
+            <div id="inventory-title"><h2>Inventory</h2></div>
         </main>
         
         <nav>
-            <button id="equip-button" class="nav-button can-hover"><img src="Assets/ItemUnequipped.svg"  class="button-equip-icon" alt=""><div class="button-text">Equip Button</div></button>
-            <button id="button1" class="nav-button can-hover"><div class="button-text">Button 1</div></button>
-            <button id="button2" class="nav-button can-hover"><div class="button-text">Button 2</div></button>
-            <button id="button3" class="nav-button can-hover"><div class="button-text">Button 3</div></button>
-            <button id="button4" class="nav-button can-hover"><div class="button-text">Button 4</div></button>
-            <button id="button5" class="nav-button can-hover"><div class="button-text">Button 5</div></button>
-            <button id="button6" class="nav-button can-hover"><div class="button-text">Button 6</div></button>
-            <button id="button7" class="nav-button can-hover"><div class="button-text">Button 7</div></button>
-            <button id="button8" class="nav-button can-hover"><div class="button-text">Button 8</div></button>
+            <button id="equip-button" class="nav-button can-hover item-button">
+                <img src="Assets/ItemUnequipped.svg"  class="button-equip-icon" alt="">
+                <div class="button-text">Equip Button</div>
+                <div id="button-stat-section">
+                    <ul>
+                        <li><img src="Assets/PowerIconSmall.svg" class="button-equip-stat"><div class="button-power-text">99</div> </li>                                                    
+                        <li><img src="Assets/StaminaIconSmall.svg" class="button-equip-stat"><div class="button-stamina-text">99</div> </li>
+                        <li><img src="Assets/DefenceIconSmall.svg" class="button-equip-stat"><div class="button-defence-text">99</div> </li>
+                    </ul>
+                </div>
+            </button>
+            <div id="button1" class="nav-button can-hover monster-button"><div class="button-text">Button 1</div></div>
+            <div id="button2" class="nav-button can-hover item-button"><div class="button-text">Button 2</div></div>
+            <div id="button3" class="nav-button can-hover npc-button"><div class="button-text">Button 3</div></div>
+            <div id="button4" class="nav-button can-hover locked-button"><div class="button-text">Button 4</div></div>
+            <div id="button5" class="nav-button can-hover location-button"><div class="button-text">Button 5</div></div>
+            <div id="button6" class="nav-button can-hover location-button"><div class="button-text">Button 6</div></div>
+            <div id="button7" class="nav-button can-hover location-button"><div class="button-text">Button 7</div></div>
+            <div id="button8" class="nav-button can-hover location-button"><div class="button-text">Button 8</div></div>
         </nav>
     </div>
 

@@ -25,6 +25,7 @@ let activeDirections = [];      // Array that contains which directions (0=north
 
 let inventory = [];             // Inventory contains index numbers for items in the items array
 
+// Default location for new games is edge_woods
 let respawnLocation = {
     context: 0,
     contextType: 0,
@@ -45,6 +46,7 @@ const inventoryIcon = document.querySelector('#inventory-icon');
 const mainTitleText =  document.querySelector('#main-title-text');
 const secondaryTitle =  document.querySelector('#secondary-title');
 const secondaryTitleText =  document.querySelector('#secondary-title-text');
+const secondaryTitleIcon =  document.querySelector('#secondary-title-icon');
 const mainText =  document.querySelector('#main-text');
 const narrationText =  document.querySelector('#narration-text');
 const updateText =  document.querySelector('#update-text');
@@ -52,10 +54,13 @@ const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
 const monsterHpText =  document.querySelector('#monster-hp-text');
 
+const powerStat = document.querySelector('#power-stat');            // Text and icon combined
+const staminaStat = document.querySelector('#stamina-stat');        // Text and icon combined
+const defenceStat = document.querySelector('#defence-stat');        // Text and icon combined
 const powerText = document.querySelector('#power-text');
 const staminaText = document.querySelector('#stamina-text');
-const evasionText = document.querySelector('#evasion-text');
-const inventoryStatsSection =  document.querySelector('#inventory-stats');
+const defenceText = document.querySelector('#defence-text');
+
 // Buttons
 const button1 = document.querySelector('#button1');
 const button2 = document.querySelector('#button2');
@@ -79,16 +84,8 @@ let resetLocations = false;     // We use this for debug, when selected on reloa
 let createdInventoryButtons = [];
 
 //Colors
-const buttonBackColorLocation = '#EAEAEA';
-const buttonBackcolorEnemy = '#FFAFAF';
-const buttonBackcolorItem = '#8ED5EC';
-const buttonBackcolorNPC = '#81DC9B';
-const buttonBackcolorLocked = '#F6F6F6';
-const buttonTextColorDefault = '#000';
-const buttonTextColorLocked = '#989898';
-
-const mainTitleActive = '#101010';
-const secondaryTitleActive = '#757575';
+const mainTitleActive = '#8F871E';
+const secondaryTitleActive = '#363718';
 
 // #region Containers
 let locations = [{
@@ -96,6 +93,7 @@ let locations = [{
     title: "",        
     description: "",
     narration: "",
+    update: "",
     actions: [
         {
             type: 0,        // Determines what the button looks like, and what it does // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
@@ -225,13 +223,13 @@ function initializeGame() {
         baseEvasion = 0;
 
         inventory = [];
-        inventory.push(0,1,3,4);        
+        inventory.push(0,1,3);        
 
         storedLocation = -1;
         locationsVisited = [];
 
         respawnLocation = {
-            context: 0,
+            context: 3,
             contextType: 1,
             storedLocation: -1
         }
@@ -349,10 +347,14 @@ function updateContext() {
     console.log("updateContext - currentContext: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
 
     narrationText.style.display = "none";
+    resetUpdateText();
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
 
-    inventoryStatsSection.style.display = "none";
+    powerStat.style.display = "none";
+    staminaStat.style.display = "none";
+    defenceStat.style.display = "none";
+
     document.querySelector("#inventory-title").style.display = "none";
 
     // By default, we'll be getting our action buttons from a location
@@ -391,7 +393,11 @@ function updateContext() {
         secondaryTitle.style.display = "none";
         
         mainTitleText.innerText = locationsModified[currentContext].title;        
-        mainText.innerText = locationsModified[currentContext].description;    
+        mainText.innerText = locationsModified[currentContext].description; 
+
+        // Some contexts have update text that should display when the player enters their context
+        if (locationsModified[currentContext].update != undefined && locationsModified[currentContext].update != "")
+            addUpdateText(locationsModified[currentContext].update);  
     }
     // If currentLocationType != 1 - We are currently in a secondary context
     else if (currentContextType != 1) {
@@ -404,6 +410,7 @@ function updateContext() {
         switch (currentContextType) {
             // 3 = Monster
             case 3:
+                secondaryTitleIcon.classList = "secondary-icon-monster";
                 secondaryTitleText.innerText = monstersModified[currentContext].title;
                 mainText.innerText = monstersModified[currentContext].description;
 
@@ -411,17 +418,27 @@ function updateContext() {
                 updateMonsterUI();
                 
                 actions = generateItemActions(monstersModified[currentContext].actions);
-                console.log(actions);
+                
+                // Some contexts have update text that should display when the player enters their context
+                if (monstersModified[currentContext].update != undefined && monstersModified[currentContext].update != "")
+                    addUpdateText(monstersModified[currentContext].update);                
+
                 break;
             // 4 = Item
             case 4:
                 break;
             // 4 = NPC
             case 5:
+                secondaryTitleIcon.classList = "secondary-icon-npc";
                 secondaryTitleText.innerText = npcsModified[currentContext].title;
                 mainText.innerText = npcsModified[currentContext].description;                
 
                 actions = npcsModified[currentContext].actions;
+
+                // Some contexts have update text that should display when the player enters their context
+                if (npcsModified[currentContext].update != undefined && npcsModified[currentContext].update != "")
+                    addUpdateText(npcsModified[currentContext].update);  
+
                 break;
         }
     }
@@ -530,40 +547,30 @@ function updateButtons(actions)  {
                     if (!doorLocked && !exitBlocked) {
                         
                         activeDirections.push(index);
-                        button.style.backgroundColor = buttonBackColorLocation;
-                        button.style.color = buttonTextColorDefault;
-                        button.classList.add("can-hover");
+                        button.classList = "nav-button can-hover location-button";
 
                         button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func);};
                     }
                     // If door is locked, or blocked by a monster then disable it
                     else if (doorLocked || exitBlocked) {
-
-                        button.style.backgroundColor = buttonBackcolorLocked;
-                        button.style.color = buttonTextColorLocked;
-                        button.classList.remove("can-hover");
+                        
+                        button.classList = "nav-button locked-button";
                     }
 
                     break;
                 // Locked Action
-                case 2:                    
-                    button.style.backgroundColor = buttonBackcolorLocked;
-                    button.style.color = buttonTextColorLocked;
-                    button.classList.remove("can-hover");
+                case 2:                                        
+                    button.classList = "nav-button locked-button";
                     break;
                 // Monster
-                case 3:
-                    button.style.backgroundColor = buttonBackcolorEnemy;
-                    button.style.color = buttonTextColorDefault;
-                    button.classList.add("can-hover");
+                case 3:                    
+                    button.classList = "nav-button can-hover monster-button";
 
                     button.onclick = function() {changeContext(element.keyword, 3)};
                     break;
                 // ITEM
-                case 4:
-                    button.style.backgroundColor = buttonBackcolorItem;
-                    button.style.color = buttonTextColorDefault;
-                    button.classList.add("can-hover");
+                case 4:                    
+                    button.classList = "nav-button can-hover item-button";
 
                     // If this is marked as "buy", that means we are talking to a vendor NPC, and need to change the button according to whether or not we can afford this item
                     let isBuy = false;
@@ -576,10 +583,8 @@ function updateButtons(actions)  {
                         
                         additionalButtonString += " [ " + itemCost + " Gold ]"
 
-                        if (itemCost > gold) {
-                            button.style.backgroundColor = buttonBackcolorLocked;
-                            button.style.color = buttonTextColorLocked;
-                            button.classList.remove("can-hover");
+                        if (itemCost > gold) {                            
+                            button.classList = "nav-button locked-button";
                         }
 
                     }
@@ -596,28 +601,20 @@ function updateButtons(actions)  {
                     };
                     break;
                 // NPC
-                case 5:
-                    button.style.backgroundColor = buttonBackcolorNPC;
-                    button.style.color = buttonTextColorDefault;
-                    button.classList.add("can-hover");
-
+                case 5:                    
+                    button.classList = "nav-button can-hover npc-button";
                     button.onclick = function() {changeContext(element.keyword, 5)};
                     break;
-                // Misc Action
-                case 6:
-                    button.style.backgroundColor = buttonBackColorLocation;                    
-                    button.style.color = buttonTextColorDefault;
-                    button.classList.add("can-hover");
-
+                // Misc Action - Styled the same as a location, but will call a custom function instead of moving to another context
+                case 6:                    
+                    button.classList = "nav-button can-hover location-button";
                     button.onclick = function() {doAction(element.func)};
 
                     // Let's check for an edge cases where this is a talk button, because talk buttons should actually be locked, if there isn't a dialogue available
                     if (element.func === "talk") {
                         
-                        if (!npcsModified[currentContext].dialogueAvailable) {
-                            button.style.backgroundColor = buttonBackcolorLocked;
-                            button.style.color = buttonTextColorLocked;
-                            button.classList.remove("can-hover");
+                        if (!npcsModified[currentContext].dialogueAvailable) {                            
+                            button.classList = "nav-button locked-button";
                         }
                     }
                     break;                
@@ -760,10 +757,12 @@ function displayInventory() {
     
     console.log("displayInventory() - ");
 
-    inventoryIcon.src = "Assets/ExitIcon.svg";
+    inventoryIcon.classList = "close-inventory";    
     inventoryIcon.onclick = exitInventory;
 
-    inventoryStatsSection.style.display = "block";
+    powerStat.style.display = "flex";
+    staminaStat.style.display = "flex";
+    defenceStat.style.display = "flex";    
 
     hideAllButtons();
 
@@ -788,17 +787,21 @@ function displayInventory() {
         document.querySelector("nav").appendChild(clone);
         createdInventoryButtons.push(clone);
 
+        clone.classList = "nav-button item-button";
+
         if ((itemsModified[element].canEquip)) {
-            clone.querySelector('.button-text').innerText += " [ P:" + itemsModified[element].power + " S:" + itemsModified[element].stamina + " E:" + itemsModified[element].evasion + " ]";
+            
+            clone.querySelector('#button-stat-section').style.display = "block";
+            clone.querySelector('.button-power-text').innerText = itemsModified[element].power;
+            clone.querySelector('.button-stamina-text').innerText = itemsModified[element].stamina;
+            clone.querySelector('.button-defence-text').innerText = itemsModified[element].evasion;
             clone.querySelector(".button-equip-icon").style.display = "block";
             clone.classList.add("can-hover");
             if (itemsModified[element].equipped) clone.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
         }
         else
             clone.classList.remove("can-hover");
-
-        clone.style.backgroundColor = buttonBackcolorItem;
-        clone.style.color = buttonTextColorDefault;        
+    
     });
 }
 
@@ -812,10 +815,13 @@ function exitInventory() {
 
 function clearInventory() {
 
-    inventoryIcon.src = "Assets/InventoryIcon.svg";
+    inventoryIcon.classList = "open-inventory";    
     inventoryIcon.onclick = displayInventory;
 
-    inventoryStatsSection.style.display = "none";
+    powerStat.style.display = "flex";
+    staminaStat.style.display = "flex";
+    defenceStat.style.display = "flex";
+
     document.querySelector("#inventory-title").style.display = "none";
 
     createdInventoryButtons.forEach((element) => {        
@@ -846,7 +852,9 @@ function displayTrain() {
     monsterHpSection.style.display = "none";
     mainTitleText.style.color = mainTitleActive;
     secondaryTitle.style.display = "none";
-    inventoryStatsSection.style.display = "block";
+    powerStat.style.display = "flex";
+    staminaStat.style.display = "flex";
+    defenceStat.style.display = "flex";
     mainTitleText.innerText = "Training";        
     mainText.innerText = "Put your hard won experience towards bettering yourself.";
 
@@ -854,69 +862,59 @@ function displayTrain() {
     button1.querySelector('.button-text').innerText = "Train your HP (10 xp)";
     button1.style.display = "block";
     if (xp >= 10) {        
-        button1.style.backgroundColor = buttonBackColorLocation;
-        button1.style.color = buttonTextColorDefault;
-        button1.classList.add("can-hover");
+        
+        button1.classList = "nav-button can-hover location-button";
         button1.onclick = function() {train(1)};
     }
     else {        
-        button1.style.backgroundColor = buttonBackcolorLocked;
-        button1.style.color = buttonTextColorLocked;
-        button1.classList.remove("can-hover");
+        
+        button1.classList = "nav-button locked-button";
         button1.onclick = "";        
     }
     
     button2.querySelector('.button-text').innerText = "Train your Power (20 xp)";
     button2.style.display = "block";
     if (xp >= 20) {        
-        button2.style.backgroundColor = buttonBackColorLocation;
-        button2.style.color = buttonTextColorDefault;
-        button2.classList.add("can-hover");
+        
+        button2.classList = "nav-button can-hover location-button";
         button2.onclick = function() {train(2)};
     }
     else {        
-        button2.style.backgroundColor = buttonBackcolorLocked;
-        button2.style.color = buttonTextColorLocked;
-        button2.classList.remove("can-hover");
+
+        button2.classList = "nav-button locked-button";
         button2.onclick = "";        
     }
 
     button3.querySelector('.button-text').innerText = "Train your Stamina (20 xp)";
     button3.style.display = "block";
     if (xp >= 20) {        
-        button3.style.backgroundColor = buttonBackColorLocation;
-        button3.style.color = buttonTextColorDefault;
-        button3.classList.add("can-hover");
+
+        button3.classList = "nav-button can-hover location-button";
         button3.onclick = function() {train(3)};
     }
     else {        
-        button3.style.backgroundColor = buttonBackcolorLocked;
-        button3.style.color = buttonTextColorLocked;
-        button3.classList.remove("can-hover");
+
+        button3.classList = "nav-button locked-button";
         button3.onclick = "";        
     }
 
     button4.querySelector('.button-text').innerText = "Train your Evasion (30 xp)";
     button4.style.display = "block";
     if (xp >= 30) {        
-        button4.style.backgroundColor = buttonBackColorLocation;
-        button4.style.color = buttonTextColorDefault;
-        button4.classList.add("can-hover");
+
+        button4.classList = "nav-button can-hover location-button";
         button4.onclick = function() {train(4)};
     }
     else {        
-        button4.style.backgroundColor = buttonBackcolorLocked;
-        button4.style.color = buttonTextColorLocked;
-        button4.classList.remove("can-hover");
+
+        button4.classList = "nav-button locked-button";
         button4.onclick = "";        
     }
 
     button5.querySelector('.button-text').innerText = "Exit";
     button5.style.display = "block";
-    button5.style.backgroundColor = buttonBackColorLocation;
-    button5.style.color = buttonTextColorDefault;
-    button5.classList.add("can-hover");
-    button5.onclick = function() { changeContextDirect(currentContext, currentContextType); };    
+    button5.classList = "nav-button can-hover location-button";
+    button5.onclick = function() { changeContextDirect(currentContext, currentContextType);};    
 }
 
 function train(trainType) {
@@ -958,9 +956,9 @@ function updateStats() {
     hpText.innerText = hpCurrent + " / " + hpMax;
     goldText.innerText = gold;
 
-    powerText.innerText = "POWER: " + power;
-    staminaText.innerText = "STAMINA: " + stamina;
-    evasionText.innerText = "EVASION: " + evasion;
+    powerText.innerText = power;
+    staminaText.innerText = stamina;
+    defenceText.innerText = evasion;
 }
 
 // Calculates stats that are based on multiple factors
@@ -1150,9 +1148,7 @@ function playerDeath() {
 
     button1.querySelector('.button-text').innerText = "Awaken";
     button1.style.display = "block";
-    button1.style.backgroundColor = buttonBackColorLocation;
-    button1.style.color = buttonTextColorDefault;
-    button1.classList.add("can-hover");
+    button1.classList = "nav-button can-hover location-button";
     button1.onclick = function() {respawn();};    
 }
 

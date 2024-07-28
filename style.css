@@ -1,9 +1,19 @@
+@font-face {
+    font-family: avara;
+    src: url(Fonts/Avara.otf);
+  }
+
+body {
+    background-color: #020C0D;
+}
+
 .wrapper {
     margin:0px;
     padding: 0px;    
-    max-width: 800px;
+    max-width: 700px;
     margin: auto;
-    font-family: Roboto;
+    font-family: Eczar;
+    background-color: #020C0D;
 }
 
 h1, h2, p {
@@ -45,47 +55,101 @@ h1, h2, p {
 }
 
 header {
-    color: black;
+    display: flex;
+    justify-content: space-between;    
     font-size: 28px;
-    border-radius: 6px;
-    background-color: #EAEAEA;    
+    border-radius: 6px;       
     margin: 75px 0 0 0;        
 }
 
-ul {        
-    display: flex;
-    justify-content: space-between;
-    gap: 2em;
+#stats {    
+    background: #01090A;
+    border: 1px solid #363718;
+    width: 100%;
+
+    div {
+        text-align: center;
+        min-width: 70px;
+    }
+}
+
+ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     height: auto;
     width: auto;        
     list-style: none;    
     margin: 0;
-    padding: 10px 40px;
+    padding: 0;
     font-size: 20px;        
     font-weight: 700;        
 }
 
 li {
-    color: black;
-    font-size: 25px;        
-    display: flex;
+    color: #CDCEC6;
+    font-size: 21px;
+    font-weight: 400;
+    display: flex;    
+    justify-content: center;
+    align-items: center;    
 }
 
-li div {
-    margin-left: 9px;
+li.hidden {
+    display:none;
 }
+
+#inventory-button-section {
+    cursor:pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #01090A;
+    border: 1px solid #363718;
+    width: 70px;
+    height: 65px;
+    margin-left: 10px;
+
+    .open-inventory {
+        width: 75%;
+        content:url("Assets/InventoryIcon.svg");
+    }
+
+    .close-inventory {
+        width: 65%;
+        content:url("Assets/ExitIcon.svg");
+    }
+}
+
+#inventory-button-section:hover {
+
+    border: 1px solid #6F7221;
+
+    .open-inventory {
+        width: 75%;
+        content:url("Assets/InventoryIconHover.svg");
+    }
+
+    .close-inventory {
+        width: 65%;
+        content:url("Assets/ExitIconHover.svg");
+    }
+}
+
 
 .title-section {
     color: black;
-    margin: 75px 0 0 0;
+    margin: 135px 0 0 0;
 
     #main-title {
         display: flex;
-        margin: 20px;
+        margin: 20px 20px 20px 0;
     }
 
     #main-title-text {
-        color: #757575;
+        font-family: avara;
+        color: #8F871E;
+        font-size: 25px;
+        letter-spacing: 2px;
     }
     
     #main-title-icon {        
@@ -93,30 +157,41 @@ li div {
     }
 
     #secondary-title {
+        font-family: Eczar;
         display: flex;
-        margin: 20px 20px 10px 20px;
+        font-size: 22px;
+        letter-spacing: 1px;
+        font-weight: 400;
+        margin: 20px 20px 10px 0;
     }
 
     #secondary-title-text {
-        color: black;
+        color: #8F871E;
     }
 
     #secondary-title-icon {        
         margin-right: 34px;
-        margin-left: 10px;
     }
 }
 
-#monster-hp-section {
+.secondary-icon-monster {
+    content:url("Assets/SecondaryIconMonster.svg");
+}
 
-    height: 30px;
+.secondary-icon-npc {
+    content:url("Assets/SecondaryIconNPC.svg");
+}
+
+#monster-hp-section {        
+    height: 23px;
 
     #monster-hp-bar-background {
-        border-radius: 6px;
-        background-color: #EAEAEA;    
+        border-radius: 2px;
+        background-color: #01090A;
+        border: 1px solid #512018;
         width: 200px;
-        height: 30px;
-        margin: 30px 0 0 37px;
+        height: 23px;
+        margin: 23px 0 0 0;
         display : flex;
         align-items : center;
         justify-content: center;
@@ -125,88 +200,148 @@ li div {
 
     #monster-hp-bar-current {
         position: relative;
-        background-color: #E98181;
-        border-radius: 6px;
+        background-color: #512018;    
+        border-radius: 2px;
         width: 100px;
-        height: 30px;
-        left: 37px;
-        top: -30px;
+        height: 23px;        
+        top: -24px;
         z-index: 2;
     }
 
     #monster-hp-text {
-        color: #3E3E3E;
-        font-size: 20px;
+        color: #E86E40;
+        font-size: 16px;
         font-weight: 300;    
         z-index: 3;
     }
 }
 
 #main-text-section {
-    color: #3E3E3E;
-    font-size: 25px;
-    font-weight: 400;
-    border-radius: 6px;
-    background-color: #EAEAEA;
-    min-height: 145px;    
+    color: #CDCEC6;
+    font-size: 20px;
+    font-weight: 400;        
+    letter-spacing: 1px;
+    min-height: 105px;    
     margin: 30px 0 25px 0;
 
     #narration-text {
-        display: none;
+        color: #969791;
+        display: none;        
+        font-weight: 400;
         font-style: italic;
-        font-weight: 300;
-        padding: 40px 40px 0 40px;
+        padding: 40px 0 30px 0;
     }
 
     #main-text {
-        padding: 40px 40px 40px 40px;
+        padding: 0 0 30px 0;
     }
 
     #update-text {
-        display: block;
-        font-style: italic;
-        font-weight: 300;
-        padding: 0px 40px 40px 40px;
+        color: #969791;
+        display: block; 
+        font-style: italic;       
+        font-weight: 400;
+        padding: 0px 0 30px 0;
     }
-}
-
-#inventory-stats {
-    display: none;
-    margin: 0 0 30px 0;
-
 }
 
 #inventory-title {
     display: none;
-    padding-bottom: 30px;
+    color: #CDCEC6;
+    font-weight: 500;
+    padding-bottom: 20px;
+    width: 100%;
+    text-align: center;
 }
 
-.nav-button {
-    display: flex;    
-    color: black;
-    font-family: Roboto;
-    font-size: 22px;    
+nav {
+    margin-bottom: 150px;;
+}
+
+.nav-button {    
+    display: flex;        
+    font-family: Eczar;
+    font-size: 18px;    
     text-align: left;
-    border-radius: 6px;
+    border-radius: 2px;
     border: none;
-    background: #EAEAEA;
+    background: #01090A;
     width: 100%;
     height: 50px;
-    line-height: 50px;
-    font-style: normal;
+    line-height: 50px;    
     font-weight: 500;
-    padding: 0 40px;
+    padding: 0;
     margin: 10px 0;
 
     .button-equip-icon {
-        display: none;
-        padding-right: 30px;
-        padding-top: 13px;
+        display: none;        
+        padding-top: 5px;
+        padding-left: 10px;
+    }
+
+    .button-text {
+        padding-left: 25px;
+    }    
+}
+
+#button-stat-section {
+    display: none;
+    margin-left: auto;
+    padding-right: 20px;
+
+    div {
+        font-size: 18px;
+        color: #877C7A;
     }
 }
 
-.can-hover:hover {    
-    border: 2px solid rgb(189, 189, 189);
+.can-hover {
+    cursor:pointer;
+}
+
+.location-button {
+    color: #8A8766;
+    border: 1px solid #363718;
+}
+
+.location-button.can-hover:hover {    
+    color: #BAB797;
+    border: 1px solid #6F7221;
+}
+
+.monster-button {
+    color: #8F3715;
+    border: 1px solid #512018;
+}
+
+.monster-button.can-hover:hover {    
+    color: #E86E40;
+    border: 1px solid #AE3E2D;
+}
+
+.item-button {
+    color: #877C7A;
+    border: 1px solid #32373A;
+}
+
+.item-button.can-hover:hover {    
+    color: #D1BDB9;
+    border: 1px solid #7C8D97;
+}
+
+.npc-button {
+    color: #6C7D5B;
+    border: 1px solid #2B382F;
+}
+
+.npc-button.can-hover:hover {    
+    color: #C4D9B0;
+    border: 1px solid #336843;
+}
+
+.locked-button {
+    color: #383724;
+    border: 1px solid #1C1D0F;
 }
 
 #equip-button {

@@ -44,7 +44,7 @@ locations = [
         keyword: "edge_wood",
         title: "Edge of the Woods",        
         description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an old village.",
-        narration: "You awaken as if from a stupor. The last weeks and months blur together in your mind and where they've lead you is not entirely clear.",
+        narration: "You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.",
         actions: [
             {
                 type: 2,
@@ -65,6 +65,11 @@ locations = [
                 type: 2,
                 title: "South",
                 keyword: ""
+            },
+            {
+                type: 5,
+                title: "Make Camp",
+                keyword: "default_camp"
             }
         ]
     },
@@ -77,7 +82,8 @@ locations = [
             {
                 type: 1,
                 title: "Next",                
-                keyword: "village_outskirts"
+                keyword: "village_outskirts",                                        
+                func: "replaceAction|edge_wood|1|{\"type\": 1,\"title\": \"East to the Village Outskirts\",\"keyword\": \"village_outskirts\"}|2"
             }
         ]
     },
@@ -150,7 +156,7 @@ locations = [
     {
         keyword: "town_square",
         title: "The Town Square",        
-        description: "Standing in the town square is a lonely stone statue. A woman in a long robe, head held high defiantly. From here pathways spread throughout the settlement.\n\nTo the east is dark sillouette of the Tower.",
+        description: "Standing in the town square is a lonely stone statue. A woman in a long robe, head held high defiantly. From here pathways spread throughout the settlement.",
         narration: "",
         actions: [
             {
@@ -165,18 +171,13 @@ locations = [
             },
             {
                 type: 1,
-                title: "East to the Blackened Road",
+                title: "East to the Black Leaf Road",
                 keyword: "narration_02_01"
             },
             {
                 type: 1,
                 title: "South to the Temple Market",
                 keyword: "temple_market"
-            },
-            {
-                type: 5,
-                title: "Make Camp",
-                keyword: "default_camp"
             }
         ]
     },
@@ -456,8 +457,213 @@ locations = [
                 keyword: "town_square"
             },
             {
+                type: 1,
+                title: "East to the Tower",
+                keyword: "f01_01"
+            },
+            {
                 type: 2,
-                title: "East to the Tower (COMING SOON)",
+                title: "South",
+                keyword: ""
+            }
+        ]
+    },
+
+            // TOWER - FLOOR 1
+
+    {
+        keyword: "f01_01",
+        title: "Tangled Entrance",
+        description: "Bramble spills over everything. Thick thorny branches seem to grow from the stones themselves. The smell of damp soil and rotting plant matter is overwhelming.",
+        narration: "Up a long stone staircase is a towering doorway. The door itself rotted away long ago. The still darkness of the tower's interior beckons you.",
+        update: "When you look back, an impenetrable wall of vine and bramble have grown over the doorway.",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "East to the Western Hallway",
+                keyword: "f01_02"
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: ""
+            }
+        ]
+    },
+    {
+        keyword: "f01_02",
+        title: "Floor 1 - The Western Hallway",        
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "West to the Tangled Entrance",
+                keyword: "f01_01"
+            },
+            {
+                type: 1,
+                title: "East to the Central Hall",
+                keyword: "f01_03"
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: ""
+            }
+        ]
+    },
+    {
+        keyword: "f01_03",
+        title: "Floor 1 - Central Hall",        
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 1,
+                title: "North to the Northern Hall",
+                keyword: "f01_06"
+            },
+            {
+                type: 1,
+                title: "West to the Western Hallway",
+                keyword: "f01_02"
+            },
+            {
+                type: 1,
+                title: "East to the Eastern Hallway",
+                keyword: "f01_07"
+            },
+            {
+                type: 1,
+                title: "South to the Southern Hallway",
+                keyword: "f01_04"
+            }
+        ]
+    },
+    {
+        keyword: "f01_04",
+        title: "Floor 1 - The Southern Hallway ",
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 1,
+                title: "North to the Central Hall",
+                keyword: "f01_03"
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "South to the Larval Room",
+                keyword: "f01_05"
+            }
+        ]
+    },
+    {
+        keyword: "f01_05",
+        title: "Floor 1 - The Larval Room",        
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 1,
+                title: "North to the Southern Hallway",
+                keyword: "f01_04"
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "Up to Floor 2",
+                keyword: ""
+            }
+        ]
+    },
+    {
+        keyword: "f01_06",
+        title: "Floor 1 - The Northern Hallway",
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "East",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "South to the Central Hall",
+                keyword: "f01_03"
+            }
+        ]
+    },
+    {
+        keyword: "f01_07",
+        title: "Floor 1 - The Eastern Hallway",
+        description: "",
+        narration: "",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "West to the Central Hall",
+                keyword: "f01_03"
+            },
+            {
+                type: 2,
+                title: "East",
                 keyword: ""
             },
             {
@@ -467,4 +673,7 @@ locations = [
             }
         ]
     }
+
+    // TOWER FLOOR 2
+
 ];

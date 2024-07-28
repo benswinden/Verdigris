@@ -90,7 +90,7 @@ npcs = [
                 type: 4,
                 title: "An old silver locket",
                 keyword: "silver_locket",
-                func: "buy|silver_locket|5"
+                func: "buy|silver_locket|53"
             },
             {
                 type: 6,
