@@ -65,7 +65,7 @@ npcs = [
         keyword: "thornhood_kijil",
         title: "Thornhood Kijil",
         shortTitle: "Kijil",        
-        description: "A black cloaked man leans casually against a pillar to the side of the road.",
+        description: "A black cloaked man leans casually against a pillar to the side of the road.",    
         dialogueAvailable: false,
         currentDialogue: 0,
         actions: [            

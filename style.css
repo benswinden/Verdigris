@@ -59,7 +59,7 @@ header {
     justify-content: space-between;    
     font-size: 28px;
     border-radius: 6px;       
-    margin: 75px 0 0 0;        
+    margin: 95px 0 0 0;        
 }
 
 #stats {    
@@ -276,7 +276,7 @@ nav {
     .button-equip-icon {
         display: none;        
         padding-top: 5px;
-        padding-left: 10px;
+        padding-left: 5px;
     }
 
     .button-text {

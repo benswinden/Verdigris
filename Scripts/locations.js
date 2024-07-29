@@ -91,7 +91,8 @@ locations = [
         keyword: "village_outskirts",
         title: "Village Outskirts",
         description: "An old cobbled road leads you in among the ruined settlement. The buildings here are nothing more than cadaverous moss-covered remains.",
-        narration: "You feel watched.",
+        narration: "",
+        update: "You feel watched.",
         actions: [
             {
                 type: 1,

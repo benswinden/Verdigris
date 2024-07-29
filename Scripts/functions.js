@@ -112,6 +112,7 @@ let monsters = [
         title: "",
         shortTitle: "",
         description: "",
+        update: "",
         hp: 0,
         power: 0,
         xp: 0,
@@ -133,6 +134,7 @@ let npcs = [
         title: "",
         shortTitle: "",
         description: "",
+        update: "",
         dialogueAvailable: true,
         currentDialogue: 0,
         actions: [
@@ -413,6 +415,10 @@ function updateContext() {
                 secondaryTitleIcon.classList = "secondary-icon-monster";
                 secondaryTitleText.innerText = monstersModified[currentContext].title;
                 mainText.innerText = monstersModified[currentContext].description;
+
+                powerStat.style.display = "flex";
+                staminaStat.style.display = "flex";
+                defenceStat.style.display = "flex";
 
                 monsterHpSection.style.display = "block";
                 updateMonsterUI();
