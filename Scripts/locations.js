@@ -95,9 +95,9 @@ locations = [
         update: "You feel watched.",
         actions: [
             {
-                type: 1,
-                title: "North into a Lamplit Ruin",
-                keyword: "lamplit_ruin"
+                type: 2,
+                title: "North",
+                keyword: ""
             },
             {
                 type: 1,
@@ -118,39 +118,6 @@ locations = [
                 type: 5,
                 title: "A cloaked man leans casually against a pillar.",
                 keyword: "thornhood_kijil"
-            }
-        ]
-    },
-    {
-        keyword: "lamplit_ruin",
-        title: "A Lamplit Ruin",
-        description: "A damp, mucky interior with some broken wood and debris doing a poor job at sheltering it from the elements. A greasy lamp swings gently from a rafter.",
-        narration: "Your greeted by a thin man, squatting amongst the debris. \"Welcome friend, name's Jorrid.\"",
-        actions: [
-            {
-                type: 2,
-                title: "North",
-                keyword: ""
-            },
-            {
-                type: 2,
-                title: "West",
-                keyword: ""
-            },
-            {
-                type: 2,
-                title: "East",
-                keyword: ""
-            },
-            {
-                type: 1,
-                title: "South to the Village Outskirts",
-                keyword: "village_outskirts"
-            },
-            {
-                type: 5,
-                title: "Jorrid squats here amongst the ruins", 
-                keyword: "jorrid"
             }
         ]
     },
@@ -284,9 +251,9 @@ locations = [
                 keyword: "kings_gate"
             },
             {
-                type: 2,
-                title: "West",
-                keyword: ""
+                type: 1,
+                title: "West to a Lamplit Ruin",
+                keyword: "lamplit_ruin"
             },
             {
                 type: 1,
@@ -297,6 +264,39 @@ locations = [
                 type: 1,
                 title: "South to the Town Square",
                 keyword: "town_square"
+            }
+        ]
+    },
+    {
+        keyword: "lamplit_ruin",
+        title: "A Lamplit Ruin",
+        description: "A damp, mucky interior with some broken wood and debris doing a poor job at sheltering it from the elements. A greasy lamp swings gently from a rafter.",
+        narration: "Your greeted by a thin man, squatting amongst the debris. \"Welcome friend, name's Jorrid.\"",
+        actions: [
+            {
+                type: 2,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 2,
+                title: "West",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "East to the King's Road",
+                keyword: "kings_road"
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: ""
+            },
+            {
+                type: 5,
+                title: "Jorrid squats here amongst the ruins", 
+                keyword: "jorrid"
             }
         ]
     },
