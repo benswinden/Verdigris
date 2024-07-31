@@ -124,7 +124,7 @@ locations = [
     {
         keyword: "town_square",
         title: "The Town Square",        
-        description: "Standing in the town square is a lonely stone statue. A woman in a long robe, head held high defiantly. From here pathways spread throughout the settlement.",
+        description: "Standing in the town square is a lonely stone statue. A woman in a long robe, head held high defiantly.\n\nPathways spread from here throughout the ruins.",
         narration: "",
         actions: [
             {

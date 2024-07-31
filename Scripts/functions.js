@@ -560,7 +560,7 @@ function updateButtons(actions)  {
                         activeDirections.push(index);
                         button.classList = "nav-button can-hover location-button";
 
-                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func); playClick();};
+                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func, true); playClick();};
                     }
                     // If door is locked, or blocked by a monster then disable it
                     else if (doorLocked || exitBlocked) {
@@ -608,7 +608,7 @@ function updateButtons(actions)  {
                             addToInventory(element.keyword); 
 
                         if (element.func != undefined) 
-                            doAction(element.func);
+                            doAction(element.func, true);
 
                         playClick();
                     };
@@ -1019,9 +1019,10 @@ function addUpdateText(text) {
 // #region ACTIONS
 
 // Translate a string provided in through the context data into an action
-function doAction(actionString) {
+function doAction(actionString, resetText) {
     
-    resetUpdateText();
+    if (resetText)
+        resetUpdateText();
 
     if (actionString === undefined) {
         console.error("doAction() - actionString is undefined");
@@ -1225,7 +1226,7 @@ function monsterDeath() {
     updateStats();
     
     if (monstersModified[currentContext].deathFunc != "") {
-        doAction(monstersModified[currentContext].deathFunc);
+        doAction(monstersModified[currentContext].deathFunc, true);
     }
     
     save();
@@ -1252,7 +1253,8 @@ function returnToPrimaryContext() {
 }
 
 function talk() {
-    
+    resetUpdateText();
+
     if (currentContextType == 5) {
 
         // Check to make sure there is a dialogue to play
@@ -1263,7 +1265,7 @@ function talk() {
             
             // Check if there is a function call attached to this dialogue
             if (npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].func != "") {
-                doAction(npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].func);
+                doAction(npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].func, false);
             }
 
             save();
