@@ -48,7 +48,7 @@ monsters = [
         description: "Bigger than most dogs you've seen, this creature looks at you without a trace of fear.",
         hpCurrent: 30,
         hpMax: 30,
-        power: 3,
+        power: 4,
         insight: 5,
         gold: 1,
         deathFunc: "",

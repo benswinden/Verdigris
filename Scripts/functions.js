@@ -1009,6 +1009,8 @@ function resetUpdateText() {
 
 function addUpdateText(text) {
 
+    if (updateText.innerText.split(/\r\n|\r|\n/).length > 5) resetUpdateText();
+
     updateText.style.display = "block";
     if (updateText.innerText != "") updateText.innerText += "\n";
     updateText.innerText += text;
@@ -1125,17 +1127,18 @@ function playerActionComplete() {
             if (element.type === 3) {
                 
                 // We have a location action button referring to a monster
-                let index = getContextIndexFromKeyword(element.keyword, 3);                
-                hpCurrent -= monstersModified[index].power;
+                let index = getContextIndexFromKeyword(element.keyword, 3);
+                let monsterDamage = Math.max(0, monstersModified[index].power - defence);        
+                hpCurrent -= monsterDamage;
                 if (monstersActionString != "") monstersActionString += "\n";
-                monstersActionString += "The " + monstersModified[index].shortTitle + " does " + monstersModified[index].power + " damage to you.";
+                monstersActionString += "The " + monstersModified[index].shortTitle + " does " + monsterDamage + " damage to you.";
             }
         });
     }
     // Currently fighting a monster
     if (currentContextType === 3) {
-
-        let monsterDamage = Math.max(0, monstersModified[currentContext].power -= defence);
+        
+        let monsterDamage = Math.max(0, monstersModified[currentContext].power - defence);        
         hpCurrent -= monsterDamage;
         if (monstersActionString != "") monstersActionString += "\n";
         monstersActionString += "The " + monstersModified[currentContext].shortTitle + " does " + monsterDamage + " damage to you.";
@@ -1412,6 +1415,8 @@ function save() {
     localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
     localStorage.setItem('hpMax', JSON.stringify(hpMax));
+    localStorage.setItem('maxStamina', JSON.stringify(maxStamina));
+    localStorage.setItem('currentStamina', JSON.stringify(currentStamina));
     localStorage.setItem('gold', JSON.stringify(gold));
     localStorage.setItem('basePower', JSON.stringify(basePower));
     localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
@@ -1435,6 +1440,8 @@ function save() {
     locationsVisited = JSON.parse(localStorage.getItem('locationsVisited'));    
     insight = JSON.parse(localStorage.getItem('insight'));
     hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
+    maxStamina = JSON.parse(localStorage.getItem('maxStamina'));
+    currentStamina = JSON.parse(localStorage.getItem('currentStamina'));
     hpMax = JSON.parse(localStorage.getItem('hpMax'));
     gold = JSON.parse(localStorage.getItem('gold'));
     basePower = JSON.parse(localStorage.getItem('basePower'));

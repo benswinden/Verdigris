@@ -49,12 +49,7 @@ items = [
         power: 0,
         stamina: 0,
         defence: 2,        
-        actions: [          // Item actions will be added while in a monster sub-context
-            {                
-                type: 6,
-                title: "Block with your shield",
-                func: "block"
-            }   
+        actions: [          // Item actions will be added while in a monster sub-context             
         ],
     },    
     {
