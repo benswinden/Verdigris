@@ -8,7 +8,7 @@ monsters = [
         description: "An amorphous form of strange goo oozes it’s way slowly towards you with malicious intent in it’s eyes.",
         hp: 100,
         power: 5,
-        xp: 50,
+        insight: 50,
         gold: 10,
         actions: [
         ]
@@ -21,7 +21,7 @@ monsters = [
         hpCurrent: 100,
         hpMax: 100,
         power: 5,
-        xp: 50,
+        insight: 50,
         gold: 10,
         deathFunc: "",
         actions: [
@@ -35,7 +35,7 @@ monsters = [
         hpCurrent: 500,
         hpMax: 500,
         power: 100,
-        xp: 200,
+        insight: 200,
         gold: 0,
         deathFunc: "",
         actions: [
@@ -49,8 +49,22 @@ monsters = [
         hpCurrent: 30,
         hpMax: 30,
         power: 3,
-        xp: 5,
+        insight: 5,
         gold: 1,
+        deathFunc: "",
+        actions: [
+        ]
+    },
+    {
+        keyword: "blooming_vine_01",
+        title: "A Blooming Vine",
+        shortTitle: "vine",        
+        description: "Covered in vibrant orange flowers and sharp thorns, it sways back and forth menacingly.",
+        hpCurrent: 10,
+        hpMax: 10,
+        power: 1,
+        insight: 0,
+        gold: 3,
         deathFunc: "",
         actions: [
         ]

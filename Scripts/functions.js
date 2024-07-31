@@ -1,20 +1,21 @@
 // #region VARIABLES
 
-let version = 0.013;
+let version = 0.014;
 
-let xp = 0;
-let hpCurrent = 0;
-let hpMax = 0;
+let insight = 0;
+let hpCurrent = 10;
+let hpMax = 10;
 let gold = 0;
 
 // Base stats are the players raw stats
 let basePower = 0;
-let baseStamina = 0;
-let baseEvasion = 0;
+let baseStamina = 3;
+let baseDefence = 0;
 // These are the calculated stats based on other factors like equipped items
 let power = 0;
-let stamina = 0;
-let evasion = 0;
+let maxStamina = 0;
+let currentStamina = 0;
+let defence = 0;
 
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
 let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
@@ -38,7 +39,7 @@ let debugStartType = 1;
 let debugActive = false;
 
 // Stats
-const xpText = document.querySelector('#xp-text');
+const insightText = document.querySelector('#insight-text');
 const hpText = document.querySelector('#hp-text');
 const goldText = document.querySelector('#gold-text');
 const inventoryIcon = document.querySelector('#inventory-icon');
@@ -115,7 +116,7 @@ let monsters = [
         update: "",
         hp: 0,
         power: 0,
-        xp: 0,
+        insight: 0,
         gold: 0,
         deathFunc: "",      // Called on monster death
         actions: [
@@ -163,7 +164,7 @@ let items = [
         equipped: false,
         power: 0,
         stamina: 0,
-        evasion: 0,
+        defence: 0,
         cost: 0,
         actions: [          // Item actions will be added while in a monster sub-context
             {                
@@ -213,16 +214,20 @@ function initializeGame() {
     // No save game, so start a new game
     else {
 
-        console.log("Save game doesn't exist");
-        
-        xp = 0;
-        hpCurrent = 30;
-        hpMax = 30;
-        gold = 20;
+        console.log("Save game doesn't exist");        
 
-        basePower = 10;
-        baseStamina = 5;
-        baseEvasion = 0;
+        insight = 0;
+        hpCurrent = 10;
+        hpMax = 10;
+        gold = 0;
+
+        // Base stats are the players raw stats
+        basePower = 0;
+        baseStamina = 3;
+        baseDefence = 0;
+        
+        currentStamina = 3;
+        maxStamina = 3;
 
         inventory = [];
         inventory.push(0,1,3);        
@@ -804,7 +809,7 @@ function displayInventory() {
             clone.querySelector('#button-stat-section').style.display = "block";
             clone.querySelector('.button-power-text').innerText = itemsModified[element].power;
             clone.querySelector('.button-stamina-text').innerText = itemsModified[element].stamina;
-            clone.querySelector('.button-defence-text').innerText = itemsModified[element].evasion;
+            clone.querySelector('.button-defence-text').innerText = itemsModified[element].defence;
             clone.querySelector(".button-equip-icon").style.display = "block";
             clone.classList.add("can-hover");
             if (itemsModified[element].equipped) clone.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
@@ -855,7 +860,7 @@ function inventoryIndexOf(keyword) {
 
 function displayTrain() {
 
-    console.log("dispdisplayTrainlayInventory() - ");    
+    console.log("displayTrain() - ");    
     button6.style.display = "none";
     narrationText.style.display = "none";
     updateText.style.display = "none";
@@ -866,12 +871,12 @@ function displayTrain() {
     staminaStat.style.display = "flex";
     defenceStat.style.display = "flex";
     mainTitleText.innerText = "Training";        
-    mainText.innerText = "Put your hard won experience towards bettering yourself.";
+    mainText.innerText = "Study your hard earned lessons and put the insight you've acquired to use.";
 
 
-    button1.querySelector('.button-text').innerText = "Train your HP (10 xp)";
+    button1.querySelector('.button-text').innerText = "Train your HP (1 insight)";
     button1.style.display = "block";
-    if (xp >= 10) {        
+    if (insight >= 1) {        
         
         button1.classList = "nav-button can-hover location-button";
         button1.onclick = function() {train(1)};
@@ -882,9 +887,9 @@ function displayTrain() {
         button1.onclick = "";        
     }
     
-    button2.querySelector('.button-text').innerText = "Train your Power (20 xp)";
+    button2.querySelector('.button-text').innerText = "Train your Power (2 insight)";
     button2.style.display = "block";
-    if (xp >= 20) {        
+    if (insight >= 2) {        
         
         button2.classList = "nav-button can-hover location-button";
         button2.onclick = function() {train(2)};
@@ -895,9 +900,9 @@ function displayTrain() {
         button2.onclick = "";        
     }
 
-    button3.querySelector('.button-text').innerText = "Train your Stamina (20 xp)";
+    button3.querySelector('.button-text').innerText = "Train your Stamina (2 insight)";
     button3.style.display = "block";
-    if (xp >= 20) {        
+    if (insight >= 2) {        
 
         button3.classList = "nav-button can-hover location-button";
         button3.onclick = function() {train(3)};
@@ -908,9 +913,9 @@ function displayTrain() {
         button3.onclick = "";        
     }
 
-    button4.querySelector('.button-text').innerText = "Train your Evasion (30 xp)";
+    button4.querySelector('.button-text').innerText = "Train your Defence (3 insight)";
     button4.style.display = "block";
-    if (xp >= 30) {        
+    if (insight >= 3) {        
 
         button4.classList = "nav-button can-hover location-button";
         button4.onclick = function() {train(4)};
@@ -932,23 +937,23 @@ function train(trainType) {
     switch (trainType) {
         //HP
         case 1:
-            xp -= 10;
+            insight -= 1;
             hpMax += 5;
             break;
         //POWER
         case 2:
-            xp -= 20;
+            insight -= 2;
             basePower += 1;        
             break;
         //STAMINA
         case 3:
-            xp -= 20;
+            insight -= 2;
             baseStamina += 1;
             break;
-        //EVASION
+        //DEFENCE
         case 4:
-            xp -= 30;
-            baseEvasion  += 1;
+            insight -= 3;
+            baseDefence  += 1;
             break;
     }
 
@@ -962,28 +967,28 @@ function updateStats() {
     
     calculateStats();
 
-    xpText.innerText = xp;
+    insightText.innerText = insight;
     hpText.innerText = hpCurrent + " / " + hpMax;
     goldText.innerText = gold;
 
     powerText.innerText = power;
-    staminaText.innerText = stamina;
-    defenceText.innerText = evasion;
+    staminaText.innerText = currentStamina + " / " + maxStamina;
+    defenceText.innerText = defence;
 }
 
 // Calculates stats that are based on multiple factors
 function calculateStats() {
 
     power = basePower;
-    stamina = baseStamina;
-    evasion = baseEvasion;
+    maxStamina = baseStamina;
+    defence = baseDefence;
 
     inventory.forEach((element) => {
         
         if (itemsModified[element].equipped) {
             power += itemsModified[element].power;
-            stamina += itemsModified[element].stamina;
-            evasion += itemsModified[element].evasion;
+            maxStamina += itemsModified[element].stamina;
+            defence += itemsModified[element].defence;
         }
     });
 }
@@ -1129,9 +1134,10 @@ function playerActionComplete() {
     // Currently fighting a monster
     if (currentContextType === 3) {
 
-        hpCurrent -= monstersModified[currentContext].power;
+        let monsterDamage = Math.max(0, monstersModified[currentContext].power -= defence);
+        hpCurrent -= monsterDamage;
         if (monstersActionString != "") monstersActionString += "\n";
-        monstersActionString += "The " + monstersModified[currentContext].shortTitle + " does " + monstersModified[currentContext].power + " damage to you.";
+        monstersActionString += "The " + monstersModified[currentContext].shortTitle + " does " + monsterDamage + " damage to you.";
     }
 
     updateStats();
@@ -1212,9 +1218,9 @@ function monsterDeath() {
     let monsterIndex = getActionIndexFromKeyword(monstersModified[currentContext].keyword, storedLocation, 1); // We're looking for the index of the monster, it will always be in the storedLocation which will always be type 1, storedLocation is the primary context, and the monster we are fighting is the secondary context
 
     locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the location array that it was contained in
-    let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].xp + " experience and " +  monstersModified[currentContext].gold + " gold";
+    let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].insight + " insight and " +  monstersModified[currentContext].gold + " gold";
 
-    xp += monstersModified[currentContext].xp;
+    insight += monstersModified[currentContext].insight;
     gold += monstersModified[currentContext].gold;
     updateStats();
     
@@ -1401,13 +1407,13 @@ function save() {
     localStorage.setItem('storedLocation', JSON.stringify(storedLocation));
     localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
     localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));    
-    localStorage.setItem('xp', JSON.stringify(xp));
+    localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
     localStorage.setItem('hpMax', JSON.stringify(hpMax));
     localStorage.setItem('gold', JSON.stringify(gold));
     localStorage.setItem('basePower', JSON.stringify(basePower));
     localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
-    localStorage.setItem('baseEvasion', JSON.stringify(baseEvasion));    
+    localStorage.setItem('baseDefence', JSON.stringify(baseDefence));    
     localStorage.setItem('inventory', JSON.stringify(inventory));
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
 
@@ -1425,13 +1431,13 @@ function save() {
     storedLocation = JSON.parse(localStorage.getItem('storedLocation'));       
     currentContextType = JSON.parse(localStorage.getItem('currentLocationType'));
     locationsVisited = JSON.parse(localStorage.getItem('locationsVisited'));    
-    xp = JSON.parse(localStorage.getItem('xp'));
+    insight = JSON.parse(localStorage.getItem('insight'));
     hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
     hpMax = JSON.parse(localStorage.getItem('hpMax'));
     gold = JSON.parse(localStorage.getItem('gold'));
     basePower = JSON.parse(localStorage.getItem('basePower'));
     baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
-    baseEvasion = JSON.parse(localStorage.getItem('baseEvasion'));
+    baseDefence = JSON.parse(localStorage.getItem('baseDefence'));
     inventory = JSON.parse(localStorage.getItem('inventory'));
     respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'));
 

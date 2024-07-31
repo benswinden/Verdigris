@@ -498,6 +498,11 @@ locations = [
                 type: 2,
                 title: "South",
                 keyword: ""
+            },
+            {
+                type: 3,
+                title: "A long black vine covered in orange blooms",
+                keyword: "blooming_vine_01"
             }
         ]
     },

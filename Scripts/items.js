@@ -7,7 +7,7 @@ items = [
         equipped: false,
         power: 0,
         stamina: 0,
-        evasion: 0,        
+        defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context           
         ],
     },
@@ -17,9 +17,9 @@ items = [
         shortTitle: "sword",
         canEquip: true,
         equipped: false,
-        power: 10,
+        power: 5,
         stamina: 0,
-        evasion: 3,        
+        defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context
             {                
                 type: 6,
@@ -36,7 +36,7 @@ items = [
         equipped: false,
         power: 0,
         stamina: 10,
-        evasion: 0,        
+        defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context            
         ],
     },    
@@ -48,7 +48,7 @@ items = [
         equipped: false,
         power: 0,
         stamina: 0,
-        evasion: 5,        
+        defence: 2,        
         actions: [          // Item actions will be added while in a monster sub-context
             {                
                 type: 6,
@@ -65,7 +65,7 @@ items = [
         equipped: false,
         power: 0,
         stamina: 0,
-        evasion: 0,        
+        defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context            
         ],
     }    

@@ -42,7 +42,7 @@ document.addEventListener('keydown', function(event) {
 debugButton1.onclick = function() { console.log("Debug: Reset Game"); resetGame()};
 debugButton2.onclick = function() { console.log("Debug: Reset & Resume " + storedLocation); let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame();storedLocation = z;  changeContextDirect(x,y);};  
 debugButton2b.onclick = function() { console.log("Debug: Kill Monster"); if (currentContextType == 3) monsterDeath();}
-debugButton3.onclick = function() { xp++; save(); updateStats();};
+debugButton3.onclick = function() { insight++; save(); updateStats();};
 debugButton4.onclick = function() { hp++; save(); updateStats();};
 debugButton5.onclick = function() { gold++; save(); updateStats();};
 
