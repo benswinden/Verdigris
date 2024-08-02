@@ -107,7 +107,7 @@ locations = [
             {
                 type: 1,
                 title: "East towards the Town Square",
-                keyword: "town_square"
+                keyword: "town_square",                
             },
             {
                 type: 2,

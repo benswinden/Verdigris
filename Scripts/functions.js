@@ -560,7 +560,7 @@ function updateButtons(actions)  {
                         activeDirections.push(index);
                         button.classList = "nav-button can-hover location-button";
 
-                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined) doAction(element.func, true); playClick();};
+                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined && element.func != "") doAction(element.func, true); playClick();};
                     }
                     // If door is locked, or blocked by a monster then disable it
                     else if (doorLocked || exitBlocked) {
@@ -639,22 +639,32 @@ function updateButtons(actions)  {
     }        
 }
 
+// 0 = North 1 = West 2 = East 3 = South 4 = Next
 function go(direction) {
 
     // This function only works while in a location context
     if (currentContextType === 1) {
 
-        // Check for 'next' button
-        if (direction === 4) {
-            if (locationsModified[currentContext].actions.length > 0 && locationsModified[currentContext].actions[0].title === "Next") {                
-                changeContextDirect(getContextIndexFromKeyword(locationsModified[currentContext].actions[0].keyword, 1), locationsModified[currentContext].actions[0].type);
-                return;
-            }
-        }
-
-        if (activeDirections.indexOf(direction) === -1) { console.log("go - [" + direction + "] is not an active direction."); return; }
+        if (direction != 4 && activeDirections.indexOf(direction) === -1) { console.log("go - [" + direction + "] is not an active direction."); return; }
                 
-        changeContextDirect(getContextIndexFromKeyword(locationsModified[currentContext].actions[direction].keyword, 1), locationsModified[currentContext].actions[direction].type);
+        switch (direction) {
+            case 0:
+                button1.onclick();
+                break;
+            case 1:
+                button2.onclick();
+                break;
+            case 2:
+                button3.onclick();
+                break;
+            case 3:
+                button4.onclick();
+                break;
+            case 4:
+                if (locationsModified[currentContext].actions.length > 0 && locationsModified[currentContext].actions[0].title === "Next")
+                    button1.onclick();
+                break;        
+        }
     }
 }
 
@@ -1045,10 +1055,16 @@ function doAction(actionString, resetText) {
 
     switch (functionString) {
         case "attack":
-            attack();
+            if (functionArray.length === 2)     // attack|staminaCost
+                attack(parseInt(functionArray[1]));
+            else
+                console.error("doAction - Called attack without an additional argument");        
             break;
         case "dodge":
             dodge();
+            break;
+        case "recover":
+            recover();
             break;
         case "returnToPrimaryContext":
             returnToPrimaryContext();
@@ -1195,26 +1211,50 @@ function respawn() {
         console.error("respawn() - Trying to respawn with an empty respawnLocation");
 }
 
-function attack() {
+function attack(staminaCost) {
 
-    console.log("attack() - Attack Power: " + power);         // Unhelpful console log imo
-    let monster = monstersModified[currentContext];
-    
-    // PLAYER ATTACK
-    monster.hpCurrent -= power;
-    updateMonsterUI();
+    console.log("attack() - Attack Power: " + power + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
+
+    if (currentStamina < staminaCost) {
         
-    let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
-    addUpdateText(updateString);  
+        addUpdateText("You try to attack, but your completely out of breath.");
+    }
+    else {
+        
+        currentStamina -= staminaCost;
+        updateStats();
+        let monster = monstersModified[currentContext];
+        
+        // PLAYER ATTACK
+        monster.hpCurrent -= power;
+        updateMonsterUI();
+            
+        let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
+        addUpdateText(updateString);  
 
-    // CHECK FOR MONSTER DEATH
-    if (monster.hpCurrent <= 0) {
+        // CHECK FOR MONSTER DEATH
+        if (monster.hpCurrent <= 0) {
 
-        monsterDeath();
+            monsterDeath();
+        }
     }
 
     save();
     playerActionComplete();
+}
+
+function recover() {
+
+    let recoverAmount = 3;
+
+    currentStamina += recoverAmount; 
+    if (currentStamina >= maxStamina) currentStamina = maxStamina;
+    playerActionComplete();
+    updateStats();
+    save();
+
+    let updateString = "You recover " + recoverAmount + " stamina."
+    addUpdateText(updateString);
 }
 
 function monsterDeath() {
@@ -1565,6 +1605,8 @@ function save() {
         array.push(element);
     });
     
+    array.push({type: 6, title: "Recover", func: "recover"});
+
     array.push({type: 6, title: "Run away", func: "returnToPrimaryContext"});
 
     return array;

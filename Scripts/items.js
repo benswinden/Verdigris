@@ -16,15 +16,15 @@ items = [
         title: "An old Rhenish straight sword",
         shortTitle: "sword",
         canEquip: true,
-        equipped: false,
+        equipped: true,
         power: 5,
         stamina: 0,
         defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context
             {                
-                type: 6,
+                type: 6,                
                 title: "Attack with piercing strike",
-                func: "attack"
+                func: "attack|1"
             }            
         ],
     },    
@@ -45,7 +45,7 @@ items = [
         title: "A battered wooden shield.",
         shortTitle: "shield",
         canEquip: true,
-        equipped: false,
+        equipped: true,
         power: 0,
         stamina: 0,
         defence: 2,        
