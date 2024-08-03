@@ -219,7 +219,11 @@ function initializeGame() {
                 
         updateStats();
         save();
-        changeContextDirect(currentContext, currentContextType);
+
+        if (currentContext === -99)
+            respawn();
+        else
+            changeContextDirect(currentContext, currentContextType);
     }
     // No save game, so start a new game
     else {
@@ -794,11 +798,10 @@ function displayInventory() {
 
     expandStats();    
 
-    resetUpdateText();
+    //resetUpdateText();
     hideAllButtons();
 
-    narrationText.style.display = "none";
-    updateText.style.display = "none";
+    narrationText.style.display = "none";    
     monsterHpSection.style.display = "none";
     mainTitleText.style.color = mainTitleActive;
     secondaryTitle.style.display = "none";
@@ -815,7 +818,7 @@ function displayInventory() {
         clone.querySelector('.button-text').innerText = itemsModified[element].title;
         clone.style.display = "flex";
         clone.onmouseover = (event) => { if (clone.classList.contains("can-hover"))  playClick(); };
-        clone.onclick =  function(){ resetUpdateText(); toggleEquipped(element, clone); playClick();};
+        clone.onclick =  function(){ toggleEquipped(element, clone); playClick();};
         document.querySelector("nav").appendChild(clone);
         createdInventoryButtons.push(clone);
 
@@ -1029,7 +1032,7 @@ function updateMonsterUI() {
     monsterHpText.innerText = monstersModified[currentContext].hpCurrent + "/" + monstersModified[currentContext].hpMax;
     let monsterHpCurrentPercent = monstersModified[currentContext].hpCurrent / monstersModified[currentContext].hpMax * 100;
     // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
-    monsterHpBar.style.width = monsterHpCurrentPercent * 2 + 'px';
+    monsterHpBar.style.width = (monsterHpCurrentPercent * 2 + 1) + 'px';
 }
 
 function resetUpdateText() {
@@ -1040,7 +1043,7 @@ function resetUpdateText() {
 
 function addUpdateText(text) {
 
-    if (updateText.innerText.split(/\r\n|\r|\n/).length > 5) resetUpdateText();
+    if (updateText.innerText.split(/\r\n|\r|\n/).length > 5) resetUpdateText(); 
 
     updateText.style.display = "block";
     if (updateText.innerText != "") updateText.innerText += "\n";
@@ -1227,6 +1230,12 @@ function playerActionComplete(monsterCanAttack) {
 
 function playerDeath() {
 
+    let updateTextStore = updateText.innerText;
+    if (inventoryOpen) {
+        clearInventory();
+        updateText.innerText = updateTextStore;
+    }
+
     // Check if a player corpse exists already, if so destroy it
     if (corpseLocation != -1) {
 
@@ -1266,19 +1275,20 @@ function playerDeath() {
 
     hideAllButtons();
 
-    narrationText.style.display = "block";
-    updateText.style.display = "none";
+    narrationText.style.display = "none";    
     monsterHpSection.style.display = "none";
     mainTitleText.style.color = mainTitleActive;
     secondaryTitle.style.display = "none";    
     mainTitleText.innerText = "";        
     mainText.innerText = "";
-    narrationText.innerText = "Life leaves your body as it's torn apart.";
+    updateText.innerText += "\n\nLife leaves your body as it's torn apart.";
 
     button1.querySelector('.button-text').innerText = "Awaken";
     button1.style.display = "block";
     button1.classList = "nav-button can-hover location-button";
-    button1.onclick = function() { respawn();};    
+    button1.onclick = function() { respawn();};
+    currentContext = -99;   // Save 'dead' state
+    save();
 }
 
 function respawn() {    
@@ -1579,10 +1589,12 @@ function toggleEquipped(index, button) {
 
         if (itemsModified[index].equipped) {
             itemsModified[index].equipped = false;
+            addUpdateText("You put away the " + itemsModified[index].shortTitle);
             button.querySelector(".button-equip-icon").src = "Assets/ItemUnequipped.svg";
         }
         else {
             itemsModified[index].equipped = true;
+            addUpdateText("You equip the " + itemsModified[index].shortTitle);
             button.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
         }
     
