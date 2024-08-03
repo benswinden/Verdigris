@@ -18,7 +18,7 @@ locations = [
         keyword: "narration_01_02",
         title: "",        
         description: "",
-        narration: "High up in the upper most reaches of the tower's many floors lives something old and long dead.\n\nA presence so evil that it's influence seeps into the soil and spreads through the earth. Across the mortal realms.",
+        narration: "High up in the upper most reaches of the tower's many floors lives something very old.\n\nA seeping presence that spread itself into the earth slowly made it's way across the mortal realms.",
         actions: [
             {
                 type: 1,
