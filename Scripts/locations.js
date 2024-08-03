@@ -540,7 +540,7 @@ locations = [
             },
             {
                 type: 3,
-                title: "A hairy creature, scavenging",
+                title: "A mishapen creature, growling a low guttural noise",
                 keyword: "scav_02"
             }
         ]

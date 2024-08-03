@@ -11,11 +11,13 @@ let gold = 0;
 let basePower = 0;
 let baseStamina = 3;
 let baseDefence = 0;
+let baseEvasion = 0;
 // These are the calculated stats based on other factors like equipped items
 let power = 0;
 let maxStamina = 0;
 let currentStamina = 0;
 let defence = 0;
+let evasion = 0;
 
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
 let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
@@ -123,6 +125,7 @@ let monsters = [
         update: "",
         hp: 0,
         power: 0,
+        evasion: 0,         // Score out of 100, percentage chance to evade
         insight: 0,
         gold: 0,
         deathFunc: "",      // Called on monster death
@@ -232,6 +235,7 @@ function initializeGame() {
         basePower = 0;
         baseStamina = 3;
         baseDefence = 0;
+        baseEvasion = 20;
         
         currentStamina = 3;
         maxStamina = 3;
@@ -1008,6 +1012,7 @@ function calculateStats() {
     power = basePower;
     maxStamina = baseStamina;
     defence = baseDefence;
+    evasion = baseEvasion;
 
     inventory.forEach((element) => {
         
@@ -1187,12 +1192,23 @@ function playerActionComplete(monsterCanAttack) {
             if (element.type === 3) {
                 
                 monstersPresent = true;
-                // We have a location action button referring to a monster
+                
                 let index = getContextIndexFromKeyword(element.keyword, 3);
-                let monsterDamage = Math.max(0, monstersModified[index].power - defence);        
-                hpCurrent -= monsterDamage;
-                if (monstersActionString != "") monstersActionString += "\n";
-                monstersActionString += "The " + monstersModified[index].shortTitle + " does " + monsterDamage + " damage to you.";
+
+                // Evasion chance
+                let evasionNumber = Math.floor(Math.random() * 101);                
+
+                if (evasionNumber <= evasion) {
+
+                    monstersActionString +=  "You evade the " + monstersModified[index].shortTitle + "'s attack."                    
+                }
+                else {      
+
+                    let monsterDamage = Math.max(0, monstersModified[index].power - defence);        
+                    hpCurrent -= monsterDamage;
+                    if (monstersActionString != "") monstersActionString += "\n";
+                    monstersActionString += "The " + monstersModified[index].shortTitle + " does " + monsterDamage + " damage to you.";
+                }
             }
         });    
     }
@@ -1303,17 +1319,29 @@ function attack(staminaCost) {
         updateStats();
         let monster = monstersModified[currentContext];
         
-        // PLAYER ATTACK
-        monster.hpCurrent -= power;
-        updateMonsterUI();
-            
-        let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
-        addUpdateText(updateString);  
+        // Evasion chance
+        let evasionNumber = Math.floor(Math.random() * 101);
+        if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
 
-        // CHECK FOR MONSTER DEATH
-        if (monster.hpCurrent <= 0) {
+        if (evasionNumber <= monster.evasion) {
 
-            monsterDeath();
+            let updateString = "The " + monster.shortTitle + " evades your attack."
+            addUpdateText(updateString); 
+        }
+        else {            
+
+            // PLAYER ATTACK
+            monster.hpCurrent -= power;
+            updateMonsterUI();
+                
+            let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
+            addUpdateText(updateString);  
+
+            // CHECK FOR MONSTER DEATH
+            if (monster.hpCurrent <= 0) {
+
+                monsterDeath();
+            }
         }
     }
 
@@ -1588,6 +1616,7 @@ function save() {
     localStorage.setItem('basePower', JSON.stringify(basePower));
     localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
     localStorage.setItem('baseDefence', JSON.stringify(baseDefence));    
+    localStorage.setItem('baseEvasion', JSON.stringify(baseEvasion));
     localStorage.setItem('inventory', JSON.stringify(inventory));
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
 
