@@ -485,9 +485,10 @@ locations = [
                 keyword: ""
             },
             {
-                type: 2,
-                title: "West",
-                keyword: ""
+                type: 1,
+                title: "West to the Black Leaf Road",
+                keyword: "",
+                blocked: "blooming_vine_01"
             },
             {
                 type: 1,
@@ -501,7 +502,7 @@ locations = [
             },
             {
                 type: 3,
-                title: "A long black vine covered in orange blooms",
+                title: "A thick wall of blooming black vines blocks the tower's exit",
                 keyword: "blooming_vine_01"
             }
         ]
@@ -534,12 +535,12 @@ locations = [
             },
             {
                 type: 3,
-                title: "A scavenging malicious creature",
+                title: "A mishapen creature, scavenging through the rot",
                 keyword: "scav_01"
             },
             {
                 type: 3,
-                title: "Two gleaming eyes within the darkness",
+                title: "A hairy creature, scavenging",
                 keyword: "scav_02"
             }
         ]

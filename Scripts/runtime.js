@@ -4,13 +4,22 @@ inventoryIcon.onclick = displayInventory;
 
 document.addEventListener('keydown', function(event) {
     if (event.code == 'Escape') {
-        if (!debugActive) {
+        if (!debugWindowActive) {
             debugWindow.style.display = "block";
-            debugActive = true;
+            debugWindowActive = true;
         }
-        else if (debugActive) {
+        else if (debugWindowActive) {
             debugWindow.style.display = "none";
-            debugActive = false;
+            debugWindowActive = false;
+        }
+    }
+
+    if (event.code == 'KeyI') {
+        if (!inventoryOpen) {
+            displayInventory();
+        }
+        else if (inventoryOpen) {
+            exitInventory();
         }
     }
 });

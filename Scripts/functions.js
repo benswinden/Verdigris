@@ -25,6 +25,7 @@ let locationsVisited = [];      // A list of locations we have already visited
 let activeDirections = [];      // Array that contains which directions (0=north, 1=west, 2=east, 3=south ) have active buttons currently
 
 let inventory = [];             // Inventory contains index numbers for items in the items array
+let inventoryOpen = false;
 
 // Default location for new games is edge_woods
 let respawnLocation = {
@@ -33,10 +34,13 @@ let respawnLocation = {
     storedLocation: 0
 }
 
+let corpseLocation = -1;
+
 // Debug
+let showDebugLog = true;
 let debugStartContext = 0;
 let debugStartType = 1;
-let debugActive = false;
+let debugWindowActive = false;
 
 // Stats
 const insightText = document.querySelector('#insight-text');
@@ -55,6 +59,9 @@ const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
 const monsterHpText =  document.querySelector('#monster-hp-text');
 
+const hpStat = document.querySelector('#hp-stat');            // Text and icon combined
+const insightStat = document.querySelector('#insight-stat');        // Text and icon combined
+const goldStat = document.querySelector('#gold-stat');        // Text and icon combined
 const powerStat = document.querySelector('#power-stat');            // Text and icon combined
 const staminaStat = document.querySelector('#stamina-stat');        // Text and icon combined
 const defenceStat = document.querySelector('#defence-stat');        // Text and icon combined
@@ -191,18 +198,18 @@ let itemsModified = []
 
 function initializeGame() {
 
-    console.log("InitializeGame - ");
+    if (showDebugLog) console.log("InitializeGame - ");
     
     // Check whether there is already a save game
     if (localStorage.getItem('saveExists')) {
-        console.log("Save game exists");
+        if (showDebugLog) console.log("Save game exists");
 
         let validVersion = versionCheck();
 
         if (validVersion)
             load();
         else {
-            console.log("Invalid save found - resetting game");
+            if (showDebugLog) console.log("Invalid save found - resetting game");
             resetGame();
             return;
         }
@@ -214,7 +221,7 @@ function initializeGame() {
     // No save game, so start a new game
     else {
 
-        console.log("Save game doesn't exist");        
+        if (showDebugLog) console.log("Save game doesn't exist");        
 
         insight = 0;
         hpCurrent = 10;
@@ -258,7 +265,7 @@ function initializeGame() {
 // We use a keyword instead of relying only on index for human readibility
 function changeContext(keyword, contextType) {
 
-    console.log("changeContext - keyword:" + keyword + "   contextType:" + contextType + "   storedLocation:" + storedLocation);
+    if (showDebugLog) console.log("changeContext - keyword:" + keyword + "   contextType:" + contextType + "   storedLocation:" + storedLocation);
 
     let entryFound = false;
     // If it's not a secondary context, we look for the new location within locations
@@ -351,16 +358,14 @@ function changeContextDirect(contextIndex, contextType) {
 // Update the UI to reflect a change in context, or other significant changes in the gameplay state
 function updateContext() {    
     
-    console.log("updateContext - currentContext: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
+    if (showDebugLog) console.log("updateContext - currentContext: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
 
     narrationText.style.display = "none";
     resetUpdateText();
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
 
-    powerStat.style.display = "none";
-    staminaStat.style.display = "none";
-    defenceStat.style.display = "none";
+    collapseStats();
 
     document.querySelector("#inventory-title").style.display = "none";
 
@@ -421,9 +426,7 @@ function updateContext() {
                 secondaryTitleText.innerText = monstersModified[currentContext].title;
                 mainText.innerText = monstersModified[currentContext].description;
 
-                powerStat.style.display = "flex";
-                staminaStat.style.display = "flex";
-                defenceStat.style.display = "flex";
+                expandStats();
 
                 monsterHpSection.style.display = "block";
                 updateMonsterUI();
@@ -560,7 +563,7 @@ function updateButtons(actions)  {
                         activeDirections.push(index);
                         button.classList = "nav-button can-hover location-button";
 
-                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined && element.func != "") doAction(element.func, true); playClick();};
+                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined && element.func != "") doAction(element.func, true); playClick(); playerActionComplete(false); };
                     }
                     // If door is locked, or blocked by a monster then disable it
                     else if (doorLocked || exitBlocked) {
@@ -645,7 +648,7 @@ function go(direction) {
     // This function only works while in a location context
     if (currentContextType === 1) {
 
-        if (direction != 4 && activeDirections.indexOf(direction) === -1) { console.log("go - [" + direction + "] is not an active direction."); return; }
+        if (direction != 4 && activeDirections.indexOf(direction) === -1) { if (showDebugLog) console.log("go - [" + direction + "] is not an active direction."); return; }
                 
         switch (direction) {
             case 0:
@@ -778,14 +781,14 @@ function replaceAction(context, contextType, action, index) {
 
 function displayInventory() {
     
-    console.log("displayInventory() - ");
+    if (showDebugLog) console.log("displayInventory() - ");
+
+    inventoryOpen = true;
 
     inventoryIcon.classList = "close-inventory";    
     inventoryIcon.onclick = function() { exitInventory(); playClick(); };
 
-    powerStat.style.display = "flex";
-    staminaStat.style.display = "flex";
-    defenceStat.style.display = "flex";    
+    expandStats();    
 
     resetUpdateText();
     hideAllButtons();
@@ -832,7 +835,9 @@ function displayInventory() {
 
 function exitInventory() {
 
-    console.log("exitInventory() - ");
+    if (showDebugLog) console.log("exitInventory() - ");
+
+    inventoryOpen = false;
 
     clearInventory();    
     changeContextDirect(currentContext, currentContextType);
@@ -843,9 +848,7 @@ function clearInventory() {
     inventoryIcon.classList = "open-inventory";
     inventoryIcon.onclick = function() { displayInventory(); playClick(); };        
 
-    powerStat.style.display = "flex";
-    staminaStat.style.display = "flex";
-    defenceStat.style.display = "flex";
+    expandStats();
 
     document.querySelector("#inventory-title").style.display = "none";
 
@@ -870,18 +873,17 @@ function inventoryIndexOf(keyword) {
 
 function displayTrain() {
 
-    console.log("displayTrain() - ");    
+    if (showDebugLog) console.log("displayTrain() - ");    
     button6.style.display = "none";
     narrationText.style.display = "none";
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
     mainTitleText.style.color = mainTitleActive;
-    secondaryTitle.style.display = "none";
-    powerStat.style.display = "flex";
-    staminaStat.style.display = "flex";
-    defenceStat.style.display = "flex";
+    secondaryTitle.style.display = "none";    
     mainTitleText.innerText = "Training";        
     mainText.innerText = "Study your hard earned lessons and put the insight you've acquired to use.";
+    
+    expandStats();
 
 
     button1.querySelector('.button-text').innerText = "Train your HP (1 insight)";
@@ -986,6 +988,20 @@ function updateStats() {
     defenceText.innerText = defence;
 }
 
+function expandStats() {
+
+    powerStat.style.display = "flex";
+    goldStat.style.display = "flex";
+    defenceStat.style.display = "flex";
+}
+
+function collapseStats() {
+
+    powerStat.style.display = "none";
+    goldStat.style.display = "none";
+    defenceStat.style.display = "none";
+}
+
 // Calculates stats that are based on multiple factors
 function calculateStats() {
 
@@ -1051,7 +1067,7 @@ function doAction(actionString, resetText) {
         functionString = functionArray[0];
     }
 
-    console.log("doAction() - functionString: " + functionString);
+    if (showDebugLog) console.log("doAction() - functionString: " + functionString);
 
     switch (functionString) {
         case "attack":
@@ -1078,6 +1094,9 @@ function doAction(actionString, resetText) {
         case "rest":
             rest();
             break;
+        case "runAway":
+                runAway();
+                break;
         case "advanceDialogue":
             if (functionArray.length === 2)         // advanceDialogue|npcKeyword
                 advanceDialogue(functionArray[1]);
@@ -1119,6 +1138,13 @@ function doAction(actionString, resetText) {
             else
                 console.error("doAction - Called addGold without the correct number of arguments");
             break;
+        case "getCorpse":  
+            if (functionArray.length === 3) // addGold|amount|updateString
+                
+                getCorpse(parseInt(functionArray[1]),functionArray[2]);                            
+            else
+                console.error("doAction - Called addGold without the correct number of arguments");
+            break;
         case "addInsight":  
             if (functionArray.length === 3) // addInsight|amount|updateString
                 
@@ -1139,16 +1165,28 @@ function doAction(actionString, resetText) {
     }
 }
 
-function playerActionComplete() {
+function playerActionComplete(monsterCanAttack) {
 
+    if (showDebugLog) console.log("playerActionComplete() - monsterCanAttack " + monsterCanAttack);
+
+    let monstersPresent = false;
     let monstersActionString = "";
-    // If current context is a location, search it's actions for monsters and tell them to attack
-    if (currentContextType === 1) {
-        
-        locationsModified[currentContext].actions.forEach((element, index) => {
+    let actions = [];
+
+    if (monsterCanAttack) {
+
+        // If current context is a location, search it's actions for monsters and tell them to attack
+        if (currentContextType === 1)
+            actions = locationsModified[currentContext].actions;        
+        // If we're already fighting a monster, use the stored location to search for monsters
+        else if (currentContextType === 3)
+            actions = locationsModified[storedLocation].actions;
+
+        actions.forEach((element, index) => {
             
             if (element.type === 3) {
                 
+                monstersPresent = true;
                 // We have a location action button referring to a monster
                 let index = getContextIndexFromKeyword(element.keyword, 3);
                 let monsterDamage = Math.max(0, monstersModified[index].power - defence);        
@@ -1156,28 +1194,60 @@ function playerActionComplete() {
                 if (monstersActionString != "") monstersActionString += "\n";
                 monstersActionString += "The " + monstersModified[index].shortTitle + " does " + monsterDamage + " damage to you.";
             }
-        });
+        });    
     }
-    // Currently fighting a monster
-    if (currentContextType === 3) {
-        
-        let monsterDamage = Math.max(0, monstersModified[currentContext].power - defence);        
-        hpCurrent -= monsterDamage;
-        if (monstersActionString != "") monstersActionString += "\n";
-        monstersActionString += "The " + monstersModified[currentContext].shortTitle + " does " + monsterDamage + " damage to you.";
-    }
+
+    if (!monstersPresent)
+        recoverMax(false);
 
     updateStats();
     save();    
      if (monstersActionString != "") addUpdateText(monstersActionString);
 
-    // Check for Player Deaath
+    // Check for Player Death
     if (hpCurrent <= 0)
         playerDeath();        
 }
 
 function playerDeath() {
-    
+
+    // Check if a player corpse exists already, if so destroy it
+    if (corpseLocation != -1) {
+
+        let corpseIndex = -1;
+        locationsModified[corpseLocation].actions.forEach((element,index) => {
+            
+            if (element.title.substr(0,12) == "Your remains") {
+                console.log("Corpse found");
+                corpseIndex = index;
+            }
+                
+        });
+
+        if (corpseIndex != -1)
+            locationsModified[corpseLocation].actions.splice(corpseIndex,1);
+    }
+
+    // We are going to create a corpse in the primary location where we are currently
+    // Check if we're fighting a monster, in which case we use the stored location instead of current context
+    let actualContext = currentContext;
+    if (currentContextType === 3)
+        actualContext = storedLocation;
+
+    let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
+    gold = 0;
+    updateStats();
+
+    corpse = {
+        type: 4,
+        title: "Your remains, aged and decayed down to bone",
+        keyword: "destroy",
+        func: funcString
+    };
+
+    corpseLocation = actualContext;
+    addActionToContext(actualContext, 1, corpse, -1);
+
     hideAllButtons();
 
     narrationText.style.display = "block";
@@ -1192,14 +1262,15 @@ function playerDeath() {
     button1.querySelector('.button-text').innerText = "Awaken";
     button1.style.display = "block";
     button1.classList = "nav-button can-hover location-button";
-    button1.onclick = function() {respawn();};    
+    button1.onclick = function() { respawn();};    
 }
 
 function respawn() {    
 
     if (respawnLocation != {}) {
 
-        hpCurrent = hpMax;    
+        hpCurrent = hpMax;
+        currentStamina = maxStamina;
 
         // Monsters all heal when you rest
         monstersModified.forEach((element) => {
@@ -1220,7 +1291,7 @@ function respawn() {
 
 function attack(staminaCost) {
 
-    console.log("attack() - Attack Power: " + power + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
+    if (showDebugLog) console.log("attack() - Attack Power: " + power + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
 
     if (currentStamina < staminaCost) {
         
@@ -1247,21 +1318,44 @@ function attack(staminaCost) {
     }
 
     save();
-    playerActionComplete();
+    playerActionComplete(true);
 }
 
 function recover() {
 
-    let recoverAmount = 3;
-
+    let maxRecoverAmount = 3;
+    let recoverAmount = maxRecoverAmount;
+    
+    if ((maxStamina - currentStamina) < maxRecoverAmount)
+        recoverAmount = maxStamina - currentStamina;
+    
     currentStamina += recoverAmount; 
     if (currentStamina >= maxStamina) currentStamina = maxStamina;
-    playerActionComplete();
+    playerActionComplete(true);
     updateStats();
     save();
 
     let updateString = "You recover " + recoverAmount + " stamina."
     addUpdateText(updateString);
+}
+
+function recoverMax(isPlayerAction) {
+
+    if (currentStamina != maxStamina) {
+        currentStamina = maxStamina;
+        if (isPlayerAction) playerActionComplete(true);
+        updateStats();
+        save();
+
+        let updateString = "You recover your stamina."
+        addUpdateText(updateString);
+    }
+}
+
+function runAway() {
+    
+    returnToPrimaryContext();
+    playerActionComplete(true);
 }
 
 function monsterDeath() {
@@ -1286,20 +1380,20 @@ function monsterDeath() {
 }
 
 function dodge() {
-    console.log("didge() - ");
-    playerActionComplete();
+    if (showDebugLog) console.log("didge() - ");
+    playerActionComplete(true);
 }
 
+// This is used specifically to return to the context, but isn't counted as a player action itself, so if a function call this that is a player action, it should call playerActionCompleted itself, like runAway
 function returnToPrimaryContext() {
 
-    console.log("returnToPrimaryContext() - ");
+    if (showDebugLog) console.log("returnToPrimaryContext() - ");
     currentContext = storedLocation;
     storedLocation = -1;
     currentContextType = 1;
 
     save();
-    updateContext();
-    playerActionComplete();
+    updateContext();    
 }
 
 function talk() {
@@ -1322,14 +1416,14 @@ function talk() {
             updateButtons(npcsModified[currentContext].actions);
         }
 
-        playerActionComplete();
+        playerActionComplete(true);
     }
     else
         console.error("talk - Somehow this was called but the current context is not an NPC")
 }
 
 function rest() {
-    console.log("rest() - ");
+    if (showDebugLog) console.log("rest() - ");
 
     hpCurrent = hpMax;
     addUpdateText("You kneel for a moment and say a prayer to the Quiet. You feel your soul anchored to this place.\n\nYou lay down on your bedroll and before you know it sleep takes you.");
@@ -1367,7 +1461,7 @@ function addToInventory(keyword) {
     
     if (keyword === "") {
 
-        console.log("addToInventory() - keyword is empty");
+        if (showDebugLog) console.log("addToInventory() - keyword is empty");
         return;
     }
 
@@ -1394,7 +1488,7 @@ function addToInventory(keyword) {
 
     save();
     addUpdateText("The " + itemsModified[inventory[inventory.length - 1]].shortTitle + " has been added to your inventory.");
-    playerActionComplete();
+    playerActionComplete(true);
 }
 
 function buy(keyword, cost) {
@@ -1424,7 +1518,20 @@ function addGold(amount, updateString) {
 
     updateStats();
     save();
-    playerActionComplete();
+    playerActionComplete(true);
+}
+
+function getCorpse(amount, updateString) {
+    
+    gold += amount;
+    if (updateString != "") 
+        addUpdateText(updateString + " ( " + amount + " gold )");    
+
+    corpseLocation = -1;
+
+    updateStats();
+    save();
+    playerActionComplete(true);
 }
 
 function addInsight(amount, updateString) {
@@ -1435,7 +1542,7 @@ function addInsight(amount, updateString) {
 
     updateStats();
     save();
-    playerActionComplete();
+    playerActionComplete(true);
 }
 
 function toggleEquipped(index, button) {
@@ -1453,7 +1560,7 @@ function toggleEquipped(index, button) {
     
         updateStats();
         save();
-        playerActionComplete();
+        playerActionComplete(true);
     }
     else
         console.error("toggleEquipped() - Trying to toggle but the index of this element is outside the bounds of the items array");    
@@ -1465,7 +1572,7 @@ function toggleEquipped(index, button) {
 
 function save() {
 
-    console.log("save");
+    if (showDebugLog) console.log("save");
     localStorage.setItem('saveExists', "!");        // Used to test whether there is a save
     localStorage.setItem('version', JSON.stringify(version));
     localStorage.setItem('currentLocation', JSON.stringify(currentContext));
@@ -1492,7 +1599,7 @@ function save() {
   
   function load() {
 
-    console.log("Load");
+    if (showDebugLog) console.log("Load");
 
     currentContext = JSON.parse(localStorage.getItem('currentLocation'));
     storedLocation = JSON.parse(localStorage.getItem('storedLocation'));       
@@ -1529,7 +1636,7 @@ function save() {
   function versionCheck() {
     
     let saveVersion = JSON.parse(localStorage.getItem('version'));
-    console.log("Current version: " + version + "    Save Version: " + saveVersion);
+    if (showDebugLog) console.log("Current version: " + version + "    Save Version: " + saveVersion);
     return version === saveVersion;
   }
 
@@ -1627,7 +1734,7 @@ function save() {
     
     array.push({type: 6, title: "Recover", func: "recover"});
 
-    array.push({type: 6, title: "Run away", func: "returnToPrimaryContext"});
+    array.push({type: 6, title: "Run away", func: "runAway"});
 
     return array;
   }
