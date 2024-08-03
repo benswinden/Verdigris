@@ -398,7 +398,7 @@ locations = [
                 title: "A small handful of gold pieces",
                 keyword: "destroy",
                 func: "addGold|10|You pick up the handful of coins"
-            }            
+            }
         ]
     },
     {
@@ -445,7 +445,7 @@ locations = [
         keyword: "black_road",
         title: "The Black Leaf Road",        
         description: "A narrow road leads east, down a long hill. Thorny vines from reaching plants search for a sleeve to catch themselves on.\n\nThe path is oddly well worn.",
-        narration: "You hear the sound of a creature calling out. A mix of crow call and hyena laugh.",
+        narration: "You hear the sound of a unsettling bird call ripple through the wet air.",
         actions: [
             {
                 type: 2,
@@ -509,7 +509,7 @@ locations = [
     {
         keyword: "f01_02",
         title: "Floor 1 - The Western Hallway",        
-        description: "",
+        description: "A sickly sweet smell permeates the high-arched hall. The walls are covered in fruiting vines and the floors are covered in rotten fruits.",
         narration: "",
         actions: [
             {
@@ -531,18 +531,29 @@ locations = [
                 type: 2,
                 title: "South",
                 keyword: ""
+            },
+            {
+                type: 3,
+                title: "A scavenging malicious creature",
+                keyword: "scav_01"
+            },
+            {
+                type: 3,
+                title: "Two gleaming eyes within the darkness",
+                keyword: "scav_02"
             }
         ]
     },
     {
         keyword: "f01_03",
         title: "Floor 1 - Central Hall",        
-        description: "",
-        narration: "",
+        description: "With a long crack running down the northern wall, a sharp beam of light cuts through the chamber. A verdant forest of purple and red mosses and leaves cover every surface.",
+        narration: "Drifting pollen sifts slowly down inside the light beams.",
         actions: [
             {
                 type: 1,
                 title: "North to the Northern Hall",
+                blocked: "blooming_vine_02",
                 keyword: "f01_06"
             },
             {
@@ -559,6 +570,16 @@ locations = [
                 type: 1,
                 title: "South to the Southern Hallway",
                 keyword: "f01_04"
+            },
+            {
+                type: 4,
+                title: "A perfectly ripe piece of fruit",
+                keyword: "ripe_fruit"
+            },
+            {
+                type: 3,
+                title: "A long black vine covered in orange blooms",
+                keyword: "blooming_vine_02"
             }
         ]
     },
@@ -626,7 +647,7 @@ locations = [
     {
         keyword: "f01_06",
         title: "Floor 1 - The Northern Hallway",
-        description: "",
+        description: "The hall leading north ends abruptly where the ceiling above collapsed down onto it.\n\nA tree the size of a house has grown through the wall and up into the tower above you.",
         narration: "",
         actions: [
             {
@@ -648,6 +669,17 @@ locations = [
                 type: 1,
                 title: "South to the Central Hall",
                 keyword: "f01_03"
+            },
+            {
+                type: 3,
+                title: "A hulking beast pacing back and forth",
+                keyword: "hulk_scav_01"
+            },
+            {
+                type: 4,
+                title: "A broken piece of stone, etched it lines of power.",
+                keyword: "destroy",
+                func: "addInsight|1|You pick up the relic and feel it's essence."
             }
         ]
     },

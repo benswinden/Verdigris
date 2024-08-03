@@ -1119,6 +1119,13 @@ function doAction(actionString, resetText) {
             else
                 console.error("doAction - Called addGold without the correct number of arguments");
             break;
+        case "addInsight":  
+            if (functionArray.length === 3) // addInsight|amount|updateString
+                
+                addInsight(parseInt(functionArray[1]),functionArray[2]);                            
+            else
+                console.error("doAction - Called addGold without the correct number of arguments");
+            break;
         case "buy":  
             if (functionArray.length === 3) // buy|item keyword
                                 
@@ -1410,9 +1417,22 @@ function buy(keyword, cost) {
 }
 
 function addGold(amount, updateString) {
-
+    
     gold += amount;
-    if (updateString != "") addUpdateText(updateString);
+    if (updateString != "") 
+        addUpdateText(updateString + " ( " + amount + " gold )");    
+
+    updateStats();
+    save();
+    playerActionComplete();
+}
+
+function addInsight(amount, updateString) {
+
+    insight += amount;
+    if (updateString != "") 
+        addUpdateText(updateString + " ( " + amount + " insight )");    
+
     updateStats();
     save();
     playerActionComplete();

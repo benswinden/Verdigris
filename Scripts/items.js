@@ -63,5 +63,17 @@ items = [
         defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context            
         ],
-    }    
+    },
+    {
+        keyword: "ripe_fruit",
+        title: "A perfectly ripe piece of fruit",
+        shortTitle: "fruit",
+        canEquip: false,
+        equipped: false,
+        power: 0,
+        stamina: 0,
+        defence: 0,        
+        actions: [          // Item actions will be added while in a monster sub-context           
+        ],
+    },
 ];

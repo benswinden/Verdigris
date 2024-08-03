@@ -46,11 +46,11 @@ monsters = [
         title: "A Large Rat",
         shortTitle: "rat",        
         description: "Bigger than most dogs you've seen, this creature looks at you without a trace of fear.",
-        hpCurrent: 30,
-        hpMax: 30,
+        hpCurrent: 15,
+        hpMax: 15,
         power: 4,
-        insight: 5,
-        gold: 1,
+        insight: 1,
+        gold: 0,
         deathFunc: "",
         actions: [
         ]
@@ -62,9 +62,65 @@ monsters = [
         description: "Covered in vibrant orange flowers and sharp thorns, it sways back and forth menacingly.",
         hpCurrent: 10,
         hpMax: 10,
-        power: 1,
+        power: 3,
         insight: 0,
         gold: 3,
+        deathFunc: "",
+        actions: [
+        ]
+    },
+    {
+        keyword: "blooming_vine_02",
+        title: "A Blooming Vine",
+        shortTitle: "vine",        
+        description: "Covered in vibrant orange flowers and sharp thorns, it sways back and forth menacingly.",
+        hpCurrent: 10,
+        hpMax: 10,
+        power: 3,
+        insight: 0,
+        gold: 3,
+        deathFunc: "",
+        actions: [
+        ]
+    },
+    {
+        keyword: "scav_01",
+        title: "Scavenger",
+        shortTitle: "scavenger",        
+        description: "A goblin creature on all fours, glaring. Come from the darkness, feeding on rot.",
+        hpCurrent: 7,
+        hpMax: 7,
+        power: 4,
+        insight: 0,
+        gold: 10,
+        deathFunc: "",
+        actions: [
+        ]
+    },
+    {
+        keyword: "scav_02",
+        title: "Scavenger",
+        shortTitle: "scavenger",        
+        description: "A goblin creature on all fours, glaring. Come from the darkness, feeding on rot.",
+        hpCurrent: 7,
+        hpMax: 7,
+        power: 3,
+        insight: 0,
+        gold: 10,
+        deathFunc: "",
+        actions: [
+        ]
+    },
+    {
+        keyword: "hulk_scav_01",
+        title: "Hulking Scavenger",
+        shortTitle: "hulk",        
+        description: "A massive goblin creature with thick forearms planted in front of it. Scarred tusks point upwards out of it's heavy jaw.",
+        hpCurrent: 24,
+        hpMax: 24,
+        power: 7,
+        insight: 1,
+        gold: 30,
         deathFunc: "",
         actions: [
         ]
