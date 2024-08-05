@@ -348,12 +348,12 @@ nav {
 }
 
 .item-button {
-    color: #877C7A;
+    color: #7e8186;
     border: 1px solid #32373A;
 }
 
 .item-button.can-hover:hover {    
-    color: #D1BDB9;
+    color: #C0C8CF;
     border: 1px solid #7C8D97;
 }
 
@@ -370,6 +370,11 @@ nav {
 .locked-button {
     color: #383724;
     border: 1px solid #1C1D0F;
+}
+
+.locked-item-button {
+    color: #3C4045;
+    border: 1px solid #1F2325;
 }
 
 #equip-button {

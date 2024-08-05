@@ -109,6 +109,54 @@ npcs = [
                 func: ""
             }
         ],
+    },    
+    {
+        keyword: "rajin",
+        title: "Rajin, Swordsmith Descendant",
+        shortTitle: "Rajin",        
+        description: "At one end of the Temple Market a makeshift smithy has been built.\n\nRajin the edge of a newly forged blade aloft, appraising it's edge.",
+        dialogueAvailable: true,
+        currentDialogue: 0,
+        actions: [  
+            {
+                type: 4,
+                title: "A heavy iron longsword",
+                keyword: "iron_longsword",
+                func: "buy|iron_longsword|265"
+            },
+            {
+                type: 4,
+                title: "A gilded Eagle crest shield",
+                keyword: "eagle_shield",
+                func: "buy|eagle_shield|195"
+            },
+            {
+                type: 4,
+                title: "A Deepstone talisman",
+                keyword: "deepstone_talisman",
+                func: "buy|deepstone_talisman|595"
+            },
+            {
+                type: 6,
+                title: "Talk",
+                func: "talk"
+            },        
+            {
+                type: 6,
+                title: "Leave",
+                func: "returnToPrimaryContext"
+            }          
+        ],
+        dialogue: [
+            {                                            
+                text: "\"I've got to stay busy. It's the only thing that keeps my mind off of, well you know.\"",
+                func: "advanceDialogue|rajin"
+            },
+            {                                            
+                text: "\"Bring me gold and I'll make you arms.\"",
+                func: ""
+            }
+        ],
     },
     {
         keyword: "default_camp",
@@ -120,7 +168,7 @@ npcs = [
         actions: [
             {
                 type: 6,
-                title: "Train",
+                title: "Seek Guidance",
                 func: "train"
             },
             {

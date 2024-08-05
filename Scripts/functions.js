@@ -170,7 +170,7 @@ let items = [
         keyword: "",
         title: "",
         shortTitle: "",
-        canEquip: false,
+        canEquip: false,        
         equipped: false,
         power: 0,
         stamina: 0,
@@ -231,8 +231,8 @@ function initializeGame() {
         if (showDebugLog) console.log("Save game doesn't exist");        
 
         insight = 0;
-        hpCurrent = 10;
-        hpMax = 10;
+        hpCurrent = 40;
+        hpMax = 40;
         gold = 0;
 
         // Base stats are the players raw stats
@@ -240,12 +240,13 @@ function initializeGame() {
         baseStamina = 3;
         baseDefence = 0;
         baseEvasion = 20;
-        
-        currentStamina = 3;
-        maxStamina = 3;
+                        
+        updateStats();
+
+        currentStamina = maxStamina;        
 
         inventory = [];
-        inventory.push(0,1,3);        
+        inventory.push(1,2,3,4,0);        
 
         storedLocation = -1;
         locationsVisited = [];
@@ -255,14 +256,14 @@ function initializeGame() {
             contextType: 1,
             storedLocation: -1
         }
+        corpseLocation = -1;
 
         // Using JSON to create deep clones of our starting data arrays
         locationsModified = JSON.parse(JSON.stringify(locations));
         monstersModified = JSON.parse(JSON.stringify(monsters));
         npcsModified = JSON.parse(JSON.stringify(npcs));
         itemsModified = JSON.parse(JSON.stringify(items));    
-        
-        updateStats();
+
         save();
         changeContextDirect(debugStartContext, debugStartType);
     }
@@ -606,7 +607,7 @@ function updateButtons(actions)  {
                         additionalButtonString += " [ " + itemCost + " Gold ]"
 
                         if (itemCost > gold) {                            
-                            button.classList = "nav-button locked-button";
+                            button.classList = "nav-button locked-item-button";
                         }
 
                     }
@@ -817,19 +818,23 @@ function displayInventory() {
         const clone = itemButton.cloneNode(true);        
         clone.querySelector('.button-text').innerText = itemsModified[element].title;
         clone.style.display = "flex";
-        clone.onmouseover = (event) => { if (clone.classList.contains("can-hover"))  playClick(); };
-        clone.onclick =  function(){ toggleEquipped(element, clone); playClick();};
+        clone.onmouseover = (event) => { if (clone.classList.contains("can-hover"))  playClick(); };        
         document.querySelector("nav").appendChild(clone);
         createdInventoryButtons.push(clone);
 
         clone.classList = "nav-button item-button";
 
-        if ((itemsModified[element].canEquip)) {
+        if (itemsModified[element].power != 0 || itemsModified[element].stamina != 0  || itemsModified[element].defence != 0 ) {
             
             clone.querySelector('#button-stat-section').style.display = "block";
             clone.querySelector('.button-power-text').innerText = itemsModified[element].power;
             clone.querySelector('.button-stamina-text').innerText = itemsModified[element].stamina;
             clone.querySelector('.button-defence-text').innerText = itemsModified[element].defence;
+        }
+
+        if (itemsModified[element].canEquip) {
+            
+            clone.onclick =  function(){ toggleEquipped(element, clone); playClick();};
             clone.querySelector(".button-equip-icon").style.display = "block";
             clone.classList.add("can-hover");
             if (itemsModified[element].equipped) clone.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
@@ -887,18 +892,19 @@ function displayTrain() {
     monsterHpSection.style.display = "none";
     mainTitleText.style.color = mainTitleActive;
     secondaryTitle.style.display = "none";    
-    mainTitleText.innerText = "Training";        
-    mainText.innerText = "Study your hard earned lessons and put the insight you've acquired to use.";
+    mainTitleText.innerText = "Seek Guidance";
+    mainText.innerText = "You close your eyes and kneel. You feel the earth below and breathe deep the air.";
     
     expandStats();
 
 
-    button1.querySelector('.button-text').innerText = "Train your HP (1 insight)";
+    let hpCost = 1;
+    button1.querySelector('.button-text').innerText = "Feed the Body (" + hpCost + " insight)";
     button1.style.display = "block";
-    if (insight >= 1) {        
+    if (insight >= hpCost) {        
         
         button1.classList = "nav-button can-hover location-button";
-        button1.onclick = function() {train(1)};
+        button1.onclick = function() {train("hp", hpCost)};
     }
     else {        
         
@@ -906,12 +912,13 @@ function displayTrain() {
         button1.onclick = "";        
     }
     
-    button2.querySelector('.button-text').innerText = "Train your Power (2 insight)";
-    button2.style.display = "block";
-    if (insight >= 2) {        
-        
+    let staminaCost = 2;
+    button2.querySelector('.button-text').innerText = "Feed the Breathe (" + staminaCost + " insight)";
+    button2.style.display = "block";    
+    if (insight >= staminaCost) {        
+
         button2.classList = "nav-button can-hover location-button";
-        button2.onclick = function() {train(2)};
+        button2.onclick = function() {train("stamina", staminaCost)};
     }
     else {        
 
@@ -919,12 +926,13 @@ function displayTrain() {
         button2.onclick = "";        
     }
 
-    button3.querySelector('.button-text').innerText = "Train your Stamina (2 insight)";
+    let curseCost = 3;
+    button3.querySelector('.button-text').innerText = "Feed the Curse Mark (" + curseCost + " insight)";
     button3.style.display = "block";
-    if (insight >= 2) {        
-
+    if (insight >= curseCost) {        
+        
         button3.classList = "nav-button can-hover location-button";
-        button3.onclick = function() {train(3)};
+        button3.onclick = function() {train("curse", curseCost)};
     }
     else {        
 
@@ -932,52 +940,34 @@ function displayTrain() {
         button3.onclick = "";        
     }
 
-    button4.querySelector('.button-text').innerText = "Train your Defence (3 insight)";
+    button4.querySelector('.button-text').innerText = "Exit";
     button4.style.display = "block";
-    if (insight >= 3) {        
-
-        button4.classList = "nav-button can-hover location-button";
-        button4.onclick = function() {train(4)};
-    }
-    else {        
-
-        button4.classList = "nav-button locked-button";
-        button4.onclick = "";        
-    }
-
-    button5.querySelector('.button-text').innerText = "Exit";
-    button5.style.display = "block";
-    button5.classList = "nav-button can-hover location-button";
-    button5.onclick = function() { changeContextDirect(currentContext, currentContextType);};    
+    button4.classList = "nav-button can-hover location-button";
+    button4.onclick = function() { changeContextDirect(currentContext, currentContextType);};    
 }
 
-function train(trainType) {
+function train(trainType, cost) {
 
-    switch (trainType) {
-        //HP
-        case 1:
-            insight -= 1;
+    switch (trainType) {        
+        case "hp":
+            insight -= cost;
             hpMax += 5;
-            break;
-        //POWER
-        case 2:
-            insight -= 2;
-            basePower += 1;        
-            break;
-        //STAMINA
-        case 3:
-            insight -= 2;
+            hpCurrent += 5;
+            break;        
+        case "stamina":
+            insight -= cost;
             baseStamina += 1;
-            break;
-        //DEFENCE
-        case 4:
-            insight -= 3;
-            baseDefence  += 1;
-            break;
+            break;        
+        case "curse":
+            insight -= cost;
+
+            let curseMarkIndex = getContextIndexFromKeyword("curse_mark", 4);
+            itemsModified[curseMarkIndex].power += 5;            
+            break;        
     }
 
-    save();
     updateStats();
+    save();
     displayTrain();
 }
 
@@ -1631,6 +1621,7 @@ function save() {
     localStorage.setItem('baseEvasion', JSON.stringify(baseEvasion));
     localStorage.setItem('inventory', JSON.stringify(inventory));
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
+    localStorage.setItem('corpseLocation', JSON.stringify(corpseLocation));
 
     localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
@@ -1656,7 +1647,8 @@ function save() {
     baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
     baseDefence = JSON.parse(localStorage.getItem('baseDefence'));
     inventory = JSON.parse(localStorage.getItem('inventory'));
-    respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'));
+    respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'))
+    corpseLocation = JSON.parse(localStorage.getItem('corpseLocation'))
 
     if (!resetLocations) { 
         

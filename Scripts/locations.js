@@ -139,7 +139,7 @@ locations = [
             },
             {
                 type: 1,
-                title: "East to the Black Leaf Road",
+                title: "East to the Old Road",
                 keyword: "narration_02_01"
             },
             {
@@ -174,6 +174,11 @@ locations = [
                 type: 1,
                 title: "South to the Templefront",
                 keyword: "templefront"
+            },
+            {
+                type: 5,
+                title: "Rajin hammers steel at the makeshift smithy",
+                keyword: "rajin"
             }
         ]
     },    
@@ -436,14 +441,14 @@ locations = [
             {
                 type: 1,
                 title: "Next",
-                keyword: "black_road",
-                func: "replaceAction|town_square|1|{\"type\": 1,\"title\": \"East to the Blackened Road\",\"keyword\": \"black_road\",\"blocked\": \"\"}|2"
+                keyword: "old_road",
+                func: "replaceAction|town_square|1|{\"type\": 1,\"title\": \"East to Old Road\",\"keyword\": \"old_road\",\"blocked\": \"\"}|2"
             }
         ]
     },
     {
-        keyword: "black_road",
-        title: "The Black Leaf Road",        
+        keyword: "old_road",
+        title: "The Old Road",        
         description: "A narrow road leads east, down a long hill. Thorny vines from reaching plants search for a sleeve to catch themselves on.\n\nThe path is oddly well worn.",
         narration: "You hear the sound of a unsettling bird call ripple through the wet air.",
         actions: [
@@ -460,6 +465,34 @@ locations = [
             {
                 type: 1,
                 title: "East to the Tower",
+                keyword: "tower_front"
+            },
+            {
+                type: 2,
+                title: "South",
+                keyword: ""
+            }
+        ]
+    },
+    {
+        keyword: "tower_front",
+        title: "Before the great Black Tower",        
+        description: "The immense monolith reaches far above you into the gray mist. Bursting with overgrowth as black as night. Brimming with power and malice.",
+        narration: "",
+        actions: [            
+            {
+                type: 2,
+                title: "North",
+                keyword: ""
+            },
+            {
+                type: 1,
+                title: "West to the Old Road",
+                keyword: "old_road"
+            },
+            {
+                type: 1,
+                title: "Enter the Tower",
                 keyword: "f01_01"
             },
             {
