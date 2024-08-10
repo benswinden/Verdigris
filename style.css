@@ -51,30 +51,31 @@ h1, h2, p {
     position: absolute;
     top: 0;
     left: 0;
-    color: #3E3E3E;
-    font-size: 25px;
+    color: #9b9b9b;
+    font-size: 16px;
     font-weight: 400;
     border-radius: 6px;
-    background-color: #EAEAEA;
-    width: 15%;
+    background-color: #030f0c;
+    width: 200px;
     padding: 40px;
     margin: 5px 0 15px 0;
 
     .debug-button {
-        color: rgb(46, 46, 46);
+        color: rgb(197, 197, 197);
         font-family: Roboto;
-        font-size: 22px;
+        font-size: 18px;
         border-radius: 6px;
         border: none;
-        background: #cccccc;        
-        height: 50px;        
+        background: #031a0f;        
+        height: 30px;
+        width: 200px;
         font-weight: 500;
         padding: 0 40px;
         margin: 10px 0;
 
         &:hover {
-            color: black;
-            background: #969696;
+            color: rgb(255, 255, 255);
+            background: #010a0a;
         }
     }
 }
@@ -283,7 +284,7 @@ main {
 }
 
 nav {
-    margin-bottom: 150px;;
+    padding-bottom: 150px;
 }
 
 .nav-button {    

@@ -4,14 +4,7 @@ inventoryIcon.onclick = displayInventory;
 
 document.addEventListener('keydown', function(event) {
     if (event.code == 'Escape') {
-        if (!debugWindowActive) {
-            debugWindow.style.display = "block";
-            debugWindowActive = true;
-        }
-        else if (debugWindowActive) {
-            debugWindow.style.display = "none";
-            debugWindowActive = false;
-        }
+        toggleDebugWindow();
     }
 
     if (event.code == 'KeyI') {
@@ -23,6 +16,17 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+function toggleDebugWindow() {
+    if (!debugWindowActive) {
+        debugWindow.style.display = "block";
+        debugWindowActive = true;
+    }
+    else if (debugWindowActive) {
+        debugWindow.style.display = "none";
+        debugWindowActive = false;
+    }
+}
 
 button1.onmouseover = (event) => { if (button1.classList.contains("can-hover")) playClick(); };
 button2.onmouseover = (event) => { if (button2.classList.contains("can-hover")) playClick(); };
@@ -48,9 +52,9 @@ document.addEventListener('keydown', function(event) {
 
 
 // DEBUG
-debugButton1.onclick = function() { console.log("Debug: Reset Game"); resetGame()};
-debugButton2.onclick = function() { console.log("Debug: Reset & Resume " + storedLocation); let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame();storedLocation = z;  changeContextDirect(x,y);};  
-debugButton2b.onclick = function() { console.log("Debug: Kill Monster"); if (currentContextType == 3) monsterDeath();}
+debugButton1.onclick = function() { console.log("Debug: Reset Game"); resetGame(); toggleDebugWindow(); };
+debugButton2.onclick = function() { console.log("Debug: Reset & Resume " + storedLocation); let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame();storedLocation = z;  changeContextDirect(x,y); toggleDebugWindow();};  
+debugButton2b.onclick = function() { console.log("Debug: Kill Monster"); if (currentContextType == 3) monsterDeath();  toggleDebugWindow();}
 debugButton3.onclick = function() { insight++; save(); updateStats();};
 debugButton4.onclick = function() { hp++; save(); updateStats();};
 debugButton5.onclick = function() { gold++; save(); updateStats();};

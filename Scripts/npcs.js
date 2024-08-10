@@ -63,7 +63,7 @@ npcs = [
     },
     {
         keyword: "thornhood_kijil",
-        title: "Thornhood Kijil",
+        title: "Thornhood nightblade",
         shortTitle: "Kijil",        
         description: "A black cloaked man leans casually against a pillar to the side of the road.",    
         dialogueAvailable: false,
@@ -111,10 +111,10 @@ npcs = [
         ],
     },    
     {
-        keyword: "rajin",
-        title: "Rajin, Swordsmith Descendant",
-        shortTitle: "Rajin",        
-        description: "At one end of the Temple Market a makeshift smithy has been built.\n\nRajin the edge of a newly forged blade aloft, appraising it's edge.",
+        keyword: "descendent",
+        title: "The Swordsmith Descendant",
+        shortTitle: "descendent",        
+        description: "A place where legendary Swordsmiths once worked a long time ago. Still maintained to exacting standards, but the sword arts have been long lost.",
         dialogueAvailable: true,
         currentDialogue: 0,
         actions: [  

@@ -43,7 +43,7 @@ locations = [
     {
         keyword: "edge_wood",
         title: "Edge of the Woods",        
-        description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an old village.",
+        description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an ancient city.",
         narration: "You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.",
         actions: [
             {
@@ -58,7 +58,7 @@ locations = [
             },
             {
                 type: 1,
-                title: "East to the Village Outskirts",
+                title: "East to the City Outskirts",
                 keyword: "narration_03_01"
             },
             {
@@ -82,14 +82,14 @@ locations = [
             {
                 type: 1,
                 title: "Next",                
-                keyword: "village_outskirts",                                        
-                func: "replaceAction|edge_wood|1|{\"type\": 1,\"title\": \"East to the Village Outskirts\",\"keyword\": \"village_outskirts\"}|2"
+                keyword: "city_outskirts",                                        
+                func: "replaceAction|edge_wood|1|{\"type\": 1,\"title\": \"East to the City Outskirts\",\"keyword\": \"city_outskirts\"}|2"
             }
         ]
     },
     {
-        keyword: "village_outskirts",
-        title: "Village Outskirts",
+        keyword: "city_outskirts",
+        title: "City Outskirts",
         description: "An old cobbled road leads you in among the ruined settlement. The buildings here are nothing more than cadaverous moss-covered remains.",
         narration: "",
         update: "You feel watched.",
@@ -106,8 +106,8 @@ locations = [
             },
             {
                 type: 1,
-                title: "East towards the Town Square",
-                keyword: "town_square",                
+                title: "East towards the City Crossroads",
+                keyword: "crossroads",                
             },
             {
                 type: 2,
@@ -122,9 +122,9 @@ locations = [
         ]
     },
     {
-        keyword: "town_square",
-        title: "The Town Square",        
-        description: "Standing in the town square is a lonely stone statue. A woman in a long robe, head held high defiantly.\n\nPathways spread from here throughout the ruins.",
+        keyword: "crossroads",
+        title: "The Crossroads",        
+        description: "All roads in this great city once came together here. Pathways spread forth from here to all corners of the ruins.",
         narration: "",
         actions: [
             {
@@ -134,8 +134,8 @@ locations = [
             },
             {
                 type: 1,
-                title: "West to the Village Outskirts",
-                keyword: "village_outskirts"
+                title: "West to the City Outskirts",
+                keyword: "city_outskirts"
             },
             {
                 type: 1,
@@ -157,8 +157,8 @@ locations = [
         actions: [
             {
                 type: 1,
-                title: "North to the Town Square",
-                keyword: "town_square"
+                title: "North to the City Crossroads",
+                keyword: "crossroads"
             },
             {
                 type: 2,
@@ -177,8 +177,8 @@ locations = [
             },
             {
                 type: 5,
-                title: "Rajin hammers steel at the makeshift smithy",
-                keyword: "rajin"
+                title: "Site of an ancient smithy. An old man works away.",
+                keyword: "descendent"
             }
         ]
     },    
@@ -247,7 +247,7 @@ locations = [
     {
         keyword: "kings_road",
         title: "The King's Road",        
-        description: "Once a wide causeway for traders heading to the Temple Market has become home to the fallen remains the tall stone buildings that once lined it.",
+        description: "What was once a wide causeway for traders heading to the Temple Market is now home to the fallen remains of the tall stone buildings that once lined it.",
         narration: "",
         actions: [
             {
@@ -267,15 +267,15 @@ locations = [
             },
             {
                 type: 1,
-                title: "South to the Town Square",
-                keyword: "town_square"
+                title: "South to the City Crossroads",
+                keyword: "crossroads"
             }
         ]
     },
     {
         keyword: "lamplit_ruin",
         title: "A Lamplit Ruin",
-        description: "A damp, mucky interior with some broken wood and debris doing a poor job at sheltering it from the elements. A greasy lamp swings gently from a rafter.",
+        description: "A damp, mucky interior lit by the glow of a gently swinging grease lamp.",
         narration: "Your greeted by a thin man, squatting amongst the debris. \"Welcome friend, name's Jorrid.\"",
         actions: [
             {
@@ -423,7 +423,7 @@ locations = [
         keyword: "narration_02_02",
         title: "",        
         description: "",
-        narration: "As you crest a final hill, you see before you the eastern half of the village has been overtaken entirely in ink black overgrowth.",
+        narration: "As you crest a final hill, you see before you the eastern half of the city has been overtaken entirely in ink black overgrowth.",
         actions: [
             {
                 type: 1,
@@ -442,7 +442,7 @@ locations = [
                 type: 1,
                 title: "Next",
                 keyword: "old_road",
-                func: "replaceAction|town_square|1|{\"type\": 1,\"title\": \"East to Old Road\",\"keyword\": \"old_road\",\"blocked\": \"\"}|2"
+                func: "replaceAction|crossroads|1|{\"type\": 1,\"title\": \"East to Old Road\",\"keyword\": \"old_road\",\"blocked\": \"\"}|2"
             }
         ]
     },
@@ -459,8 +459,8 @@ locations = [
             },
             {
                 type: 1,
-                title: "West to the Town Square",
-                keyword: "town_square"
+                title: "West to the City Crossroads",
+                keyword: "crossroads"
             },
             {
                 type: 1,

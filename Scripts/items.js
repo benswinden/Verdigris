@@ -17,7 +17,7 @@ items = [
         shortTitle: "sword",
         canEquip: true,
         equipped: true,
-        power: 75,
+        power: 20,
         stamina: 0,
         defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context
@@ -42,7 +42,7 @@ items = [
     },
     {
         keyword: "green_cloak",
-        title: "Long green cloak of the Woodland Protectors of Rhen",
+        title: "Long green cloak of the Woodland Protectors",
         shortTitle: "cloak",
         canEquip: true,
         equipped: true,
@@ -58,7 +58,7 @@ items = [
         shortTitle: "mark",
         canEquip: false,
         equipped: true,
-        power: -55,
+        power: 5,
         stamina: 0,
         defence: 0,        
         actions: [          // Item actions will be added while in a monster sub-context            

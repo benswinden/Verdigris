@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.015;
+let version = 0.016;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -962,7 +962,7 @@ function train(trainType, cost) {
             insight -= cost;
 
             let curseMarkIndex = getContextIndexFromKeyword("curse_mark", 4);
-            itemsModified[curseMarkIndex].power += 5;            
+            itemsModified[curseMarkIndex].power += 5;
             break;        
     }
 
