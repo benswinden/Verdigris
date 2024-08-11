@@ -274,13 +274,17 @@ main {
     }
 }
 
-#inventory-title {
-    display: none;
-    color: #CDCEC6;
+#inventory-title, #equipment-title, #sale-title {
+    display: block;
+    color: #8F871E;
+    font-size: 12px;
     font-weight: 500;
-    padding-bottom: 20px;
-    width: 100%;
-    text-align: center;
+    padding-bottom: 10px;
+    width: 100%;    
+}
+
+#inventory-title, #sale-title {
+    margin-top: 40px;
 }
 
 nav {
@@ -289,14 +293,15 @@ nav {
 
 .nav-button {    
     display: flex;        
+    flex-wrap: wrap;
     font-family: Eczar;
     font-size: 18px;    
     text-align: left;
-    border-radius: 2px;
+    border-radius: 3px;
     border: none;
     background: #01090A;
     width: 100%;
-    height: 50px;
+    height: 100%;
     line-height: 50px;    
     font-weight: 500;
     padding: 0;
@@ -310,18 +315,18 @@ nav {
 
     .button-text {
         padding-left: 25px;
+        max-width: 90%;
     }    
 }
 
-#button-stat-section {
-    display: none;
+.break {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+.left-spacer {
     margin-left: auto;
     padding-right: 20px;
-
-    div {
-        font-size: 18px;
-        color: #877C7A;
-    }
 }
 
 .can-hover {
@@ -330,52 +335,133 @@ nav {
 
 .location-button {
     color: #8A8766;
-    border: 1px solid #363718;
+    border: 3px solid #363718;
 }
 
 .location-button.can-hover:hover {    
     color: #BAB797;
-    border: 1px solid #6F7221;
+    border: 3px solid #6F7221;
 }
 
 .monster-button {
     color: #8F3715;
-    border: 1px solid #512018;
+    border: 3px solid #512018;
 }
 
 .monster-button.can-hover:hover {    
     color: #E86E40;
-    border: 1px solid #AE3E2D;
+    border: 3px solid #AE3E2D;
+}
+
+#item-button {
+    display: none;
 }
 
 .item-button {
     color: #7e8186;
-    border: 1px solid #32373A;
+    border: 3px solid #32373A;
+
+    .button-chevron {     
+        cursor:pointer;
+        margin-left: auto;        
+        padding-right: 20px;
+        position: relative;
+        top: 50%;
+        transform: translateY(20%);
+    }
+
+    .item-cost-section {
+        display: flex;
+        padding-left: 10px;
+    }
+
+    .item-cost-text.active {
+        color: #7e8186;
+    }
+    .item-cost-text.inactive {
+        color: #8F3715;
+    }
+
+    .chevron-closed {
+        content:url("Assets/ChevronClosed.svg");
+    }
+
+    .chevron-closed.hover {
+        content:url("Assets/ChevronClosedHover.svg");
+    }
+
+    .chevron-open {
+        content:url("Assets/ChevronOpen.svg");
+    }
+
+    .chevron-open.hover {
+        content:url("Assets/ChevronOpenHover.svg");
+    }
+
+    .description-section {
+        display: block;
+        font-size: 16px;
+        line-height: 1.75em;
+        color: #7e8186;
+        padding-top: 10px;
+        padding-bottom: 35px;
+        font-weight: 600;        
+    }
+
+    .button-stat-section {
+        display: block;        
+
+        div {
+            font-size: 18px;
+            color: #877C7A;
+        }
+
+        li {
+            margin-right: 15px;
+        }
+    }
+
+    .secondary-action-button {
+        margin: 0 20px 20px 0;        
+        height: 35px;
+        width: 100px;
+
+        .secondary-button-text {
+            text-align: center;
+            height: 100%;
+            line-height: 36px;            
+        }
+    }
+}
+
+.item-button.active {    
+    color: #C0C8CF;
+    border: 3px solid #7C8D97;
 }
 
 .item-button.can-hover:hover {    
     color: #C0C8CF;
-    border: 1px solid #7C8D97;
+    border: 3px solid #7C8D97;
 }
 
 .npc-button {
     color: #6C7D5B;
-    border: 1px solid #2B382F;
+    border: 3px solid #2B382F;
 }
 
 .npc-button.can-hover:hover {    
     color: #C4D9B0;
-    border: 1px solid #336843;
+    border: 3px solid #336843;
 }
 
 .locked-button {
     color: #383724;
-    border: 1px solid #1C1D0F;
+    border: 3px solid #1C1D0F;
 }
 
 .locked-item-button {
     color: #3C4045;
-    border: 1px solid #1F2325;
+    border: 3px solid #1F2325;
 }
 
 #equip-button {

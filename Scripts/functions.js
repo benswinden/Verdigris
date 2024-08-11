@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.016;
+let version = 0.017;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -60,6 +60,12 @@ const updateText =  document.querySelector('#update-text');
 const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
 const monsterHpText =  document.querySelector('#monster-hp-text');
+const equipmentTitle =  document.querySelector('#equipment-title');
+const equipmentSection =  document.querySelector('#equipment-section');
+const inventoryTitle =  document.querySelector('#inventory-title');
+const inventorySection =  document.querySelector('#inventory-section');
+const saleTitle =  document.querySelector('#sale-title');
+const saleSection =  document.querySelector('#sale-section');
 
 const hpStat = document.querySelector('#hp-stat');            // Text and icon combined
 const insightStat = document.querySelector('#insight-stat');        // Text and icon combined
@@ -80,6 +86,7 @@ const button5 = document.querySelector('#button5');
 const button6 = document.querySelector('#button6');
 const button7 = document.querySelector('#button7');
 const button8 = document.querySelector('#button8');
+const itemButtonMaster = document.querySelector('#item-button');
 //Misc
 const debugWindow = document.querySelector('#debug');
 const debugButton1 = document.querySelector('#debug-button1');
@@ -91,7 +98,7 @@ const debugButton5 = document.querySelector('#debug-button5');
 const resetLocationsCheckbox = document.querySelector('#resetLocations');
 let resetLocations = false;     // We use this for debug, when selected on reload we will always re-write locationsModified from locations so that updates to the games content can be tested immediately without needing to reset the whole game
 
-let createdInventoryButtons = [];
+let createdItemButtons = [];
 
 //Colors
 const mainTitleActive = '#8F871E';
@@ -104,6 +111,7 @@ let locations = [{
     description: "",
     narration: "",
     update: "",
+    items: [],
     actions: [
         {
             type: 0,        // Determines what the button looks like, and what it does // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
@@ -148,6 +156,7 @@ let npcs = [
         update: "",
         dialogueAvailable: true,
         currentDialogue: 0,
+        items: [],
         actions: [
             {
                 type: 0,
@@ -170,6 +179,7 @@ let items = [
         keyword: "",
         title: "",
         shortTitle: "",
+        description: "",
         canEquip: false,        
         equipped: false,
         power: 0,
@@ -246,7 +256,7 @@ function initializeGame() {
         currentStamina = maxStamina;        
 
         inventory = [];
-        inventory.push(1,2,3,4,0);        
+        inventory.push("straight_sword","worn_shield","green_cloak","silver_locket","strange_stone");
 
         storedLocation = -1;
         locationsVisited = [];
@@ -376,10 +386,13 @@ function updateContext() {
 
     collapseStats();
 
-    document.querySelector("#inventory-title").style.display = "none";
+    inventoryTitle.style.display = "none";
+    equipmentTitle.style.display = "none";
+    saleTitle.style.display = "none";
 
     // By default, we'll be getting our action buttons from a location
     let actions = [];
+    let items = [];
 
     // If we are updating to a location type - 
     if (currentContextType === 1) {    
@@ -409,6 +422,7 @@ function updateContext() {
         }
 
         actions = locationsModified[currentContext].actions;
+        items = locationsModified[currentContext].items;
 
         mainTitleText.style.color = mainTitleActive;
         secondaryTitle.style.display = "none";
@@ -440,7 +454,7 @@ function updateContext() {
                 monsterHpSection.style.display = "block";
                 updateMonsterUI();
                 
-                actions = generateItemActions(monstersModified[currentContext].actions);
+                actions = generateItemActions(monstersModified[currentContext].actions);                
                 
                 // Some contexts have update text that should display when the player enters their context
                 if (monstersModified[currentContext].update != undefined && monstersModified[currentContext].update != "")
@@ -457,6 +471,7 @@ function updateContext() {
                 mainText.innerText = npcsModified[currentContext].description;                
 
                 actions = npcsModified[currentContext].actions;
+                items = npcsModified[currentContext].items;
 
                 // Some contexts have update text that should display when the player enters their context
                 if (npcsModified[currentContext].update != undefined && npcsModified[currentContext].update != "")
@@ -466,10 +481,12 @@ function updateContext() {
         }
     }
 
-    updateButtons(actions);
+    updateButtons(actions, items);
 }
 
 function hideAllButtons() {
+
+    clearCreatedButtons();
 
     button1.style.display = "none";
     button2.style.display = "none";
@@ -481,7 +498,15 @@ function hideAllButtons() {
     button8.style.display = "none";    
 }
 
-function updateButtons(actions)  {        
+function clearCreatedButtons() {
+
+    createdItemButtons.forEach((element) => {        
+        element.remove();
+    });
+    createdItemButtons = [];
+}
+
+function updateButtons(actions, items)  {        
         
     hideAllButtons();
     activeDirections = [];
@@ -495,7 +520,7 @@ function updateButtons(actions)  {
     button7.onclick = '';
     button8.onclick = '';
 
-    if (actions.length > 0) {
+    if (!inventoryOpen && actions.length > 0) {
 
         actions.forEach((element, index) => {
             
@@ -593,37 +618,7 @@ function updateButtons(actions)  {
                     break;
                 // ITEM
                 case 4:                    
-                    button.classList = "nav-button can-hover item-button";
-
-                    // If this is marked as "buy", that means we are talking to a vendor NPC, and need to change the button according to whether or not we can afford this item
-                    let isBuy = false;
-                    let itemCost = 0;
-                    if (element.func != undefined && element.func.substr(0,3) == "buy") {
-                        isBuy = true;                        
-                        itemCost = element.func.split("|")[2];
-                        let item = itemsModified[getContextIndexFromKeyword(element.keyword, 4)];
-                        if (item === undefined) console.error("updateButtons() - Creating a purchasable item button, couldn't find the item");
-                        
-                        additionalButtonString += " [ " + itemCost + " Gold ]"
-
-                        if (itemCost > gold) {                            
-                            button.classList = "nav-button locked-item-button";
-                        }
-
-                    }
-
-                    button.onclick = function() {
-                        
-                        if (element.keyword === "destroy")
-                            removeActionFromContext(currentContext, currentContextType, index);                        
-                        else if (!isBuy)
-                            addToInventory(element.keyword); 
-
-                        if (element.func != undefined) 
-                            doAction(element.func, true);
-
-                        playClick();
-                    };
+                    // Where item context actions used to be before refactoring into their own process
                     break;
                 // NPC
                 case 5:                    
@@ -648,7 +643,179 @@ function updateButtons(actions)  {
             button.querySelector('.button-text').innerText = element.title + additionalButtonString;
             button.style.display = "flex";
         });
-    }        
+    }
+
+    if (inventoryOpen)
+        items = inventory;
+
+    // Create buttons for items contained here    
+    if (items != undefined && items.length > 0) {
+                
+        // Functionality is defined by the context this button is in:
+        // 1: Location    2: Inventory Normal     3: Inventory + Monster      4: Vendor Buy        5: Vendor Upgrade
+        let buttonContext = -1;
+        // Location
+        if (currentContextType === 1) {
+            buttonContext = 1;
+        }    
+        if (currentContextType === 5) {
+            buttonContext = 4;
+        }
+        if (currentContextType != 3 && inventoryOpen) {
+            buttonContext = 2;
+        }
+        if (currentContextType === 3 && inventoryOpen) {
+            buttonContext = 3;
+        }
+
+        // Create a button for each item contained in our array
+        items.forEach((element,index) => {
+            
+            let item = itemsModified[getContextIndexFromKeyword(element, 4)];
+            
+            let itemCostActive = false;            
+            let descriptionTextActive = false;
+
+            // Get all the elements for this specific button, deactivate things as though it was toggled off
+            const clone = itemButtonMaster.cloneNode(true);
+
+            const itemCostSection = clone.querySelector('.item-cost-section');        
+            const itemCostText = clone.querySelector('.item-cost-text');
+            const buttonChevron = clone.querySelector('.button-chevron');
+            const descriptionText = clone.querySelector('.description-section');            
+            const buttonStatSection = clone.querySelector('.button-stat-section');
+            const secondaryButton = clone.querySelector('.secondary-action-button');
+            const secondaryButtonText = clone.querySelector('.secondary-button-text');
+            clone.classList.remove('active');
+            itemCostSection.style.display = "none";
+            descriptionText.style.display = "none";
+            buttonStatSection.style.display = "none";
+            secondaryButton.style.display = "none";            
+
+            clone.querySelector('.button-text').innerText = item.title;
+            
+            if (item.description != undefined && item.description != "") {
+                descriptionText.innerText = item.description;            
+                descriptionTextActive = true;
+            }
+            clone.style.display = "flex";
+            clone.onmouseover = (event) => { buttonChevron.querySelector('img').classList.add('hover'); };
+            clone.onmouseleave = (event) => { buttonChevron.querySelector('img').classList.remove('hover'); };        
+            createdItemButtons.push(clone);
+
+            clone.classList = "nav-button item-button can-hover";
+
+            let statSectionActive = false;
+            if (item.power != 0 || item.stamina != 0  || item.defence != 0 ) {
+                
+                statSectionActive = true;
+                clone.querySelector('.button-power-text').innerText = item.power;
+                clone.querySelector('.button-stamina-text').innerText = item.stamina;
+                clone.querySelector('.button-defence-text').innerText = item.defence;
+            }
+                    
+
+            // Context specific changes - items behave and display differently depending on the context we find them in, below are the contexts that can contain items          
+            // 1: Location = Take    2: Inventory = Equip / Unequip     3: Inventory + Monster = Use     4: Vendor Buy = Purchase        5: Vendor Upgrade = Upgrade
+            let secondaryButtonDisplayed = false;
+            let secondaryButtonActive = true;  
+            switch (buttonContext) {
+                // 1: Location = Take 
+                case 1:
+                    document.querySelector("nav").appendChild(clone);
+                    secondaryButtonDisplayed = true;
+                    secondaryButtonText.innerText = "Take";
+                    secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); this.event.stopPropagation(); };
+                    break;
+                    // 2: Inventory = Equip / Unequip
+                case 2:
+
+                    if (item.equipped)
+                        equipmentSection.appendChild(clone);                    
+                    else
+                        inventorySection.appendChild(clone);
+
+                    if (item.canEquip) {
+                        if (item.equipped)
+                            secondaryButtonText.innerText = "Unequip";                        
+                        else
+                            secondaryButtonText.innerText = "Equip";
+                    
+                        secondaryButtonDisplayed = true;                    
+                        secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); this.event.stopPropagation(); };
+                    }
+                    break;
+                case 3:
+                    // 3: Inventory + Monster = Use
+                    break;
+                    // 4: Vendor Buy = Purchase 
+                case 4:
+                    itemCostActive = true;
+                    itemCostSection.style.display = "flex";
+                    itemCostText.innerText = item.cost;
+
+                    // Check if we can afford this item, style text red if we can't
+                    if (item.cost < gold) {
+                        itemCostText.classList = "item-cost-text active";  
+                        secondaryButtonActive = true;                      
+                    }
+                    else {
+                        itemCostText.classList = "item-cost-text inactive";
+                        secondaryButtonActive = false;
+                    }
+
+                    saleTitle.style.display = "block";
+                    saleSection.appendChild(clone);
+                    secondaryButtonDisplayed = true;
+                    secondaryButtonText.innerText = "Purchase";
+                    secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); this.event.stopPropagation(); };
+                    break;
+                    break;
+                case 5:
+                    // 5: Vendor Upgrade = Upgrade
+                    break;
+            }
+
+            // The function for opening and collapsing the button
+            let buttonOpened = false;
+            clone.onclick = function() { toggleButton(); playClick(); };           
+
+            function toggleButton() {
+
+                if (buttonOpened) {
+                    
+                    buttonOpened = false;
+                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
+                    clone.classList.remove('active');
+                    descriptionText.style.display = "none";
+                    buttonStatSection.style.display = "none";
+                    secondaryButton.style.display = "none";
+
+                    buttonChevron.querySelector('img').classList.add('chevron-closed');
+                    buttonChevron.querySelector('img').classList.remove('chevron-open');
+                }
+                else {
+                                        
+                    buttonOpened = true;
+                    clone.classList.add('active');
+                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
+                    if (descriptionTextActive) descriptionText.style.display = "block";
+                    if (statSectionActive) buttonStatSection.style.display = "block";
+                    if (secondaryButtonDisplayed) secondaryButton.style.display = "block";
+                    if (secondaryButtonActive) { secondaryButton.classList.add('item-button'); secondaryButton.classList.remove('locked-item-button'); }
+                    else { secondaryButton.classList.remove('item-button'); secondaryButton.classList.add('locked-item-button'); }
+
+                    buttonChevron.querySelector('img').classList.add('chevron-open');
+                    buttonChevron.querySelector('img').classList.remove('chevron-closed');
+                }
+            }
+
+            if (!descriptionTextActive && !statSectionActive && !secondaryButtonDisplayed) {
+                buttonChevron.style.display = "none";
+                clone.classList = "nav-button locked-item-button";
+            }
+        });
+    }
 }
 
 // 0 = North 1 = West 2 = East 3 = South 4 = Next
@@ -697,6 +864,7 @@ function addActionToContext(context, contextType, action, index) {
         contextInt = parseInt(context);
 
     let actions = [];
+    let items = [];
     switch (contextType) {
         case 1://Location
             if (index == -1)
@@ -705,6 +873,7 @@ function addActionToContext(context, contextType, action, index) {
                 locationsModified[contextInt].actions.splice(index, 0, action);
 
             actions = locationsModified[currentContext].actions;            // Store this in case this is our current context
+            items = locationsModified[currentContext].items;
             break;
         case 3://Monster
             if (index == -1)
@@ -727,13 +896,14 @@ function addActionToContext(context, contextType, action, index) {
                 npcsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
 
                 actions = npcsModified[currentContext].actions;
+                items = npcsModified[currentContext].items;
             break; 
         }
         
         save();
         // If this is our current context, we need to update the buttons immediately. Will never be an item
         if (context == currentContext && contextType == currentContextType)
-            updateButtons(actions);
+            updateButtons(actions, items);
 }
 
 // Remove an action in a given context at the specified index
@@ -753,11 +923,13 @@ function removeActionFromContext(context, contextType, index) {
         contextInt = parseInt(context);
 
     let actions = [];
+    let items = [];
     switch (contextType) {
         case 1://Location            
 
             locationsModified[contextInt].actions.splice(index, 1);
             actions = locationsModified[currentContext].actions;
+            items = locationsModified[currentContext].items;
             break;
         case 3://Monster            
 
@@ -772,13 +944,14 @@ function removeActionFromContext(context, contextType, index) {
 
             npcsModified[contextInt].actions.splice(index, 1);
             actions = npcsModified[currentContext].actions;
+            items = npcsModified[currentContext].items;
             break;
         }
         
         save();
         // If this is our current context, we need to update the buttons immediately. Will never be an item
         if (contextInt == currentContext && contextType == currentContextType)
-            updateButtons(actions);
+            updateButtons(actions, items);
 }
 
 // Remove action at index, add new one in it's place
@@ -800,7 +973,7 @@ function displayInventory() {
     expandStats();    
 
     //resetUpdateText();
-    hideAllButtons();
+    updateButtons();
 
     narrationText.style.display = "none";    
     monsterHpSection.style.display = "none";
@@ -810,39 +983,9 @@ function displayInventory() {
     mainTitleText.innerText = "Traveler";        
     mainText.innerText = "A worn traveler come from a foreign land. Stricken by a mysterious curse. Unable to resist the call.";
 
-    document.querySelector("#inventory-title").style.display = "block";
-
-    const itemButton = document.querySelector("#equip-button");    
-    inventory.forEach((element,index) => {
-                
-        const clone = itemButton.cloneNode(true);        
-        clone.querySelector('.button-text').innerText = itemsModified[element].title;
-        clone.style.display = "flex";
-        clone.onmouseover = (event) => { if (clone.classList.contains("can-hover"))  playClick(); };        
-        document.querySelector("nav").appendChild(clone);
-        createdInventoryButtons.push(clone);
-
-        clone.classList = "nav-button item-button";
-
-        if (itemsModified[element].power != 0 || itemsModified[element].stamina != 0  || itemsModified[element].defence != 0 ) {
-            
-            clone.querySelector('#button-stat-section').style.display = "block";
-            clone.querySelector('.button-power-text').innerText = itemsModified[element].power;
-            clone.querySelector('.button-stamina-text').innerText = itemsModified[element].stamina;
-            clone.querySelector('.button-defence-text').innerText = itemsModified[element].defence;
-        }
-
-        if (itemsModified[element].canEquip) {
-            
-            clone.onclick =  function(){ toggleEquipped(element, clone); playClick();};
-            clone.querySelector(".button-equip-icon").style.display = "block";
-            clone.classList.add("can-hover");
-            if (itemsModified[element].equipped) clone.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
-        }
-        else
-            clone.classList.remove("can-hover");
-    
-    });
+    inventoryTitle.style.display = "block";
+    equipmentTitle.style.display = "block";
+    saleTitle.style.display = "none";
 }
 
 function exitInventory() {
@@ -862,12 +1005,8 @@ function clearInventory() {
 
     expandStats();
 
-    document.querySelector("#inventory-title").style.display = "none";
-
-    createdInventoryButtons.forEach((element) => {        
-        element.remove();
-    });
-    createdInventoryButtons = [];
+    inventoryTitle.style.display = "none";
+    equipmentTitle.style.display = "none";
 }
 
 function inventoryIndexOf(keyword) {
@@ -875,7 +1014,7 @@ function inventoryIndexOf(keyword) {
     let i = -1;
     inventory.forEach((element,index) => {
         
-        if (itemsModified[element].keyword === keyword) {            
+        if (element === keyword) {            
             i = index;
         }
     });
@@ -1009,10 +1148,12 @@ function calculateStats() {
 
     inventory.forEach((element) => {
         
-        if (itemsModified[element].equipped) {
-            power += itemsModified[element].power;
-            maxStamina += itemsModified[element].stamina;
-            defence += itemsModified[element].defence;
+        let index = getContextIndexFromKeyword(element, 4);
+
+        if (itemsModified[index].equipped) {
+            power += itemsModified[index].power;
+            maxStamina += itemsModified[index].stamina;
+            defence += itemsModified[index].defence;
         }
     });
 }
@@ -1441,7 +1582,7 @@ function talk() {
             }
 
             save();
-            updateButtons(npcsModified[currentContext].actions);
+            updateButtons(npcsModified[currentContext].actions,npcsModified[currentContext].items);
         }
 
         playerActionComplete(true);
@@ -1499,23 +1640,37 @@ function addToInventory(keyword) {
         return;
     }
 
-    inventory.push(getContextIndexFromKeyword(keyword, 4));
+    inventory.push(keyword);
     
-    // Find the index of the action that is linked to this item in this location, remove it
-    let actionIndex = getActionIndexFromKeyword(keyword, currentContext, currentContextType);
     let actions = [];
-    if (currentContextType === 1)
+    let items = [];
+
+    // Depending on the contextType, we will splice this item out of a different context
+    if (currentContextType === 1) {
         actions = locationsModified[currentContext].actions;
+        items = locationsModified[currentContext].items;
+    }
     else if (currentContextType === 3)
-        actions = monstersModified[currentContext].actions;
-    else if (currentContextType === 5)
+        actions = monstersModified[currentContext].actions; // This will never happen, you cant add an item to your inventory while fighting a monster
+    else if (currentContextType === 5) {
         actions = npcsModified[currentContext].actions;
-        
-    actions.splice(actionIndex, 1);   // Remove the item from context it was contained in
-    updateButtons(actions);
+        items = npcsModified[currentContext].items;
+    }
+    
+    // Find and remove the item from the item list that it was contained in
+    let itemIndex = -1;
+    items.forEach((element, index) => {
+
+        if (element === keyword) {
+            itemIndex = index;
+        }
+    });
+    if (itemIndex != -1) items.splice(itemIndex, 1);
+
+    updateButtons(actions, items);
 
     save();
-    addUpdateText("The " + itemsModified[inventory[inventory.length - 1]].shortTitle + " has been added to your inventory.");
+    addUpdateText("The " + item.shortTitle + " has been added to your inventory.");
     playerActionComplete(true);
 }
 
@@ -1573,27 +1728,29 @@ function addInsight(amount, updateString) {
     playerActionComplete(true);
 }
 
-function toggleEquipped(index, button) {
+function toggleEquipped(keyword) {
+    
+    // Double check to make sure this is in our inventory
+    if (inventoryIndexOf(keyword) != -1) {
 
-    if (index < itemsModified.length) {
+        let item = itemsModified[getContextIndexFromKeyword(keyword,4)];
+        
+        if (item.equipped) {
 
-        if (itemsModified[index].equipped) {
-            itemsModified[index].equipped = false;
-            addUpdateText("You put away the " + itemsModified[index].shortTitle);
-            button.querySelector(".button-equip-icon").src = "Assets/ItemUnequipped.svg";
+            item.equipped = false;
+            addUpdateText("You put away the " + item.shortTitle);            
         }
         else {
-            itemsModified[index].equipped = true;
-            addUpdateText("You equip the " + itemsModified[index].shortTitle);
-            button.querySelector(".button-equip-icon").src = "Assets/ItemEquipped.svg";
+            item.equipped = true;
+            addUpdateText("You equip the " + item.shortTitle);            
         }
-    
+        
         updateStats();
         save();
-        playerActionComplete(true);
+        playerActionComplete(true);        
     }
     else
-        console.error("toggleEquipped() - Trying to toggle but the index of this element is outside the bounds of the items array");    
+        console.error("toggleEquipped() - Inventory doesn't contain [" + keyword + "]");
 }
 
 // #endregion
@@ -1752,10 +1909,11 @@ function save() {
     let array = [];    
 
     inventory.forEach((element,index) => {
-                        
-        if (itemsModified[element].canEquip && itemsModified[element].equipped)
+        
+        let item = itemsModified[getContextIndexFromKeyword(element,4)];
+        if (item.canEquip && item.equipped)
             
-            itemsModified[element].actions.forEach((element, index) => {                
+            item.actions.forEach((element, index) => {                
                 array.push(element);
             });            
     });

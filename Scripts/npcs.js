@@ -112,30 +112,13 @@ npcs = [
     },    
     {
         keyword: "descendent",
-        title: "The Swordsmith Descendant",
+        title: "The Swordsmith's Descendant",
         shortTitle: "descendent",        
         description: "A place where legendary Swordsmiths once worked a long time ago. Still maintained to exacting standards, but the sword arts have been long lost.",
         dialogueAvailable: true,
         currentDialogue: 0,
-        actions: [  
-            {
-                type: 4,
-                title: "A heavy iron longsword",
-                keyword: "iron_longsword",
-                func: "buy|iron_longsword|265"
-            },
-            {
-                type: 4,
-                title: "A gilded Eagle crest shield",
-                keyword: "eagle_shield",
-                func: "buy|eagle_shield|195"
-            },
-            {
-                type: 4,
-                title: "A Deepstone talisman",
-                keyword: "deepstone_talisman",
-                func: "buy|deepstone_talisman|595"
-            },
+        items: ["iron_longsword","eagle_shield","deepstone_talisman"],
+        actions: [
             {
                 type: 6,
                 title: "Talk",

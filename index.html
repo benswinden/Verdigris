@@ -67,21 +67,14 @@
                         
                     </p> 
                 </div>
-                <div id="inventory-title"><h2>Inventory</h2></div>
             </main>
             
             <nav>
-                <button id="equip-button" class="nav-button can-hover item-button">
-                    <img src="Assets/ItemUnequipped.svg"  class="button-equip-icon" alt="">
-                    <div class="button-text">Equip Button</div>
-                    <div id="button-stat-section">
-                        <ul>
-                            <li><img src="Assets/PowerIconSmall.svg" class="button-equip-stat"><div class="button-power-text">99</div> </li>                                                    
-                            <li><img src="Assets/StaminaIconSmall.svg" class="button-equip-stat"><div class="button-stamina-text">99</div> </li>
-                            <li><img src="Assets/DefenceIconSmall.svg" class="button-equip-stat"><div class="button-defence-text">99</div> </li>
-                        </ul>
-                    </div>
-                </button>
+                <div id="equipment-title"><h2>Equipment</h2></div>
+                <div id="equipment-section"></div>
+                <div id="inventory-title"><h2>Inventory</h2></div>
+                <div id="inventory-section"></div>            
+
                 <div id="button1" class="nav-button can-hover monster-button"><div class="button-text">Button 1</div></div>
                 <div id="button2" class="nav-button can-hover item-button"><div class="button-text">Button 2</div></div>
                 <div id="button3" class="nav-button can-hover npc-button"><div class="button-text">Button 3</div></div>
@@ -90,6 +83,29 @@
                 <div id="button6" class="nav-button can-hover location-button"><div class="button-text">Button 6</div></div>
                 <div id="button7" class="nav-button can-hover location-button"><div class="button-text">Button 7</div></div>
                 <div id="button8" class="nav-button can-hover location-button"><div class="button-text">Button 8</div></div>
+
+                <div id="sale-title"><h2>For Sale</h2></div>
+                <div id="sale-section"></div>
+
+                <div id="item-button" class="nav-button can-hover item-button active">
+                    <div class="item-cost-section"><img src="Assets/GoldSmallIcon.svg" class="item-cost-icon"><div class="item-cost-text">250</div></div>
+                    <div class="button-text">Old Rhenish Straight Sword</div>
+                    <div class="button-chevron"><img src="Assets/ChevronClosed.svg" class="chevron-closed"></div>
+                    <div class="break"></div>
+                    <div class="description-section button-text">
+                        A relic of the time before the burning war when there was still forests in Rhen that needed protecting. A simple blade made for those who moved silently through the woodlands.
+                    </div>
+                    <div class="break"></div>
+                    <div class="left-spacer"></div>
+                    <div class="button-stat-section">
+                        <ul>
+                            <li><img src="Assets/PowerIconSmall.svg" class="button-equip-stat"><div class="button-power-text">2</div> </li>                                                    
+                            <li><img src="Assets/StaminaIconSmall.svg" class="button-equip-stat"><div class="button-stamina-text">2</div> </li>
+                            <li><img src="Assets/DefenceIconSmall.svg" class="button-equip-stat"><div class="button-defence-text">2</div> </li>
+                        </ul>
+                    </div>                
+                    <div class="secondary-action-button can-hover item-button"><div class="secondary-button-text">Take</div></div>
+                </div>
             </nav>
         </div>
         <div class="bg">

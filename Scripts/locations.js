@@ -45,6 +45,7 @@ locations = [
         title: "Edge of the Woods",        
         description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an ancient city.",
         narration: "You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.",
+        items: ["key","iron_longsword"],
         actions: [
             {
                 type: 2,
@@ -397,12 +398,6 @@ locations = [
                 type: 3,
                 title: "A hungry rat is here gnashing on a bone",
                 keyword: "large_rat"
-            },
-            {
-                type: 4,
-                title: "A small handful of gold pieces",
-                keyword: "destroy",
-                func: "addGold|10|You pick up the handful of coins"
             }
         ]
     },
@@ -606,11 +601,6 @@ locations = [
                 keyword: "f01_04"
             },
             {
-                type: 4,
-                title: "A perfectly ripe piece of fruit",
-                keyword: "ripe_fruit"
-            },
-            {
                 type: 3,
                 title: "A long black vine covered in orange blooms",
                 keyword: "blooming_vine_02"
@@ -708,12 +698,6 @@ locations = [
                 type: 3,
                 title: "A hulking beast pacing back and forth",
                 keyword: "hulk_scav_01"
-            },
-            {
-                type: 4,
-                title: "A broken piece of stone, etched it lines of power.",
-                keyword: "destroy",
-                func: "addInsight|1|You pick up the relic and feel it's essence."
             }
         ]
     },
