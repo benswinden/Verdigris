@@ -114,16 +114,21 @@ npcs = [
         keyword: "descendent",
         title: "The Swordsmith's Descendant",
         shortTitle: "descendent",        
-        description: "A place where legendary Swordsmiths once worked a long time ago. Still maintained to exacting standards, but the sword arts have been long lost.",
+        description: "A place where the Swordsmiths to the King's army once worked. Still maintained to exacting standards, but the sword arts have been long lost.",
         dialogueAvailable: true,
         currentDialogue: 0,
         items: ["iron_longsword","eagle_shield","deepstone_talisman"],
         actions: [
             {
                 type: 6,
+                title: "Reforge",
+                func: "upgrade"
+            },
+            {
+                type: 6,
                 title: "Talk",
                 func: "talk"
-            },        
+            },
             {
                 type: 6,
                 title: "Leave",

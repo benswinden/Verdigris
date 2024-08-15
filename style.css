@@ -408,6 +408,18 @@ nav {
         font-weight: 600;        
     }
 
+    .upgrade-material-cost {
+        display: none;
+        font-size: 15px;
+        margin-right: 15px;
+    }
+    .upgrade-material-cost.active {
+        color: #7e8186;
+    }
+    .upgrade-material-cost.inactive {
+        color: #8F3715;
+    }
+
     .button-stat-section {
         display: block;        
 

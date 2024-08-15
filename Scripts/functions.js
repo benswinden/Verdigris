@@ -1,11 +1,14 @@
 // #region VARIABLES
 
-let version = 0.017;
+let version = 0.018;
 
 let insight = 0;
 let hpCurrent = 10;
 let hpMax = 10;
 let gold = 0;
+
+let ore = 0;
+let leather = 0;
 
 // Base stats are the players raw stats
 let basePower = 0;
@@ -28,6 +31,7 @@ let activeDirections = [];      // Array that contains which directions (0=north
 
 let inventory = [];             // Inventory contains index numbers for items in the items array
 let inventoryOpen = false;
+let upgardeMenuOpen = false;
 
 // Default location for new games is edge_woods
 let respawnLocation = {
@@ -173,19 +177,24 @@ let npcs = [
         ]
     }
 ];
-
+// ITEM TYPES - WEAPON, ARMOR, TALISMAN
 let items = [
     {
         keyword: "",
         title: "",
         shortTitle: "",
         description: "",
+        itemType: "",
         canEquip: false,        
         equipped: false,
+        canUpgrade: false,
+        level: 0,
         power: 0,
         stamina: 0,
         defence: 0,
         cost: 0,
+        quantity: 0,
+        upgradeMaterial: [],
         actions: [          // Item actions will be added while in a monster sub-context
             {                
                 type: 0,
@@ -243,7 +252,9 @@ function initializeGame() {
         insight = 0;
         hpCurrent = 40;
         hpMax = 40;
-        gold = 0;
+        gold = 1000;
+        ore = 0;
+        leather = 0;
 
         // Base stats are the players raw stats
         basePower = 0;
@@ -256,7 +267,7 @@ function initializeGame() {
         currentStamina = maxStamina;        
 
         inventory = [];
-        inventory.push("straight_sword","worn_shield","green_cloak","silver_locket","strange_stone");
+        inventory.push("straight_sword","worn_shield","green_cloak","curse_mark", "silver_locket","strange_stone");
 
         storedLocation = -1;
         locationsVisited = [];
@@ -520,6 +531,24 @@ function updateButtons(actions, items)  {
     button7.onclick = '';
     button8.onclick = '';
 
+    // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
+    if (upgardeMenuOpen) {
+
+        actions = [];
+        actions.push({
+            type: 6,
+            title: "Back",
+            func: "exitUpgrade"
+            });
+
+        items = [];
+        inventory.forEach((element, index) => {
+
+            if (itemsModified[getContextIndexFromKeyword(element, 4)].canUpgrade)
+                items.push(element);
+        });
+    }    
+
     if (!inventoryOpen && actions.length > 0) {
 
         actions.forEach((element, index) => {
@@ -645,8 +674,12 @@ function updateButtons(actions, items)  {
         });
     }
 
-    if (inventoryOpen)
-        items = inventory;
+    if (inventoryOpen) {
+        
+        items = JSON.parse(JSON.stringify(inventory));
+        if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", 4)].quantity = ore; items.splice(0,0, "ore"); }
+        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }            
+    }
 
     // Create buttons for items contained here    
     if (items != undefined && items.length > 0) {
@@ -667,6 +700,8 @@ function updateButtons(actions, items)  {
         if (currentContextType === 3 && inventoryOpen) {
             buttonContext = 3;
         }
+        if (upgardeMenuOpen)
+            buttonContext = 5;
 
         // Create a button for each item contained in our array
         items.forEach((element,index) => {
@@ -675,6 +710,7 @@ function updateButtons(actions, items)  {
             
             let itemCostActive = false;            
             let descriptionTextActive = false;
+            let upgradeMaterialCostActive = false
 
             // Get all the elements for this specific button, deactivate things as though it was toggled off
             const clone = itemButtonMaster.cloneNode(true);
@@ -686,14 +722,21 @@ function updateButtons(actions, items)  {
             const buttonStatSection = clone.querySelector('.button-stat-section');
             const secondaryButton = clone.querySelector('.secondary-action-button');
             const secondaryButtonText = clone.querySelector('.secondary-button-text');
+            const upgradeMaterialCost = clone.querySelector('.upgrade-material-cost');
             clone.classList.remove('active');
             itemCostSection.style.display = "none";
             descriptionText.style.display = "none";
             buttonStatSection.style.display = "none";
             secondaryButton.style.display = "none";            
+            upgradeMaterialCost.style.display = "none";
 
-            clone.querySelector('.button-text').innerText = item.title;
+            // ITEM NAME
+            let itemTitle = item.title;
+            if (item.level != undefined && item.level > 0) itemTitle += " +" + item.level;
+            if (item.quantity != undefined && item.quantity > 0) itemTitle += " [ " + item.quantity + " ]";
+            clone.querySelector('.button-text').innerText = itemTitle;
             
+            // ITEM DESCRIPTION
             if (item.description != undefined && item.description != "") {
                 descriptionText.innerText = item.description;            
                 descriptionTextActive = true;
@@ -769,10 +812,60 @@ function updateButtons(actions, items)  {
                     secondaryButtonDisplayed = true;
                     secondaryButtonText.innerText = "Purchase";
                     secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); this.event.stopPropagation(); };
-                    break;
-                    break;
+                    break;                    
                 case 5:
                     // 5: Vendor Upgrade = Upgrade
+                    let costToUpgrade = item.level * 50 + 100;
+                    itemCostActive = true;
+                    itemCostSection.style.display = "flex";
+                    itemCostText.innerText = costToUpgrade;
+                    let notEnoughGold = false;
+
+                    // Check if we can afford this item, style text red if we can't
+                    if (costToUpgrade < gold) {
+                        itemCostText.classList = "item-cost-text active";  
+                        secondaryButtonActive = true;                      
+                    }
+                    else {
+                        itemCostText.classList = "item-cost-text inactive";
+                        notEnoughGold = true;
+                        secondaryButtonActive = false;
+                    }
+
+                    // Check if we have the necessary materials for this item
+                    let oreCost = 0; let leatherCost = 0;
+                    if (item.upgradeMaterial != undefined && item.upgradeMaterial.includes("ore"))
+                        oreCost = item.level * 3 + 1;
+                    if (item.upgradeMaterial != undefined && item.upgradeMaterial.includes("leather"))
+                        leatherCost = item.level * 5 + 3;
+
+                    if (oreCost === 0 && leatherCost === 0) {
+
+                        upgradeMaterialCostActive = false;
+                    }
+                    else {
+
+                        upgradeMaterialCostActive = true;
+                        let upgradeMaterialString = "";
+                        if (oreCost > 0) upgradeMaterialString += oreCost + " Refined Ore";
+                        if (leatherCost > 0) upgradeMaterialString += leatherCost + " Hardened Leather";
+                        upgradeMaterialCost.innerText = upgradeMaterialString;
+
+                        if (!notEnoughGold && ore > oreCost && leather > leatherCost) {
+                            upgradeMaterialCost.classList = "upgrade-material-cost active";                            
+                            secondaryButtonActive = true;
+                        }
+                        else {
+                            upgradeMaterialCost.classList = "upgrade-material-cost inactive";                        
+                            secondaryButtonActive = false;
+                        }
+                    }
+
+                    document.querySelector("nav").appendChild(clone);                    
+                    statSectionActive = false;                
+                    secondaryButtonDisplayed = true;
+                    secondaryButtonText.innerText = "Upgrade";
+                    secondaryButton.onclick = function() {  upgrade(item.keyword, costToUpgrade, oreCost, leatherCost); playClick(); this.event.stopPropagation(); };
                     break;
             }
 
@@ -790,6 +883,7 @@ function updateButtons(actions, items)  {
                     descriptionText.style.display = "none";
                     buttonStatSection.style.display = "none";
                     secondaryButton.style.display = "none";
+                    upgradeMaterialCost.style.display = "none";
 
                     buttonChevron.querySelector('img').classList.add('chevron-closed');
                     buttonChevron.querySelector('img').classList.remove('chevron-open');
@@ -802,6 +896,7 @@ function updateButtons(actions, items)  {
                     if (descriptionTextActive) descriptionText.style.display = "block";
                     if (statSectionActive) buttonStatSection.style.display = "block";
                     if (secondaryButtonDisplayed) secondaryButton.style.display = "block";
+                    if (upgradeMaterialCostActive) upgradeMaterialCost.style.display = "block";
                     if (secondaryButtonActive) { secondaryButton.classList.add('item-button'); secondaryButton.classList.remove('locked-item-button'); }
                     else { secondaryButton.classList.remove('item-button'); secondaryButton.classList.add('locked-item-button'); }
 
@@ -1007,6 +1102,26 @@ function clearInventory() {
 
     inventoryTitle.style.display = "none";
     equipmentTitle.style.display = "none";
+}
+
+function displayUpgrade() {
+
+    upgardeMenuOpen = true;
+    updateButtons();
+    expandStats();
+
+    narrationText.style.display = "none";    
+    monsterHpSection.style.display = "none";        
+         
+    mainText.innerText = "Not all weapons can become the stuff of legends, but given the right materials any weapon might become functional.";
+
+    saleTitle.style.display = "none";
+}
+
+function exitUpgrade() {
+
+    upgardeMenuOpen = false;
+    changeContextDirect(currentContext, currentContextType);
 }
 
 function inventoryIndexOf(keyword) {
@@ -1215,8 +1330,11 @@ function doAction(actionString, resetText) {
             else
                 console.error("doAction - Called attack without an additional argument");        
             break;
-        case "dodge":
-            dodge();
+        case "upgrade":
+            displayUpgrade();
+            break;
+        case "exitUpgrade":
+            exitUpgrade();
             break;
         case "recover":
             recover();
@@ -1685,12 +1803,40 @@ function buy(keyword, cost) {
     if (gold >= cost) {
 
         gold -= cost;
-        addUpdateText("Your purchased the " + item.shortTitle + ".");
+        addUpdateText("You purchased the " + item.shortTitle + ".");
         addToInventory(keyword);
         updateStats();        
     }
     else
         console.error("buy() - cost greater than gold");
+}
+
+function upgrade(keyword, cost, oreCost, leatherCost) {
+
+    let item = itemsModified[getContextIndexFromKeyword(keyword, 4)];
+    if (item === undefined) {
+        console.error("upgrade() - keyword:" + keyword + " not found in items array");
+        return;
+    }
+
+    if (gold >= cost && ore > oreCost && leather > leatherCost) {
+
+        gold -= cost;
+        ore -= oreCost;
+        leather -= leatherCost;
+        addUpdateText("You upgrade the " + item.shortTitle + ".");
+        item.level += 1;
+
+        if (item.itemType === "weapon")
+            item.power += 5;
+        if (item.itemType === "armor")
+            item.defence += 10;
+
+        updateStats();
+        updateButtons();
+    }
+    else
+        console.error("upgrade() - cost greater than gold");
 }
 
 function addGold(amount, updateString) {
@@ -1772,6 +1918,8 @@ function save() {
     localStorage.setItem('maxStamina', JSON.stringify(maxStamina));
     localStorage.setItem('currentStamina', JSON.stringify(currentStamina));
     localStorage.setItem('gold', JSON.stringify(gold));
+    localStorage.setItem('ore', JSON.stringify(ore));
+    localStorage.setItem('leather', JSON.stringify(leather));
     localStorage.setItem('basePower', JSON.stringify(basePower));
     localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
     localStorage.setItem('baseDefence', JSON.stringify(baseDefence));    
@@ -1800,6 +1948,8 @@ function save() {
     currentStamina = JSON.parse(localStorage.getItem('currentStamina'));
     hpMax = JSON.parse(localStorage.getItem('hpMax'));
     gold = JSON.parse(localStorage.getItem('gold'));
+    ore = JSON.parse(localStorage.getItem('ore'));
+    leather = JSON.parse(localStorage.getItem('leather'));
     basePower = JSON.parse(localStorage.getItem('basePower'));
     baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
     baseDefence = JSON.parse(localStorage.getItem('baseDefence'));
