@@ -217,6 +217,22 @@ items = [
         quantity: 20,        
         actions: [          // Item actions will be added while in a monster sub-context             
         ],
+    },        
+    {
+        keyword: "corpse",
+        title: "Your remains, aged and decayed down to bone",
+        shortTitle: "corpse",
+        itemType: "pickupGold",
+        canEquip: false,
+        equipped: false,
+        canUpgrade: false,
+        level: 0,
+        power: 0,
+        stamina: 0,
+        defence: 0,
+        cost: 0,
+        quantity: 0,        
+        actions: [          // Item actions will be added while in a monster sub-context             
+        ],
     }
-
 ];

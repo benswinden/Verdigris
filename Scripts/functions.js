@@ -1519,20 +1519,9 @@ function playerDeath() {
     }
 
     // Check if a player corpse exists already, if so destroy it
-    if (corpseLocation != -1) {
+    if (corpseLocation != -1 && locationsModified[corpseLocation].items.includes("corpse")) {
 
-        let corpseIndex = -1;
-        locationsModified[corpseLocation].actions.forEach((element,index) => {
-            
-            if (element.title.substr(0,12) == "Your remains") {
-                console.log("Corpse found");
-                corpseIndex = index;
-            }
-                
-        });
-
-        if (corpseIndex != -1)
-            locationsModified[corpseLocation].actions.splice(corpseIndex,1);
+        removeItemFromContext("corpse", corpseLocation);
     }
 
     // We are going to create a corpse in the primary location where we are currently
@@ -1542,18 +1531,14 @@ function playerDeath() {
         actualContext = storedLocation;
 
     let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
+    // Set the quantity of the corpse item to the amount of gold we are holding
+    itemsModified[getContextIndexFromKeyword("corpse", 4)].quantity = gold;
+    // Remove all our gold
     gold = 0;
     updateStats();
 
-    corpse = {
-        type: 4,
-        title: "Your remains, aged and decayed down to bone",
-        keyword: "destroy",
-        func: funcString
-    };
-
-    corpseLocation = actualContext;
-    addActionToContext(actualContext, 1, corpse, -1);
+    corpseLocation = actualContext;    
+    locationsModified[corpseLocation].items.push("corpse");
 
     hideAllButtons();
 
