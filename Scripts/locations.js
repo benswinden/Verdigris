@@ -45,7 +45,7 @@ locations = [
         title: "Edge of the Woods",        
         description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an ancient city.",
         narration: "You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.",
-        items: ["key","iron_longsword"],
+        items: ["coins"],
         actions: [
             {
                 type: 2,

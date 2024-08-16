@@ -518,7 +518,33 @@ function clearCreatedButtons() {
 }
 
 function updateButtons(actions, items)  {        
+    
+    // If we call this function without supplying actions and items lists, we should find the correct list ourself
+    if (actions === undefined && items === undefined) {
         
+        actions = [];
+        items = [];
+        
+        switch (currentContextType) {
+            case 1://Location            
+                actions = locationsModified[currentContext].actions;
+                items = locationsModified[currentContext].items;
+                break;
+            case 3://Monster            
+
+                actions = generateItemActions(monstersModified[currentContext].actions);
+                break;
+            case 4://Item            
+                break;
+            case 5://NPC            
+                actions = npcsModified[currentContext].actions;
+                items = npcsModified[currentContext].items;
+                break;
+        }
+        console.log(actions);
+    }
+
+
     hideAllButtons();
     activeDirections = [];
 
@@ -768,7 +794,12 @@ function updateButtons(actions, items)  {
                     document.querySelector("nav").appendChild(clone);
                     secondaryButtonDisplayed = true;
                     secondaryButtonText.innerText = "Take";
-                    secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); this.event.stopPropagation(); };
+
+                    if (item.itemType != undefined && item.itemType === "pickupGold")
+                        secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                    else
+                        secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };    
+
                     break;
                     // 2: Inventory = Equip / Unequip
                 case 2:
@@ -785,7 +816,7 @@ function updateButtons(actions, items)  {
                             secondaryButtonText.innerText = "Equip";
                     
                         secondaryButtonDisplayed = true;                    
-                        secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); this.event.stopPropagation(); };
+                        secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
                     }
                     break;
                 case 3:
@@ -811,7 +842,7 @@ function updateButtons(actions, items)  {
                     saleSection.appendChild(clone);
                     secondaryButtonDisplayed = true;
                     secondaryButtonText.innerText = "Purchase";
-                    secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); this.event.stopPropagation(); };
+                    secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); };
                     break;                    
                 case 5:
                     // 5: Vendor Upgrade = Upgrade
@@ -865,7 +896,7 @@ function updateButtons(actions, items)  {
                     statSectionActive = false;                
                     secondaryButtonDisplayed = true;
                     secondaryButtonText.innerText = "Upgrade";
-                    secondaryButton.onclick = function() {  upgrade(item.keyword, costToUpgrade, oreCost, leatherCost); playClick(); this.event.stopPropagation(); };
+                    secondaryButton.onclick = function() {  upgrade(item.keyword, costToUpgrade, oreCost, leatherCost); playClick(); };
                     break;
             }
 
@@ -1017,19 +1048,15 @@ function removeActionFromContext(context, contextType, index) {
     else
         contextInt = parseInt(context);
 
-    let actions = [];
-    let items = [];
     switch (contextType) {
         case 1://Location            
 
             locationsModified[contextInt].actions.splice(index, 1);
-            actions = locationsModified[currentContext].actions;
-            items = locationsModified[currentContext].items;
+
             break;
         case 3://Monster            
 
             monstersModified[contextInt].actions.splice(index, 1);
-            actions = generateItemActions(monstersModified[currentContext].actions);
             break;
         case 4://Item            
 
@@ -1038,15 +1065,13 @@ function removeActionFromContext(context, contextType, index) {
         case 5://NPC            
 
             npcsModified[contextInt].actions.splice(index, 1);
-            actions = npcsModified[currentContext].actions;
-            items = npcsModified[currentContext].items;
             break;
         }
         
         save();
         // If this is our current context, we need to update the buttons immediately. Will never be an item
         if (contextInt == currentContext && contextType == currentContextType)
-            updateButtons(actions, items);
+            updateButtons();
 }
 
 // Remove action at index, add new one in it's place
@@ -1294,6 +1319,14 @@ function addUpdateText(text) {
     updateText.style.display = "block";
     if (updateText.innerText != "") updateText.innerText += "\n";
     updateText.innerText += text;
+}
+
+function removeItemFromContext(keyword, context) {
+    
+    locationsModified[context].items = locationsModified[context].items.filter(item => item !== keyword);    
+    
+    save();
+    updateButtons();
 }
 
 // #endregion
