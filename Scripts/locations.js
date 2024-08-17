@@ -220,7 +220,7 @@ locations = [
             },
             {
                 type: 3,
-                title: "A Temple Golem is standing here",
+                title: "Temple Golem",
                 keyword: "temple_golem"
             }
         ]
@@ -410,7 +410,7 @@ locations = [
             },
             {
                 type: 3,
-                title: "A hungry rat is here gnashing on a bone",
+                title: "Large Rat",
                 keyword: "large_rat"
             }
         ]
@@ -550,7 +550,7 @@ locations = [
             },
             {
                 type: 3,
-                title: "A thick wall of blooming black vines blocks the tower's exit",
+                title: "Blooming Vine",
                 keyword: "blooming_vine_01"
             }
         ]
@@ -584,12 +584,12 @@ locations = [
             },
             {
                 type: 3,
-                title: "A mishapen creature, scavenging through the rot",
+                title: "GoblÌn Darkling",
                 keyword: "gob_01"
             },
             {
                 type: 3,
-                title: "A mishapen creature, growling a low guttural noise",
+                title: "GoblÌn Darkling",
                 keyword: "gob_02"
             }
         ]
@@ -624,7 +624,7 @@ locations = [
             },
             {
                 type: 3,
-                title: "A long black vine covered in orange blooms",
+                title: "Blooming Vine",
                 keyword: "blooming_vine_02"
             }
         ]
@@ -721,7 +721,7 @@ locations = [
             },
             {
                 type: 3,
-                title: "A hulking beast pacing back and forth",
+                title: "GoblÌn Hulk",
                 keyword: "gob_hulk_01"
             }
         ]

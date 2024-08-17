@@ -483,6 +483,7 @@ function updateContext() {
             // 4 = NPC
             case 5:
                 secondaryTitleIcon.classList = "npc";
+                secondaryTitleIcon.innerText = "";
                 secondaryTitleText.innerText = npcsModified[currentContext].title;
                 mainText.innerText = npcsModified[currentContext].description;                
 
