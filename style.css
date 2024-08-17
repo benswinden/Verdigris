@@ -194,21 +194,30 @@ main {
         margin: 20px 20px 10px 0;
     }
 
+    #secondary-title-icon {
+        text-align: center;        
+        color: #8F3715;
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 43px;
+        width: 42px;
+        height: 40px;
+        margin-right: 20px;
+        background-image: url("Assets/SecondaryIconMonster.svg");
+        background-repeat: no-repeat;
+    }
+
+    #secondary-title-icon.monster {
+        background-image: url("Assets/SecondaryIconMonster.svg");
+    }
+
+    #secondary-title-icon.npc {
+        background-image: url("Assets/SecondaryIconNPC.svg");
+    }
+
     #secondary-title-text {
-        color: #8F871E;
+        color: #8F871E;        
     }
-
-    #secondary-title-icon {        
-        margin-right: 34px;
-    }
-}
-
-.secondary-icon-monster {
-    content:url("Assets/SecondaryIconMonster.svg");
-}
-
-.secondary-icon-npc {
-    content:url("Assets/SecondaryIconNPC.svg");
 }
 
 #monster-hp-section {        
@@ -317,6 +326,32 @@ nav {
         padding-left: 25px;
         max-width: 90%;
     }    
+
+    .stamina-cost-section {
+        display: none;
+        padding-left: 10px;
+    }
+
+    .stamina-cost-text.active {
+        color: #7e8186;
+    }
+    .stamina-cost-text.inactive {
+        color: #8F3715;
+    }
+
+    #button-level-icon {
+        display: none;
+        text-align: center;        
+        color: #8F3715;
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 43px;
+        width: 40px;
+        height: 40px;
+        margin: 5px 20px 0 -20px;        
+        background-image: url("Assets/SecondaryIconMonster.svg");
+        background-repeat: no-repeat;
+    }
 }
 
 .break {

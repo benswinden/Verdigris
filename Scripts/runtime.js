@@ -58,6 +58,8 @@ debugButton2b.onclick = function() { console.log("Debug: Kill Monster"); if (cur
 debugButton3.onclick = function() { insight++; save(); updateStats();};
 debugButton4.onclick = function() { hp++; save(); updateStats();};
 debugButton5.onclick = function() { gold++; save(); updateStats();};
+debugButton6.onclick = function() { currentStamina++; save(); updateStats();};
+debugButton7.onclick = function() { currentStamina--; save(); updateStats();};
 
 if (localStorage.getItem('resetLocations')) {
     resetLocations = JSON.parse(localStorage.getItem('resetLocations'));

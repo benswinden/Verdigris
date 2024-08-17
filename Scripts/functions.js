@@ -31,7 +31,7 @@ let activeDirections = [];      // Array that contains which directions (0=north
 
 let inventory = [];             // Inventory contains index numbers for items in the items array
 let inventoryOpen = false;
-let upgardeMenuOpen = false;
+let upgradeMenuOpen = false;
 
 // Default location for new games is edge_woods
 let respawnLocation = {
@@ -58,6 +58,7 @@ const mainTitleText =  document.querySelector('#main-title-text');
 const secondaryTitle =  document.querySelector('#secondary-title');
 const secondaryTitleText =  document.querySelector('#secondary-title-text');
 const secondaryTitleIcon =  document.querySelector('#secondary-title-icon');
+const monsterLevelText =  document.querySelector('#monster-level-text');
 const mainText =  document.querySelector('#main-text');
 const narrationText =  document.querySelector('#narration-text');
 const updateText =  document.querySelector('#update-text');
@@ -99,6 +100,8 @@ const debugButton2b = document.querySelector('#debug-button2b');
 const debugButton3 = document.querySelector('#debug-button3');
 const debugButton4 = document.querySelector('#debug-button4');
 const debugButton5 = document.querySelector('#debug-button5');
+const debugButton6 = document.querySelector('#debug-button6');
+const debugButton7 = document.querySelector('#debug-button7');
 const resetLocationsCheckbox = document.querySelector('#resetLocations');
 let resetLocations = false;     // We use this for debug, when selected on reload we will always re-write locationsModified from locations so that updates to the games content can be tested immediately without needing to reset the whole game
 
@@ -135,6 +138,7 @@ let monsters = [
         shortTitle: "",
         description: "",
         update: "",
+        level: 0,
         hp: 0,
         power: 0,
         evasion: 0,         // Score out of 100, percentage chance to evade
@@ -456,7 +460,8 @@ function updateContext() {
         switch (currentContextType) {
             // 3 = Monster
             case 3:
-                secondaryTitleIcon.classList = "secondary-icon-monster";
+                secondaryTitleIcon.classList = "monster";
+                secondaryTitleIcon.innerText = monstersModified[currentContext].level;
                 secondaryTitleText.innerText = monstersModified[currentContext].title;
                 mainText.innerText = monstersModified[currentContext].description;
 
@@ -477,7 +482,7 @@ function updateContext() {
                 break;
             // 4 = NPC
             case 5:
-                secondaryTitleIcon.classList = "secondary-icon-npc";
+                secondaryTitleIcon.classList = "npc";
                 secondaryTitleText.innerText = npcsModified[currentContext].title;
                 mainText.innerText = npcsModified[currentContext].description;                
 
@@ -500,13 +505,29 @@ function hideAllButtons() {
     clearCreatedButtons();
 
     button1.style.display = "none";
+    button1.querySelector('.stamina-cost-section').style.display = "none";
+    button1.querySelector('#button-level-icon').style.display = "none";
     button2.style.display = "none";
+    button2.querySelector('.stamina-cost-section').style.display = "none";
+    button2.querySelector('#button-level-icon').style.display = "none";
     button3.style.display = "none";
+    button3.querySelector('.stamina-cost-section').style.display = "none";
+    button3.querySelector('#button-level-icon').style.display = "none";
     button4.style.display = "none";
+    button4.querySelector('.stamina-cost-section').style.display = "none";
+    button4.querySelector('#button-level-icon').style.display = "none";
     button5.style.display = "none";
+    button5.querySelector('.stamina-cost-section').style.display = "none";
+    button5.querySelector('#button-level-icon').style.display = "none";
     button6.style.display = "none";
+    button6.querySelector('.stamina-cost-section').style.display = "none";
+    button6.querySelector('#button-level-icon').style.display = "none";
     button7.style.display = "none";
+    button7.querySelector('.stamina-cost-section').style.display = "none";
+    button7.querySelector('#button-level-icon').style.display = "none";
     button8.style.display = "none";    
+    button8.querySelector('.stamina-cost-section').style.display = "none";
+    button8.querySelector('#button-level-icon').style.display = "none";
 }
 
 function clearCreatedButtons() {
@@ -558,7 +579,7 @@ function updateButtons(actions, items)  {
     button8.onclick = '';
 
     // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
-    if (upgardeMenuOpen) {
+    if (!inventoryOpen && upgradeMenuOpen) {
 
         actions = [];
         actions.push({
@@ -668,7 +689,9 @@ function updateButtons(actions, items)  {
                 // Monster
                 case 3:                    
                     button.classList = "nav-button can-hover monster-button";
-
+                    button.querySelector('#button-level-icon').style.display = "block";
+                    button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element.keyword, 3)].level;
+                    
                     button.onclick = function() {changeContext(element.keyword, 3); playClick();};
                     break;
                 // ITEM
@@ -681,9 +704,33 @@ function updateButtons(actions, items)  {
                     button.onclick = function() {changeContext(element.keyword, 5); playClick();};
                     break;
                 // Misc Action - Styled the same as a location, but will call a custom function instead of moving to another context
-                case 6:                    
-                    button.classList = "nav-button can-hover location-button";
-                    button.onclick = function() {doAction(element.func); playClick();};
+                // Type 7 = misc action with a stamina cost
+                case 6:
+                case 7:
+
+                    let buttonActive = true;
+                    
+                    // If there is a stamina cost, activate that
+                    if (element.type === 7) {
+
+                        let staminaCost = parseInt(element.func.split("|")[1]);
+                        if (staminaCost > currentStamina) {
+                            buttonActive = false;                                                
+                            button.querySelector('.stamina-cost-text').classList = "stamina-cost-text inactive";
+                        }
+                        else
+                            button.querySelector('.stamina-cost-text').classList = "stamina-cost-text active";
+                        
+                        button.querySelector('.stamina-cost-section').style.display = "flex";
+                        button.querySelector('.stamina-cost-text').innerText = staminaCost;
+                    }
+
+                    if (buttonActive) {
+                        button.classList = "nav-button can-hover location-button";
+                        button.onclick = function() {doAction(element.func); playClick();};
+                    }
+                    else
+                        button.classList = "nav-button locked-button";
 
                     // Let's check for an edge cases where this is a talk button, because talk buttons should actually be locked, if there isn't a dialogue available
                     if (element.func === "talk") {
@@ -726,7 +773,7 @@ function updateButtons(actions, items)  {
         if (currentContextType === 3 && inventoryOpen) {
             buttonContext = 3;
         }
-        if (upgardeMenuOpen)
+        if (!inventoryOpen && upgradeMenuOpen)
             buttonContext = 5;
 
         // Create a button for each item contained in our array
@@ -797,8 +844,12 @@ function updateButtons(actions, items)  {
 
                     if (item.itemType != undefined && item.itemType === "pickupGold")
                         secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                    else if (item.itemType != undefined && item.itemType === "pickupInsight")
+                        secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                    else if (item.itemType != undefined && item.itemType === "pickupCorpse")
+                        secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); removeItemFromContext(item.keyword, currentContext); playClick(); };
                     else
-                        secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };    
+                        secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
 
                     break;
                     // 2: Inventory = Equip / Unequip
@@ -1114,8 +1165,10 @@ function exitInventory() {
 
     inventoryOpen = false;
 
-    clearInventory();    
+    clearInventory();
     changeContextDirect(currentContext, currentContextType);
+    if (upgradeMenuOpen)
+        displayUpgrade();
 }
 
 function clearInventory() {
@@ -1131,7 +1184,7 @@ function clearInventory() {
 
 function displayUpgrade() {
 
-    upgardeMenuOpen = true;
+    upgradeMenuOpen = true;
     updateButtons();
     expandStats();
 
@@ -1145,7 +1198,7 @@ function displayUpgrade() {
 
 function exitUpgrade() {
 
-    upgardeMenuOpen = false;
+    upgradeMenuOpen = false;
     changeContextDirect(currentContext, currentContextType);
 }
 
@@ -1353,7 +1406,7 @@ function doAction(actionString, resetText) {
         functionArray = actionString.split("|");
         functionString = functionArray[0];
     }
-
+    
     if (showDebugLog) console.log("doAction() - functionString: " + functionString);
 
     switch (functionString) {
@@ -1507,7 +1560,9 @@ function playerActionComplete(monsterCanAttack) {
 
     // Check for Player Death
     if (hpCurrent <= 0)
-        playerDeath();        
+        playerDeath();
+    else
+        updateButtons();
 }
 
 function playerDeath() {
@@ -1589,6 +1644,50 @@ function attack(staminaCost) {
     if (currentStamina < staminaCost) {
         
         addUpdateText("You try to attack, but your completely out of breath.");
+    }
+    else {
+        
+        currentStamina -= staminaCost;
+        updateStats();
+        let monster = monstersModified[currentContext];
+        
+        // Evasion chance
+        let evasionNumber = Math.floor(Math.random() * 101);
+        if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
+
+        if (evasionNumber <= monster.evasion) {
+
+            let updateString = "The " + monster.shortTitle + " evades your attack."
+            addUpdateText(updateString); 
+        }
+        else {            
+
+            // PLAYER ATTACK
+            monster.hpCurrent -= power;
+            updateMonsterUI();
+                
+            let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
+            addUpdateText(updateString);  
+
+            // CHECK FOR MONSTER DEATH
+            if (monster.hpCurrent <= 0) {
+
+                monsterDeath();
+            }
+        }
+    }
+
+    save();
+    playerActionComplete(true);
+}
+
+function block(staminaCost) {
+
+    if (showDebugLog) console.log("block() - Defence: " + defence + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
+
+    if (currentStamina < staminaCost) {
+        
+        addUpdateText("You raise your shield to block, but your completely out of breath.");
     }
     else {
         

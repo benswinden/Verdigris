@@ -11,7 +11,7 @@ items = [
         power: 0,
         stamina: 0,
         defence: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context           
+        actions: [              
         ],
     },
     {
@@ -27,9 +27,9 @@ items = [
         stamina: 0,
         defence: 0,
         upgradeMaterial: ["ore"],        
-        actions: [          // Item actions will be added while in a monster sub-context
+        actions: [   
             {                
-                type: 6,                
+                type: 7,                
                 title: "Attack with piercing strike",
                 func: "attack|1"
             }            
@@ -48,7 +48,12 @@ items = [
         stamina: 0,
         defence: 10,
         upgradeMaterial: ["leather"],        
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [
+            {                
+                type: 7,                
+                title: "Block with you shield",
+                func: "block|3"
+            } 
         ],
     },
     {
@@ -64,7 +69,7 @@ items = [
         stamina: 1,
         defence: 0,
         upgradeMaterial: ["leather"],        
-        actions: [          // Item actions will be added while in a monster sub-context            
+        actions: [               
         ],
     },
     {
@@ -78,7 +83,7 @@ items = [
         power: 5,
         stamina: 0,
         defence: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context            
+        actions: [               
         ],
     },
     {
@@ -92,7 +97,7 @@ items = [
         power: 0,
         stamina: 10,
         defence: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context            
+        actions: [               
         ],
     },
     {
@@ -106,7 +111,7 @@ items = [
         power: 0,
         stamina: 0,
         defence: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context            
+        actions: [               
         ],
     },
     {
@@ -120,7 +125,7 @@ items = [
         power: 0,
         stamina: 0,
         defence: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context           
+        actions: [              
         ],
     },        
     {
@@ -136,7 +141,7 @@ items = [
         stamina: 0,
         defence: 10,
         cost: 1,        
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [                
         ],
     },        
     {
@@ -151,7 +156,7 @@ items = [
         stamina: 0,
         defence: 10,
         cost: 250,
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [                
         ],
     },        
     {
@@ -166,7 +171,7 @@ items = [
         stamina: 5,
         defence: 0,
         cost: 560,        
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [                
         ],
     },        
     {
@@ -182,7 +187,7 @@ items = [
         defence: 0,
         cost: 0,
         quantity: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [                
         ],
     },        
     {
@@ -198,7 +203,7 @@ items = [
         defence: 0,
         cost: 0,
         quantity: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [                
         ],
     },        
     {
@@ -215,14 +220,31 @@ items = [
         defence: 0,
         cost: 0,
         quantity: 20,        
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [                
         ],
     },        
+    {
+        keyword: "relic",
+        title: "Broken piece of stone, etched it lines of power",
+        shortTitle: "relic",
+        itemType: "pickupInsight",
+        canEquip: false,
+        equipped: false,
+        canUpgrade: false,
+        level: 0,
+        power: 0,
+        stamina: 0,
+        defence: 0,
+        cost: 0,
+        quantity: 1,        
+        actions: [                
+        ],
+    },  
     {
         keyword: "corpse",
         title: "Your remains, aged and decayed down to bone",
         shortTitle: "corpse",
-        itemType: "pickupGold",
+        itemType: "pickupCorpse",
         canEquip: false,
         equipped: false,
         canUpgrade: false,
@@ -232,7 +254,7 @@ items = [
         defence: 0,
         cost: 0,
         quantity: 0,        
-        actions: [          // Item actions will be added while in a monster sub-context             
+        actions: [                
         ],
     }
 ];

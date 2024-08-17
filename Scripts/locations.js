@@ -585,12 +585,12 @@ locations = [
             {
                 type: 3,
                 title: "A mishapen creature, scavenging through the rot",
-                keyword: "scav_01"
+                keyword: "gob_01"
             },
             {
                 type: 3,
                 title: "A mishapen creature, growling a low guttural noise",
-                keyword: "scav_02"
+                keyword: "gob_02"
             }
         ]
     },
@@ -697,7 +697,7 @@ locations = [
         title: "Floor 1 - The Northern Hallway",
         description: "The hall leading north ends abruptly where the ceiling above collapsed down onto it.\n\nA tree the size of a house has grown through the wall and up into the tower above you.",
         narration: "",
-        items: [],
+        items: ["relic"],
         actions: [
             {
                 type: 2,
@@ -722,7 +722,7 @@ locations = [
             {
                 type: 3,
                 title: "A hulking beast pacing back and forth",
-                keyword: "hulk_scav_01"
+                keyword: "gob_hulk_01"
             }
         ]
     },

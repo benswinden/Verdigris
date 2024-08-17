@@ -19,9 +19,11 @@
                 <button id="debug-button1" class="debug-button">Reset Game</button>
                 <button id="debug-button2" class="debug-button">Reset Resume</button>
                 <button id="debug-button2b" class="debug-button">Kill Monster</button>
-                <button id="debug-button3" class="debug-button">XP+</button>
-                <button id="debug-button4" class="debug-button">HP+</button>
-                <button id="debug-button5" class="debug-button">GOLD+</button>
+                <button id="debug-button3" class="debug-button">+XP</button>
+                <button id="debug-button4" class="debug-button">+HP</button>
+                <button id="debug-button5" class="debug-button">+GOLD</button>
+                <button id="debug-button6" class="debug-button">+Stamina</button>
+                <button id="debug-button7" class="debug-button">-Stamina</button>
                 <input type="checkbox" id="resetLocations" name="locations">
                 <label for="resetLocations"> Reset Locations</label>
             </div>
@@ -45,7 +47,7 @@
                         <div id="main-title-text"></div>
                     </div>
                     <div id="secondary-title">
-                        <img id="secondary-title-icon" src="Assets/SecondaryIconMonster.svg" class="secondary-icon-monster" alt=""><div id="secondary-title-text"></div>
+                        <div id="secondary-title-icon">1</div><div id="secondary-title-text"></div>
                     </div>
                     <div id="monster-hp-section">
                         <div id="monster-hp-bar-background">
@@ -75,14 +77,14 @@
                 <div id="inventory-title"><h2>Inventory</h2></div>
                 <div id="inventory-section"></div>            
 
-                <div id="button1" class="nav-button can-hover monster-button"><div class="button-text">Button 1</div></div>
-                <div id="button2" class="nav-button can-hover item-button"><div class="button-text">Button 2</div></div>
-                <div id="button3" class="nav-button can-hover npc-button"><div class="button-text">Button 3</div></div>
-                <div id="button4" class="nav-button can-hover locked-button"><div class="button-text">Button 4</div></div>
-                <div id="button5" class="nav-button can-hover location-button"><div class="button-text">Button 5</div></div>
-                <div id="button6" class="nav-button can-hover location-button"><div class="button-text">Button 6</div></div>
-                <div id="button7" class="nav-button can-hover location-button"><div class="button-text">Button 7</div></div>
-                <div id="button8" class="nav-button can-hover location-button"><div class="button-text">Button 8</div></div>
+                <div id="button1" class="nav-button can-hover monster-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 1</div></div>
+                <div id="button2" class="nav-button can-hover item-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 2</div></div>
+                <div id="button3" class="nav-button can-hover npc-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 3</div></div>
+                <div id="button4" class="nav-button can-hover locked-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 4</div></div>
+                <div id="button5" class="nav-button can-hover location-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 5</div></div>
+                <div id="button6" class="nav-button can-hover location-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 6</div></div>
+                <div id="button7" class="nav-button can-hover location-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 7</div></div>
+                <div id="button8" class="nav-button can-hover location-button"><div id="button-level-icon">1</div><div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">1</div></div><div class="button-text">Button 8</div></div>
 
                 <div id="sale-title"><h2>For Sale</h2></div>
                 <div id="sale-section"></div>
