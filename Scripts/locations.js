@@ -48,7 +48,7 @@ locations = [
         title: "Edge of the Woods",        
         description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an ancient city.",
         narration: "You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.",        
-        items: [],
+        items: ["green_herb_pickup"],
         actions: [
             {
                 type: 2,
@@ -132,7 +132,7 @@ locations = [
         title: "The Crossroads",        
         description: "All roads in this great city once came together here. Pathways spread forth from here to all corners of the ruins.",
         narration: "",
-        items: [],
+        items: ["green_herb_pickup"],
         actions: [
             {
                 type: 1,
@@ -195,7 +195,7 @@ locations = [
         title: "The Templefront",        
         description: "A great temple stands before, it's walls have stood the test of time much better than most of this place.\n\nIt's made of a white stone that gleams under the moistness in the air.",
         narration: "Standing imposingly to the south is an ancient stone golem. It's head turns to face you.",
-        items: [],
+        items: ["green_herb_pickup"],
         actions: [
             {
                 type: 1,
@@ -322,7 +322,7 @@ locations = [
         title: "King's Gate",        
         description: "A crumbling wall still stands holding the arch of the old King's Gate.",
         narration: "",
-        items: [],
+        items: ["green_herb_pickup"],
         actions: [
             {
                 type: 1,
@@ -386,7 +386,7 @@ locations = [
         title: "A Sheltered Nook",        
         description: "You managed to find a cranny amongst the ruins with four walls and some degree of shelter from the rain.",
         narration: "",
-        items: [],
+        items: ["green_herb_pickup"],
         actions: [
             {
                 type: 2,

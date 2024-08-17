@@ -9,6 +9,7 @@ let gold = 0;
 
 let ore = 0;
 let leather = 0;
+let greenHerb = 0;
 
 // Base stats are the players raw stats
 let basePower = 0;
@@ -259,6 +260,7 @@ function initializeGame() {
         gold = 1000;
         ore = 0;
         leather = 0;
+        greenHerb = 0;
 
         // Base stats are the players raw stats
         basePower = 0;
@@ -562,8 +564,7 @@ function updateButtons(actions, items)  {
                 actions = npcsModified[currentContext].actions;
                 items = npcsModified[currentContext].items;
                 break;
-        }
-        console.log(actions);
+        }        
     }
 
 
@@ -749,10 +750,11 @@ function updateButtons(actions, items)  {
     }
 
     if (inventoryOpen) {
-        
+        console.log("inventory open - green herbs: " + greenHerb);
         items = JSON.parse(JSON.stringify(inventory));
         if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", 4)].quantity = ore; items.splice(0,0, "ore"); }
-        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }            
+        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }
+        if (greenHerb > 0) { itemsModified[getContextIndexFromKeyword("green_herb", 4)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
     }
 
     // Create buttons for items contained here    
@@ -837,6 +839,7 @@ function updateButtons(actions, items)  {
             let secondaryButtonDisplayed = false;
             let secondaryButtonActive = true;  
             switch (buttonContext) {
+
                 // 1: Location = Take 
                 case 1:
                     document.querySelector("nav").appendChild(clone);
@@ -849,31 +852,50 @@ function updateButtons(actions, items)  {
                         secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, currentContext); playClick(); };
                     else if (item.itemType != undefined && item.itemType === "pickupCorpse")
                         secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                    else if (item.itemType != undefined && item.itemType === "pickupHeal")
+                        secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                    else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
+                        secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, currentContext); playClick(); };                
                     else
                         secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
 
                     break;
+
                     // 2: Inventory = Equip / Unequip
                 case 2:
 
-                    if (item.equipped)
-                        equipmentSection.appendChild(clone);                    
-                    else
-                        inventorySection.appendChild(clone);
+                    // The healing item we can use from our inventory
+                    if (item.itemType != undefined && item.itemType === "healGreenHerb") {
+                        secondaryButtonDisplayed = true;
+                        secondaryButtonText.innerText = "Eat";
+                        secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(); playClick(); };
 
-                    if (item.canEquip) {
+                        inventorySection.appendChild(clone);
+                    }
+                    else {
+
                         if (item.equipped)
-                            secondaryButtonText.innerText = "Unequip";                        
+                            equipmentSection.appendChild(clone);                    
                         else
-                            secondaryButtonText.innerText = "Equip";
-                    
-                        secondaryButtonDisplayed = true;                    
-                        secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
+                            inventorySection.appendChild(clone);
+
+                        if (item.canEquip) {
+                            if (item.equipped)
+                                secondaryButtonText.innerText = "Unequip";                        
+                            else
+                                secondaryButtonText.innerText = "Equip";
+                        
+                            secondaryButtonDisplayed = true;                    
+                            secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
+                        }
                     }
                     break;
-                case 3:
+
                     // 3: Inventory + Monster = Use
+                case 3:
+                    
                     break;
+
                     // 4: Vendor Buy = Purchase 
                 case 4:
                     itemCostActive = true;
@@ -895,9 +917,11 @@ function updateButtons(actions, items)  {
                     secondaryButtonDisplayed = true;
                     secondaryButtonText.innerText = "Purchase";
                     secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); };
-                    break;                    
-                case 5:
+                    break;
+
                     // 5: Vendor Upgrade = Upgrade
+                case 5:
+                    
                     let costToUpgrade = item.level * 50 + 100;
                     itemCostActive = true;
                     itemCostSection.style.display = "flex";
@@ -1992,6 +2016,31 @@ function addInsight(amount, updateString) {
     playerActionComplete(true);
 }
 
+function addHealth(amount, updateString) {
+
+    hpCurrent += amount;
+    if (hpCurrent > hpMax)
+        hpCurrent = hpMax;
+    if (updateString != "") 
+        addUpdateText(updateString + " ( " + amount + " health )");    
+
+    updateStats();
+    save();
+    playerActionComplete(true);
+}
+
+function addGreenHerb(amount, updateString) {
+
+    greenHerb += amount;
+
+    if (updateString != "") 
+        addUpdateText(updateString + " ( " + amount + " Green Herb )");    
+
+    updateStats();
+    save();
+    playerActionComplete(true);
+}
+
 function toggleEquipped(keyword) {
     
     // Double check to make sure this is in our inventory
@@ -2038,6 +2087,7 @@ function save() {
     localStorage.setItem('gold', JSON.stringify(gold));
     localStorage.setItem('ore', JSON.stringify(ore));
     localStorage.setItem('leather', JSON.stringify(leather));
+    localStorage.setItem('greenHerb', JSON.stringify(greenHerb));
     localStorage.setItem('basePower', JSON.stringify(basePower));
     localStorage.setItem('baseStamina', JSON.stringify(baseStamina));
     localStorage.setItem('baseDefence', JSON.stringify(baseDefence));    
@@ -2067,6 +2117,7 @@ function save() {
     hpMax = JSON.parse(localStorage.getItem('hpMax'));
     gold = JSON.parse(localStorage.getItem('gold'));
     ore = JSON.parse(localStorage.getItem('ore'));
+    greenHerb = JSON.parse(localStorage.getItem('greenHerb'));
     leather = JSON.parse(localStorage.getItem('leather'));
     basePower = JSON.parse(localStorage.getItem('basePower'));
     baseStamina = JSON.parse(localStorage.getItem('baseStamina'));

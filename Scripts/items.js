@@ -256,5 +256,39 @@ items = [
         quantity: 0,        
         actions: [                
         ],
+    },  
+    {
+        keyword: "green_herb",
+        title: "Young Green Herb",
+        shortTitle: "herb",
+        itemType: "healGreenHerb",
+        canEquip: false,
+        equipped: false,
+        canUpgrade: false,
+        level: 0,
+        power: 0,
+        stamina: 0,
+        defence: 0,
+        cost: 0,
+        quantity: 0,
+        actions: [                
+        ],
+    },  
+    {
+        keyword: "green_herb_pickup",
+        title: "Young Green Herb",
+        shortTitle: "herb",
+        itemType: "pickupGreenHerb",
+        canEquip: false,
+        equipped: false,
+        canUpgrade: false,
+        level: 0,
+        power: 0,
+        stamina: 0,
+        defence: 0,
+        cost: 0,
+        quantity: 1,
+        actions: [                
+        ],
     }
 ];
