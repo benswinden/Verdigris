@@ -1,4 +1,6 @@
 
+*.xlsx
+_Working/
 
 # Logs
 logs

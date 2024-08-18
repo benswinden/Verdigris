@@ -5,8 +5,9 @@ locations = [
         keyword: "narration_01_01",
         title: "",        
         description: "",
-        narration: "Far off in the misty lands, lies an ancient tower.",
+        narration: "Far off in the misty lands, lies a fallen city. Drowned in darkness.",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -19,8 +20,9 @@ locations = [
         keyword: "narration_01_02",
         title: "",        
         description: "",
-        narration: "High up in the upper most reaches of the tower's many floors lives something very old.\n\nA seeping presence that spread itself into the earth slowly made it's way across the mortal realms.",
+        narration: "This city was once a great capital. Balmora The Gilded City. Crown of the Lowland Provinces",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -33,8 +35,24 @@ locations = [
         keyword: "narration_01_03",
         title: "",        
         description: "",
-        narration: "With it came a curse. A calling curse. To the tower it calls.",
+        narration: "The heart of this great city was a grand castle to rival the homes of the gods.\n\nBut within it darkness and shadow festered and eventually swallowed the castle whole.",
         items: [],
+        monsters: [],
+        actions: [
+            {
+                type: 1,
+                title: "Next",
+                keyword: "narration_01_04"
+            }
+        ]
+    },
+    {
+        keyword: "narration_01_04",
+        title: "",        
+        description: "",
+        narration: "A shadow that spread itself into the earth and made it's way slowly across the mortal realms.\n\nWith it came a curse. A calling curse. To the darkness it calls.",
+        items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -49,6 +67,7 @@ locations = [
         description: "The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an ancient city.",
         narration: "You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.",        
         items: ["green_herb_pickup"],
+        monsters: ["large_rat","goblin_hulk"],
         actions: [
             {
                 type: 2,
@@ -81,8 +100,25 @@ locations = [
         keyword: "narration_03_01",
         title: "",        
         description: "",
-        narration: "Following the meandering forest trail, you're unable to ignore a looming shadow to the east. A black tower, reaching high into the surrounding mist.",
+        narration: "A hunter's trail meanders it's way from the forest and through low foothills.\n\nBefore long you crest a tall hill and before you in the valley below is a great sprawl of overgrown ruins.",
         items: [],
+        monsters: [],
+        actions: [
+            {
+                type: 1,
+                title: "Next",                
+                keyword: "narration_03_02",                                        
+                func: ""
+            }
+        ]
+    },
+    {
+        keyword: "narration_03_02",
+        title: "",        
+        description: "",
+        narration: "Old stone structures, sunken into the soil and grown over with reaching vines and tall grass. All gathered round a great black lake at the center.",
+        items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -99,6 +135,7 @@ locations = [
         narration: "",
         update: "You feel watched.",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 2,
@@ -113,17 +150,28 @@ locations = [
             {
                 type: 1,
                 title: "East towards the City Crossroads",
-                keyword: "crossroads",                
+                keyword: "narration_04_01",                
             },
             {
                 type: 2,
                 title: "South",
                 keyword: ""
-            },            
+            }
+        ]
+    },    
+    {
+        keyword: "narration_04_01",
+        title: "",        
+        description: "",
+        narration: "You pass beneath massive arches of what remains of the city's outer-gates and into the Fallen city of Balmora.",
+        items: [],
+        monsters: [],
+        actions: [
             {
-                type: 5,
-                title: "A cloaked man leans casually against a pillar.",
-                keyword: "thornhood_kijil"
+                type: 1,
+                title: "Next",                
+                keyword: "crossroads",                                        
+                func: "replaceAction|city_outskirts|1|{\"type\": 1,\"title\": \"East towards the City Crossroads\",\"keyword\": \"crossroads\"}|2"
             }
         ]
     },
@@ -133,6 +181,7 @@ locations = [
         description: "All roads in this great city once came together here. Pathways spread forth from here to all corners of the ruins.",
         narration: "",
         items: ["green_herb_pickup"],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -146,7 +195,7 @@ locations = [
             },
             {
                 type: 1,
-                title: "East to the Old Road",
+                title: "East to the Lake Shore",
                 keyword: "narration_02_01"
             },
             {
@@ -162,6 +211,7 @@ locations = [
         description: "A winding street, that once lead to a place of worship. The stones here are covered in rich green and purple mosses.\n\nPropped up inside a ruined wall is a makeshift tent, providing some respite from the dripping rain. From within, a small campfire is flickering away.",
         narration: "A soft rain sifts through the gray clouds above.",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -196,6 +246,7 @@ locations = [
         description: "A great temple stands before, it's walls have stood the test of time much better than most of this place.\n\nIt's made of a white stone that gleams under the moistness in the air.",
         narration: "Standing imposingly to the south is an ancient stone golem. It's head turns to face you.",
         items: ["green_herb_pickup"],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -231,6 +282,7 @@ locations = [
         description: "TO DO",
         narration: "",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -260,6 +312,7 @@ locations = [
         description: "What was once a wide causeway for traders heading to the Temple Market is now home to the fallen remains of the tall stone buildings that once lined it.",
         narration: "",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -289,6 +342,7 @@ locations = [
         description: "A damp, mucky interior lit by the glow of a gently swinging grease lamp.",
         narration: "Your greeted by a thin man, squatting amongst the debris. \"Welcome friend, name's Jorrid.\"",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 2,
@@ -323,6 +377,7 @@ locations = [
         description: "A crumbling wall still stands holding the arch of the old King's Gate.",
         narration: "",
         items: ["green_herb_pickup"],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -344,6 +399,11 @@ locations = [
                 type: 1,
                 title: "South to the King's Road",
                 keyword: "kings_road"
+            },            
+            {
+                type: 5,
+                title: "A cloaked man leans casually against a pillar.",
+                keyword: "thornhood_kijil"
             }
         ]
     },
@@ -353,6 +413,7 @@ locations = [
         description: "The interior of the King's Gate foritifications hold a collapsed stone staircase that once lead up into the battlements.",
         narration: "",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 2,
@@ -387,6 +448,7 @@ locations = [
         description: "You managed to find a cranny amongst the ruins with four walls and some degree of shelter from the rain.",
         narration: "",
         items: ["green_herb_pickup"],
+        monsters: [],
         actions: [
             {
                 type: 2,
@@ -419,8 +481,9 @@ locations = [
         keyword: "narration_02_01",
         title: "",        
         description: "",
-        narration: "You make your way through the winding streets of the ruined settlement.\n\nMarking a serpentine path eastwards.",
+        narration: "You make your way through the overgrown streets and pathways of the fallen city. Eventually arriving at the black-curse lake at it's center.",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -433,43 +496,26 @@ locations = [
         keyword: "narration_02_02",
         title: "",        
         description: "",
-        narration: "As you crest a final hill, you see before you the eastern half of the city has been overtaken entirely in ink black overgrowth.",
+        narration: "The retched waters sit like a scar where once Balmora's great castle stood.\n\nThe water is so still you feel as though you could stride into the image within.",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
                 title: "Next",
-                keyword: "narration_02_03"
+                keyword: "lake_shore",
+                func: "replaceAction|crossroads|1|{\"type\": 1,\"title\": \"East to the Lake Shore\",\"keyword\": \"lake_shore\",\"blocked\": \"\"}|2"
             }
         ]
     },
     {
-        keyword: "narration_02_03",
-        title: "",        
-        description: "",
-        narration: "An undulating sea of leaves and thorn bramble as dark as night reaching forth and at the center of it all, the obelisk.\n\nThe great Black Tower.",
+        keyword: "lake_shore",
+        title: "Shore of the Black Lake",        
+        description: "The city ruins collapse away into the perfectly still waters of the Black Lake.\n\nPainted deep in the water's depths is a vision of the castle. It calls to you.",
+        narration: "",
         items: [],
+        monsters: [],
         actions: [
-            {
-                type: 1,
-                title: "Next",
-                keyword: "old_road",
-                func: "replaceAction|crossroads|1|{\"type\": 1,\"title\": \"East to Old Road\",\"keyword\": \"old_road\",\"blocked\": \"\"}|2"
-            }
-        ]
-    },
-    {
-        keyword: "old_road",
-        title: "The Old Road",        
-        description: "A narrow road leads east, down a long hill. Thorny vines from reaching plants search for a sleeve to catch themselves on.\n\nThe path is oddly well worn.",
-        narration: "You hear the sound of a unsettling bird call ripple through the wet air.",
-        items: [],
-        actions: [
-            {
-                type: 2,
-                title: "North",
-                keyword: ""
-            },
             {
                 type: 1,
                 title: "West to the City Crossroads",
@@ -477,45 +523,29 @@ locations = [
             },
             {
                 type: 1,
-                title: "East to the Tower",
-                keyword: "tower_front"
-            },
-            {
-                type: 2,
-                title: "South",
-                keyword: ""
+                title: "Enter the Lake",
+                keyword: "narration_05_01"
             }
         ]
     },
     {
-        keyword: "tower_front",
-        title: "Before the great Black Tower",        
-        description: "The immense monolith reaches far above you into the gray mist. Bursting with overgrowth as black as night. Brimming with power and malice.",
-        narration: "",
+        keyword: "narration_05_01",
+        title: "",        
+        description: "",
+        narration: "The retched waters sit like a scar where once Balmora's great castle stood.\n\nThe water is so still you feel as though you could stride into the image within.",
         items: [],
-        actions: [            
-            {
-                type: 2,
-                title: "North",
-                keyword: ""
-            },
+        monsters: [],
+        actions: [
             {
                 type: 1,
-                title: "West to the Old Road",
-                keyword: "old_road"
-            },
-            {
-                type: 1,
-                title: "Enter the Tower",
-                keyword: "f01_01"
-            },
-            {
-                type: 2,
-                title: "South",
-                keyword: ""
+                title: "Next",
+                keyword: "lake_shore",
+                func: "replaceAction|crossroads|1|{\"type\": 1,\"title\": \"East to the Lake Shore\",\"keyword\": \"lake_shore\",\"blocked\": \"\"}|2"
             }
         ]
     },
+    
+
 
             // TOWER - FLOOR 1
 
@@ -526,6 +556,7 @@ locations = [
         narration: "Up a long stone staircase is a towering doorway. The door itself rotted away long ago. The still darkness of the tower's interior beckons you.",
         update: "When you look back, an impenetrable wall of vine and bramble have grown over the doorway.",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 2,
@@ -561,6 +592,7 @@ locations = [
         description: "A sickly sweet smell permeates the high-arched hall. The walls are covered in fruiting vines and the floors are covered in rotten fruits.",
         narration: "",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 2,
@@ -585,12 +617,12 @@ locations = [
             {
                 type: 3,
                 title: "GoblÌn Darkling",
-                keyword: "gob_01"
+                keyword: "goblin_01"
             },
             {
                 type: 3,
                 title: "GoblÌn Darkling",
-                keyword: "gob_02"
+                keyword: "goblin_02"
             }
         ]
     },
@@ -600,6 +632,7 @@ locations = [
         description: "With a long crack running down the northern wall, a sharp beam of light cuts through the chamber. A verdant forest of purple and red mosses and leaves cover every surface.",
         narration: "Drifting pollen sifts slowly down inside the light beams.",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -635,6 +668,7 @@ locations = [
         description: "",
         narration: "",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -664,6 +698,7 @@ locations = [
         description: "",
         narration: "",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 1,
@@ -698,6 +733,7 @@ locations = [
         description: "The hall leading north ends abruptly where the ceiling above collapsed down onto it.\n\nA tree the size of a house has grown through the wall and up into the tower above you.",
         narration: "",
         items: ["relic"],
+        monsters: [],
         actions: [
             {
                 type: 2,
@@ -722,7 +758,7 @@ locations = [
             {
                 type: 3,
                 title: "GoblÌn Hulk",
-                keyword: "gob_hulk_01"
+                keyword: "goblin_hulk_01"
             }
         ]
     },
@@ -732,6 +768,7 @@ locations = [
         description: "",
         narration: "",
         items: [],
+        monsters: [],
         actions: [
             {
                 type: 2,

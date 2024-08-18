@@ -53,7 +53,7 @@ document.addEventListener('keydown', function(event) {
 
 // DEBUG
 debugButton1.onclick = function() { console.log("Debug: Reset Game"); resetGame(); toggleDebugWindow(); };
-debugButton2.onclick = function() { console.log("Debug: Reset & Resume " + storedLocation); let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame();storedLocation = z;  changeContextDirect(x,y); toggleDebugWindow();};  
+debugButton2.onclick = function() { console.log("Debug: Reset & Resume " + storedLocation); let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame(); storedLocation = z;  changeContextDirect(x,y); toggleDebugWindow();};  
 debugButton2b.onclick = function() { console.log("Debug: Kill Monster"); if (currentContextType == 3) monsterDeath();  toggleDebugWindow();}
 debugButton3.onclick = function() { insight++; save(); updateStats();};
 debugButton4.onclick = function() { hp++; save(); updateStats();};
@@ -83,6 +83,8 @@ resetLocationsCheckbox.onclick = function() {
     localStorage.setItem('resetLocations', JSON.stringify(resetLocations));
 };
 
-
-
-initializeGame();
+// We wait till all async processes have completed before starting the game
+Promise.all([promise1, promise2, promise3]).then((values) => {
+    
+    initializeGame();
+  });

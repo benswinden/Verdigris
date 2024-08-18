@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.019;
+let version = 0.020;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -120,6 +120,7 @@ let locations = [{
     narration: "",
     update: "",
     items: [],
+    monsters: [],
     actions: [
         {
             type: 0,        // Determines what the button looks like, and what it does // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
@@ -132,29 +133,7 @@ let locations = [{
     ]
 }];
 
-let monsters = [
-    {
-        keyword: "",
-        title: "",
-        shortTitle: "",
-        description: "",
-        update: "",
-        level: 0,
-        hp: 0,
-        power: 0,
-        evasion: 0,         // Score out of 100, percentage chance to evade
-        insight: 0,
-        gold: 0,
-        deathFunc: "",      // Called on monster death
-        actions: [
-            {
-                type: 0,
-                title: "",
-                func: ""
-            }            
-        ]
-    }
-];
+let monsters = [];
 
 let npcs = [
     {
@@ -183,32 +162,40 @@ let npcs = [
     }
 ];
 // ITEM TYPES - WEAPON, ARMOR, TALISMAN
-let items = [
-    {
-        keyword: "",
-        title: "",
-        shortTitle: "",
-        description: "",
-        itemType: "",
-        canEquip: false,        
-        equipped: false,
-        canUpgrade: false,
-        level: 0,
-        power: 0,
-        stamina: 0,
-        defence: 0,
-        cost: 0,
-        quantity: 0,
-        upgradeMaterial: [],
-        actions: [          // Item actions will be added while in a monster sub-context
-            {                
-                type: 0,
-                title: "",
-                func: ""
-            }            
-        ],
-    }
-];
+let items = [];
+let actions = [];
+
+var config = 
+{
+	header: true,
+	dynamicTyping: true,
+	skipEmptyLines: true
+}
+
+const promise1 = fetch('Data/items.csv')
+  .then((response) => response.text())
+  .then((data) => { 
+    items = Papa.parse(data, config).data;
+    // Filter out empty rows
+    items = items.filter(({ keyword }) => keyword != null);
+});
+
+const promise2 = fetch('Data/monsters.csv')
+  .then((response) => response.text())
+  .then((data) => { 
+    monsters = Papa.parse(data, config).data;
+    // Filter out empty rows
+    monsters = monsters.filter(({ keyword }) => keyword != null);
+});
+
+const promise3 = fetch('Data/actions.csv')
+  .then((response) => response.text())
+  .then((data) => { 
+    actions = Papa.parse(data, config).data;
+    // Filter out empty rows
+    actions = actions.filter(({ keyword }) => keyword != null);
+});
+
 
 // Store these containers at runtime because they will be modified as the player plays
 let locationsModified = [];
@@ -257,7 +244,7 @@ function initializeGame() {
         insight = 0;
         hpCurrent = 40;
         hpMax = 40;
-        gold = 1000;
+        gold = 2;
         ore = 0;
         leather = 0;
         greenHerb = 0;
@@ -279,17 +266,17 @@ function initializeGame() {
         locationsVisited = [];
 
         respawnLocation = {
-            context: 3,
+            context: 4,
             contextType: 1,
             storedLocation: -1
         }
         corpseLocation = -1;
 
         // Using JSON to create deep clones of our starting data arrays
-        locationsModified = JSON.parse(JSON.stringify(locations));
-        monstersModified = JSON.parse(JSON.stringify(monsters));
-        npcsModified = JSON.parse(JSON.stringify(npcs));
-        itemsModified = JSON.parse(JSON.stringify(items));    
+        locationsModified = JSON.parse(JSON.stringify(locations));        
+        npcsModified = JSON.parse(JSON.stringify(npcs));  
+        monstersModified = monsters;
+        itemsModified = items;  
 
         save();
         changeContextDirect(debugStartContext, debugStartType);
@@ -407,10 +394,6 @@ function updateContext() {
     equipmentTitle.style.display = "none";
     saleTitle.style.display = "none";
 
-    // By default, we'll be getting our action buttons from a location
-    let actions = [];
-    let items = [];
-
     // If we are updating to a location type - 
     if (currentContextType === 1) {    
 
@@ -437,9 +420,6 @@ function updateContext() {
                 narrationText.innerText = locationsModified[currentContext].narration;  // Add the narration text so it appears before the main text for the locat                
             }
         }
-
-        actions = locationsModified[currentContext].actions;
-        items = locationsModified[currentContext].items;
 
         mainTitleText.style.color = mainTitleActive;
         secondaryTitle.style.display = "none";
@@ -472,8 +452,6 @@ function updateContext() {
                 monsterHpSection.style.display = "block";
                 updateMonsterUI();
                 
-                actions = generateItemActions(monstersModified[currentContext].actions);                
-                
                 // Some contexts have update text that should display when the player enters their context
                 if (monstersModified[currentContext].update != undefined && monstersModified[currentContext].update != "")
                     addUpdateText(monstersModified[currentContext].update);                
@@ -489,9 +467,6 @@ function updateContext() {
                 secondaryTitleText.innerText = npcsModified[currentContext].title;
                 mainText.innerText = npcsModified[currentContext].description;                
 
-                actions = npcsModified[currentContext].actions;
-                items = npcsModified[currentContext].items;
-
                 // Some contexts have update text that should display when the player enters their context
                 if (npcsModified[currentContext].update != undefined && npcsModified[currentContext].update != "")
                     addUpdateText(npcsModified[currentContext].update);  
@@ -500,7 +475,7 @@ function updateContext() {
         }
     }
 
-    updateButtons(actions, items);
+    updateButtons();
 }
 
 function hideAllButtons() {
@@ -541,13 +516,11 @@ function clearCreatedButtons() {
     createdItemButtons = [];
 }
 
-function updateButtons(actions, items)  {        
+function updateButtons()  {        
     
-    // If we call this function without supplying actions and items lists, we should find the correct list ourself
-    if (actions === undefined && items === undefined) {
-        
-        actions = [];
-        items = [];
+        let actions = [];
+        let items = [];
+        let monsters = [];
         
         switch (currentContextType) {
             case 1://Location            
@@ -564,8 +537,7 @@ function updateButtons(actions, items)  {
                 actions = npcsModified[currentContext].actions;
                 items = npcsModified[currentContext].items;
                 break;
-        }        
-    }
+        }            
 
 
     hideAllButtons();
@@ -598,6 +570,7 @@ function updateButtons(actions, items)  {
         });
     }    
 
+    // Setup buttons based on actions within the action array
     if (!inventoryOpen && actions.length > 0) {
 
         actions.forEach((element, index) => {
@@ -749,6 +722,11 @@ function updateButtons(actions, items)  {
         });
     }
 
+    // Set up any new buttons, starting where we left off
+    let nextButton = actions.length;
+
+    //if (monsters)
+
     if (inventoryOpen) {
         console.log("inventory open - green herbs: " + greenHerb);
         items = JSON.parse(JSON.stringify(inventory));
@@ -845,17 +823,19 @@ function updateButtons(actions, items)  {
                     document.querySelector("nav").appendChild(clone);
                     secondaryButtonDisplayed = true;
                     secondaryButtonText.innerText = "Take";
+                    let _currentContext = currentContext;       // Storing this value as it changes before we can use it to remove the item
 
                     if (item.itemType != undefined && item.itemType === "pickupGold")
-                        secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                        secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
                     else if (item.itemType != undefined && item.itemType === "pickupInsight")
-                        secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                        secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
                     else if (item.itemType != undefined && item.itemType === "pickupCorpse")
-                        secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                        // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
+                        secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
                     else if (item.itemType != undefined && item.itemType === "pickupHeal")
-                        secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, currentContext); playClick(); };
+                        secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
                     else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
-                        secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, currentContext); playClick(); };                
+                        secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
                     else
                         secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
 
@@ -1065,25 +1045,20 @@ function addActionToContext(context, contextType, action, index) {
     else
         contextInt = parseInt(context);
 
-    let actions = [];
-    let items = [];
+
     switch (contextType) {
         case 1://Location
             if (index == -1)
                 locationsModified[contextInt].actions.push(action);
             else
-                locationsModified[contextInt].actions.splice(index, 0, action);
-
-            actions = locationsModified[currentContext].actions;            // Store this in case this is our current context
-            items = locationsModified[currentContext].items;
+                locationsModified[contextInt].actions.splice(index, 0, action);            
             break;
         case 3://Monster
             if (index == -1)
                 monstersModified[contextInt].actions.push(action);
             else
                 monstersModified[contextInt].actions.splice(index, 0, action);
-
-            actions = generateItemActions(monstersModified[currentContext].actions);            // Store this in case this is our current context
+            
             break;
         case 4://Item
             if (index == -1)
@@ -1096,16 +1071,14 @@ function addActionToContext(context, contextType, action, index) {
                 npcsModified[contextInt].actions.push(action);
             else
                 npcsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
-
-                actions = npcsModified[currentContext].actions;
-                items = npcsModified[currentContext].items;
+                
             break; 
         }
         
         save();
         // If this is our current context, we need to update the buttons immediately. Will never be an item
         if (context == currentContext && contextType == currentContextType)
-            updateButtons(actions, items);
+            updateButtons();
 }
 
 // Remove an action in a given context at the specified index
@@ -1400,11 +1373,13 @@ function addUpdateText(text) {
 }
 
 function removeItemFromContext(keyword, context) {
-    
+    console.log("remove item " +keyword);
     locationsModified[context].items = locationsModified[context].items.filter(item => item !== keyword);    
     
     save();
-    updateButtons();
+
+    if (context === currentContext)
+        updateButtons();
 }
 
 // #endregion
@@ -1597,7 +1572,7 @@ function playerDeath() {
         clearInventory();
         updateText.innerText = updateTextStore;
     }
-
+    
     // Check if a player corpse exists already, if so destroy it
     if (corpseLocation != -1 && locationsModified[corpseLocation].items.includes("corpse")) {
 
@@ -1797,8 +1772,8 @@ function monsterDeath() {
     insight += monstersModified[currentContext].insight;
     gold += monstersModified[currentContext].gold;
     updateStats();
-    
-    if (monstersModified[currentContext].deathFunc != "") {
+        
+    if (monstersModified[currentContext].deathFunc != null) {
         doAction(monstersModified[currentContext].deathFunc, true);
     }
     
@@ -1842,7 +1817,7 @@ function talk() {
             }
 
             save();
-            updateButtons(npcsModified[currentContext].actions,npcsModified[currentContext].items);
+            updateButtons();
         }
 
         playerActionComplete(true);
@@ -1906,14 +1881,10 @@ function addToInventory(keyword) {
     let items = [];
 
     // Depending on the contextType, we will splice this item out of a different context
-    if (currentContextType === 1) {
-        actions = locationsModified[currentContext].actions;
+    if (currentContextType === 1) {        
         items = locationsModified[currentContext].items;
-    }
-    else if (currentContextType === 3)
-        actions = monstersModified[currentContext].actions; // This will never happen, you cant add an item to your inventory while fighting a monster
-    else if (currentContextType === 5) {
-        actions = npcsModified[currentContext].actions;
+    }    
+    else if (currentContextType === 5) {        
         items = npcsModified[currentContext].items;
     }
     
@@ -1927,7 +1898,7 @@ function addToInventory(keyword) {
     });
     if (itemIndex != -1) items.splice(itemIndex, 1);
 
-    updateButtons(actions, items);
+    updateButtons();
 
     save();
     addUpdateText("The " + item.shortTitle + " has been added to your inventory.");
@@ -1973,6 +1944,8 @@ function upgrade(keyword, cost, oreCost, leatherCost) {
             item.power += 5;
         if (item.itemType === "armor")
             item.defence += 10;
+        if (item.itemType === "shield")
+            item.defence += 5;
 
         updateStats();
         updateButtons();
@@ -1998,6 +1971,7 @@ function getCorpse(amount, updateString) {
     if (updateString != "") 
         addUpdateText(updateString + " ( " + amount + " gold )");    
 
+    removeItemFromContext("corpse", currentContext);
     corpseLocation = -1;
 
     updateStats();
@@ -2134,11 +2108,11 @@ function save() {
         if (localStorage.getItem('itemsModified')) itemsModified = JSON.parse(localStorage.getItem('itemsModified')); else console.error("load - itemsModified entry doesn't exist");
     }
     else {
-        locationsModified = locations;
+        locationsModified = JSON.parse(JSON.stringify(locations));        
         locationsVisited = [];
-        monstersModified = monsters;
-        npcsModified = npcs;
-        itemsModified = items;
+        monstersModified = JSON.parse(JSON.stringify(monsters));                
+        npcsModified = JSON.parse(JSON.stringify(npcs));
+        itemsModified = JSON.parse(JSON.stringify(items));
     }
   }
 
@@ -2222,25 +2196,45 @@ function save() {
     return index;
   }
 
+  function getElementFromKeyword(keyword, array) {
+    
+    let index = -1;
+    
+    array.forEach((element, i) => {        
+        if (element.keyword === keyword) {
+            
+            index = i;            
+        }
+    });
+    
+    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
+    return index;
+  }
+
   // Create an array of actions based on the currently equipped items in the player's inventory
   function generateItemActions(monsterActions) {
 
-    let array = [];    
-
+    let array = [];        
     inventory.forEach((element,index) => {
         
         let item = itemsModified[getContextIndexFromKeyword(element,4)];
-        if (item.canEquip && item.equipped)
+        if (item.canEquip && item.equipped) {
             
-            item.actions.forEach((element, index) => {                
-                array.push(element);
-            });            
+            if (item.actions != null && item.actions != undefined && item.actions != "") {
+                let actionArray = item.actions.split(',');
+                
+                actionArray.forEach((element, index) => {
+                        
+                    array.push(actions[getElementFromKeyword(element, actions)]);            
+                });            
+            }
+        }
     });
 
     // Add monster specific actions
-    monsterActions.forEach((element,index) => {        
-        array.push(element);
-    });
+    // monsterActions.forEach((element,index) => {        
+    //     array.push(element);
+    // });
     
     array.push({type: 6, title: "Recover", func: "recover"});
 
