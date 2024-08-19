@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.020;
+let version = 0.021;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -121,6 +121,7 @@ let locations = [{
     update: "",
     items: [],
     monsters: [],
+    npcs: [],
     actions: [
         {
             type: 0,        // Determines what the button looks like, and what it does // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
@@ -521,11 +522,14 @@ function updateButtons()  {
         let actions = [];
         let items = [];
         let monsters = [];
+        let npcs = [];
         
         switch (currentContextType) {
             case 1://Location            
                 actions = locationsModified[currentContext].actions;
-                items = locationsModified[currentContext].items;
+                items = locationsModified[currentContext].items;                
+                monsters = locationsModified[currentContext].monsters;      // TODO - After CSV implementation, split from comma seperated string
+                npcs = locationsModified[currentContext].npcs;
                 break;
             case 3://Monster            
 
@@ -663,20 +667,17 @@ function updateButtons()  {
                     break;
                 // Monster
                 case 3:                    
-                    button.classList = "nav-button can-hover monster-button";
-                    button.querySelector('#button-level-icon').style.display = "block";
-                    button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element.keyword, 3)].level;
-                    
-                    button.onclick = function() {changeContext(element.keyword, 3); playClick();};
+                    //
+                    // MONSTERS ARE NOW CREATED BELOW
+                    //
                     break;
                 // ITEM
                 case 4:                    
-                    // Where item context actions used to be before refactoring into their own process
+                    // ITEMS ARE NOW CREATED BELOW
                     break;
                 // NPC
                 case 5:                    
-                    button.classList = "nav-button can-hover npc-button";
-                    button.onclick = function() {changeContext(element.keyword, 5); playClick();};
+                    // NPCS ARE NOW CREATED BELOW
                     break;
                 // Misc Action - Styled the same as a location, but will call a custom function instead of moving to another context
                 // Type 7 = misc action with a stamina cost
@@ -722,10 +723,93 @@ function updateButtons()  {
         });
     }
 
+    //  MONSTERS
     // Set up any new buttons, starting where we left off
     let nextButton = actions.length;
 
-    //if (monsters)
+    if (monsters != undefined && monsters.length > 0) {
+        
+        monsters.forEach((element, index) => {
+
+            switch (nextButton) {
+                case 0:
+                    button = button1;
+                    break;
+                case 1:
+                    button = button2;
+                    break;
+                case 2:
+                    button = button3;
+                    break;
+                case 3:
+                    button = button4;
+                    break;
+                case 4:
+                    button = button5;
+                    break;
+                case 5:
+                    button = button6;
+                    break; 
+                case 6:
+                    button = button7;
+                    break;
+                case 7:
+                    button = button8;
+                    break; 
+            }
+
+            button.classList = "nav-button can-hover monster-button";
+            button.querySelector('#button-level-icon').style.display = "block";
+            button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].level;
+            
+            button.onclick = function() {changeContext(element, 3); playClick();};   
+            button.querySelector('.button-text').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].title;
+            button.style.display = "flex";
+            nextButton++;
+        });
+    }
+
+    //  NPCS
+    // Set up any new buttons, starting where we left off
+    if (npcs != undefined && npcs.length > 0) {
+        
+        npcs.forEach((element, index) => {
+
+            switch (nextButton) {
+                case 0:
+                    button = button1;
+                    break;
+                case 1:
+                    button = button2;
+                    break;
+                case 2:
+                    button = button3;
+                    break;
+                case 3:
+                    button = button4;
+                    break;
+                case 4:
+                    button = button5;
+                    break;
+                case 5:
+                    button = button6;
+                    break; 
+                case 6:
+                    button = button7;
+                    break;
+                case 7:
+                    button = button8;
+                    break; 
+            }
+
+            button.classList = "nav-button can-hover npc-button";
+            button.onclick = function() { changeContext(element, 5); playClick(); };
+            button.querySelector('.button-text').innerText = npcsModified[getContextIndexFromKeyword(element, 5)].title;
+            button.style.display = "flex";
+            nextButton++;
+        });
+    }
+
 
     if (inventoryOpen) {
         console.log("inventory open - green herbs: " + greenHerb);
