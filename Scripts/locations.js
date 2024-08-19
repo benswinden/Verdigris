@@ -56,7 +56,7 @@ locations = [
             {
                 type: 1,
                 title: "East towards the City Crossroads",
-                keyword: "city_enter",                
+                keyword: "crossroads",                
             },
             {
                 type: 2,
@@ -69,7 +69,7 @@ locations = [
         keyword: "crossroads",
         title: "The Crossroads",        
         description: "All roads in this great city once came together here. Pathways spread forth from here to all corners of the ruins.",
-        narration: "",
+        narration: "city_enter",
         items: ["green_herb_pickup"],
         monsters: [],
         npcs: [],

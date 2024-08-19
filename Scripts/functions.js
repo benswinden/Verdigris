@@ -28,6 +28,10 @@ let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = It
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
 
+let currentNarration = "";
+let currentNarrationIndex = 0;
+let narrationOpen = false;
+
 let activeDirections = [];      // Array that contains which directions (0=north, 1=west, 2=east, 3=south ) have active buttons currently
 
 let inventory = [];             // Inventory contains index numbers for items in the items array
@@ -133,6 +137,14 @@ let locations = [{
         }        
     ]
 }];
+
+let narrations = [
+    {
+        keyword: "",
+        seen: false,
+        text:[]
+    }
+]
 
 let monsters = [];
 
@@ -409,6 +421,15 @@ function updateContext() {
         // First time visiting this location, check whether there is a narration to play first
         if (!locationVisited) {
             
+            if (locationsModified[currentContext].narration != undefined && locationsModified[currentContext].narration != "") {
+                // Check if this narration has already been seen                
+                if (narrations[getElementFromKeyword(locationsModified[currentContext].narration, narrations)].seen === false) {
+
+                    displayNarration(locationsModified[currentContext].narration);
+                    return;
+                }
+            }
+
             // If the description for this context is empty, that means it's only narration and we shouldn't add it to visited. If we did, players could get linked back to it and it would be empty as narration doesn't appear the second time visiting
             if (locationsModified[currentContext].description != "") {
                 locationsVisited.push(currentContext);
@@ -416,9 +437,9 @@ function updateContext() {
             }
             
             // Check if there is narration text, then show it as this is the first time visiting
-            if (locationsModified[currentContext].narration != "") {
+            if (locationsModified[currentContext].update != undefined && locationsModified[currentContext].update != "") {
                 narrationText.style.display = "block";
-                narrationText.innerText = locationsModified[currentContext].narration;  // Add the narration text so it appears before the main text for the locat                
+                narrationText.innerText = locationsModified[currentContext].update;  // Add the narration text so it appears before the main text for the locat                
             }
         }
 
@@ -427,10 +448,7 @@ function updateContext() {
         
         mainTitleText.innerText = locationsModified[currentContext].title;        
         mainText.innerText = locationsModified[currentContext].description; 
-
-        // Some contexts have update text that should display when the player enters their context
-        if (locationsModified[currentContext].update != undefined && locationsModified[currentContext].update != "")
-            addUpdateText(locationsModified[currentContext].update);  
+         
     }
     // If currentLocationType != 1 - We are currently in a secondary context
     else if (currentContextType != 1) {
@@ -519,28 +537,30 @@ function clearCreatedButtons() {
 
 function updateButtons()  {        
     
-        let actions = [];
-        let items = [];
-        let monsters = [];
-        let npcs = [];
-        
-        switch (currentContextType) {
-            case 1://Location            
-                actions = locationsModified[currentContext].actions;
-                items = locationsModified[currentContext].items;                
-                monsters = locationsModified[currentContext].monsters;      // TODO - After CSV implementation, split from comma seperated string
-                npcs = locationsModified[currentContext].npcs;
-                break;
-            case 3://Monster            
+    if (showDebugLog) console.log("updateButtons() - ");
 
-                actions = generateItemActions(monstersModified[currentContext].actions);
-                break;
-            case 4://Item            
-                break;
-            case 5://NPC            
-                actions = npcsModified[currentContext].actions;
-                items = npcsModified[currentContext].items;
-                break;
+    let actions = [];
+    let items = [];
+    let monsters = [];
+    let npcs = [];
+    
+    switch (currentContextType) {
+        case 1://Location            
+            actions = locationsModified[currentContext].actions;
+            items = locationsModified[currentContext].items;                
+            monsters = locationsModified[currentContext].monsters;      // TODO - After CSV implementation, split from comma seperated string
+            npcs = locationsModified[currentContext].npcs;
+            break;
+        case 3://Monster            
+
+            actions = generateItemActions(monstersModified[currentContext].actions);
+            break;
+        case 4://Item            
+            break;
+        case 5://NPC            
+            actions = npcsModified[currentContext].actions;
+            items = npcsModified[currentContext].items;
+            break;
         }            
 
 
@@ -555,9 +575,22 @@ function updateButtons()  {
     button6.onclick = '';
     button7.onclick = '';
     button8.onclick = '';
+    
+    if (narrationOpen) {
+
+        actions = [];
+        items = [];
+        monsters = [];
+        npcs = [];
+        actions.push({
+            type: 6,
+            title: "Next",
+            func: "continueNarration"
+            });
+    }
 
     // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
-    if (!inventoryOpen && upgradeMenuOpen) {
+    if (!narrationOpen && !inventoryOpen && upgradeMenuOpen) {
 
         actions = [];
         actions.push({
@@ -1214,6 +1247,54 @@ function replaceAction(context, contextType, action, index) {
     addActionToContext(context, contextType, action, index);
 }
 
+
+function displayNarration(narrationKeyword) {
+    
+    if (showDebugLog) console.log("displayNarration() - ");
+    
+    if (narrationKeyword != undefined) {
+        currentNarration = narrationKeyword;
+        currentNarrationIndex = 0;
+    }
+    else if (narrationKeyword === undefined && currentNarration === "") {
+        console.error("displayNarrative - no narrationKeyword provided, currentNarration is undefined as well");
+    }        
+
+    narrationOpen = true;
+    updateButtons();
+
+    narrationText.style.display = "none";    
+    monsterHpSection.style.display = "none";
+    mainTitleText.style.color = mainTitleActive;
+    mainTitleText.innerText = "";
+    secondaryTitle.style.display = "none";
+    
+    if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex) {    
+        mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
+    }
+    else
+        console.error("displayNarrative - Narration index [" + currentNarrationIndex + "] is higher than text length [" + narrations[getElementFromKeyword(currentNarration, narrations)].text.length + "]");
+}
+
+function continueNarration() {
+
+    if (showDebugLog) console.log("displayNarration() - ");
+
+    currentNarrationIndex++;
+    if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex)
+        mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
+    else {
+        narrations[getElementFromKeyword(currentNarration, narrations)].seen = true;
+        closeNarration();
+    }
+}
+
+function closeNarration() {
+
+    narrationOpen = false;
+    changeContextDirect(currentContext, currentContextType);
+}
+
 function displayInventory() {
     
     if (showDebugLog) console.log("displayInventory() - ");
@@ -1224,8 +1305,6 @@ function displayInventory() {
     inventoryIcon.onclick = function() { exitInventory(); playClick(); };
 
     expandStats();    
-
-    //resetUpdateText();
     updateButtons();
 
     narrationText.style.display = "none";    
@@ -1251,6 +1330,8 @@ function exitInventory() {
     changeContextDirect(currentContext, currentContextType);
     if (upgradeMenuOpen)
         displayUpgrade();
+    if (narrationOpen)
+        displayNarration();
 }
 
 function clearInventory() {
@@ -1523,6 +1604,9 @@ function doAction(actionString, resetText) {
             break;
         case "runAway":
                 runAway();
+                break;
+        case "continueNarration":
+                continueNarration();
                 break;
         case "advanceDialogue":
             if (functionArray.length === 2)         // advanceDialogue|npcKeyword
