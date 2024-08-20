@@ -117,26 +117,7 @@ const mainTitleActive = '#8F871E';
 const secondaryTitleActive = '#363718';
 
 // #region Containers
-let locations = [{
-    keyword: "",
-    title: "",        
-    description: "",
-    narration: "",
-    update: "",
-    items: [],
-    monsters: [],
-    npcs: [],
-    actions: [
-        {
-            type: 0,        // Determines what the button looks like, and what it does // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
-            title: "",      // String used in the button
-            keyword: "",    // key used to search for the associated action
-            blocked: "",    // If this monster is present, this location is blocked
-            locked: "",
-            func: "",       // When this is a misc action button
-        }        
-    ]
-}];
+let locations = [];
 
 let narrations = [
     {
@@ -209,6 +190,14 @@ const promise3 = fetch('Data/actions.csv')
     actions = actions.filter(({ keyword }) => keyword != null);
 });
 
+const promise4 = fetch('Data/locations.csv')
+  .then((response) => response.text())
+  .then((data) => { 
+    locations = Papa.parse(data, config).data;
+    // Filter out empty rows
+    locations = locations.filter(({ keyword }) => keyword != null);
+});
+
 
 // Store these containers at runtime because they will be modified as the player plays
 let locationsModified = [];
@@ -279,17 +268,14 @@ function initializeGame() {
         locationsVisited = [];
 
         respawnLocation = {
-            context: 4,
+            context: 0,
             contextType: 1,
             storedLocation: -1
         }
         corpseLocation = -1;
 
         // Using JSON to create deep clones of our starting data arrays
-        locationsModified = JSON.parse(JSON.stringify(locations));        
-        npcsModified = JSON.parse(JSON.stringify(npcs));  
-        monstersModified = monsters;
-        itemsModified = items;  
+        formatData();
 
         save();
         changeContextDirect(debugStartContext, debugStartType);
@@ -539,30 +525,65 @@ function updateButtons()  {
     
     if (showDebugLog) console.log("updateButtons() - ");
 
-    let actions = [];
+    let contextActions = [];
     let items = [];
     let monsters = [];
     let npcs = [];
     
-    switch (currentContextType) {
-        case 1://Location            
-            actions = locationsModified[currentContext].actions;
-            items = locationsModified[currentContext].items;                
-            monsters = locationsModified[currentContext].monsters;      // TODO - After CSV implementation, split from comma seperated string
-            npcs = locationsModified[currentContext].npcs;
-            break;
-        case 3://Monster            
+    if (narrationOpen) {
 
-            actions = generateItemActions(monstersModified[currentContext].actions);
-            break;
-        case 4://Item            
-            break;
-        case 5://NPC            
-            actions = npcsModified[currentContext].actions;
-            items = npcsModified[currentContext].items;
-            break;
-        }            
+        contextActions.push({
+            type: 6,
+            title: "Next",
+            func: "continueNarration"
+            });
+    }
+    else {
 
+        switch (currentContextType) {
+            case 1://Location            
+                
+                // NORTH            
+                contextActions.push({
+                    type: locationsModified[currentContext].north === null ?  2 : 1,
+                    title: locationsModified[currentContext].north === null ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,
+                    keyword: locationsModified[currentContext].north
+                });
+                // WEST
+                contextActions.push({
+                    type: locationsModified[currentContext].west === null ? 2 : 1,
+                    title: locationsModified[currentContext].west === null ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
+                    keyword: locationsModified[currentContext].west
+                });
+                // EAST
+                contextActions.push({
+                    type: locationsModified[currentContext].east === null ? 2 : 1,
+                    title: locationsModified[currentContext].east === null ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
+                    keyword: locationsModified[currentContext].east
+                });
+                // SOUTH
+                contextActions.push({
+                    type: locationsModified[currentContext].south === null ? 2 : 1,
+                    title: locationsModified[currentContext].south === null ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
+                    keyword: locationsModified[currentContext].south
+                });
+                
+                items = locationsModified[currentContext].items;
+                monsters = locationsModified[currentContext].monsters;
+                npcs = locationsModified[currentContext];
+                break;
+            case 3://Monster            
+
+                contextActions = generateItemActions(monstersModified[currentContext].actions);
+                break;
+            case 4://Item            
+                break;
+            case 5://NPC            
+                contextActions = npcsModified[currentContext].actions;
+                items = npcsModified[currentContext].items;
+                break;
+        }     
+    }       
 
     hideAllButtons();
     activeDirections = [];
@@ -575,25 +596,12 @@ function updateButtons()  {
     button6.onclick = '';
     button7.onclick = '';
     button8.onclick = '';
-    
-    if (narrationOpen) {
-
-        actions = [];
-        items = [];
-        monsters = [];
-        npcs = [];
-        actions.push({
-            type: 6,
-            title: "Next",
-            func: "continueNarration"
-            });
-    }
 
     // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
     if (!narrationOpen && !inventoryOpen && upgradeMenuOpen) {
 
-        actions = [];
-        actions.push({
+        contextActions = [];
+        contextActions.push({
             type: 6,
             title: "Back",
             func: "exitUpgrade"
@@ -608,9 +616,9 @@ function updateButtons()  {
     }    
 
     // Setup buttons based on actions within the action array
-    if (!inventoryOpen && actions.length > 0) {
+    if (!inventoryOpen && contextActions.length > 0) {
 
-        actions.forEach((element, index) => {
+        contextActions.forEach((element, index) => {
             
             let additionalButtonString = "";        // If any additional text needs to be appended to a button
             let button = button1;
@@ -656,7 +664,7 @@ function updateButtons()  {
                     if (element.blocked != undefined && element.blocked != "") {
                         
                         // Loop through all actions to see if there is a monster with a matching keyword
-                        actions.forEach((actionElement, index) => {                            
+                        contextActions.forEach((actionElement, index) => {                            
                             if (element.blocked == actionElement.keyword) {
                                 
                                 exitBlocked = true;                            
@@ -758,7 +766,7 @@ function updateButtons()  {
 
     //  MONSTERS
     // Set up any new buttons, starting where we left off
-    let nextButton = actions.length;
+    let nextButton = contextActions.length;
 
     if (monsters != undefined && monsters.length > 0) {
         
@@ -1682,18 +1690,18 @@ function playerActionComplete(monsterCanAttack) {
 
     let monstersPresent = false;
     let monstersActionString = "";
-    let actions = [];
+    let contextActions = [];
 
     if (monsterCanAttack) {
 
         // If current context is a location, search it's actions for monsters and tell them to attack
         if (currentContextType === 1)
-            actions = locationsModified[currentContext].actions;        
+            contextActions = locationsModified[currentContext].actions;
         // If we're already fighting a monster, use the stored location to search for monsters
         else if (currentContextType === 3)
-            actions = locationsModified[storedLocation].actions;
+            contextActions = locationsModified[storedLocation].actions;
 
-        actions.forEach((element, index) => {
+        contextActions.forEach((element, index) => {
             
             if (element.type === 3) {
                 
@@ -2435,6 +2443,29 @@ function save() {
 
     var audio = new Audio(audioClip);
     audio.play();      
+  }
+
+  function formatData() {
+
+    locationsModified = JSON.parse(JSON.stringify(locations));
+
+    locationsModified.forEach((element,index) => {
+
+        element.items != null ? element.items = element.items.split(',') : element.items = [];
+        element.monsters != null ? element.monsters = element.monsters.split(',') : element.monsters = [];
+        element.npcs != null ? element.npcs = element.npcs.split(',') : element.npcs = [];
+    });    
+    
+    npcsModified = JSON.parse(JSON.stringify(npcs));
+    monstersModified = JSON.parse(JSON.stringify(monsters));
+
+    itemsModified = JSON.parse(JSON.stringify(items));
+
+    itemsModified.forEach((element,index) => {
+
+        element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
+        element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
+    }); 
   }
 
   // #endregion
