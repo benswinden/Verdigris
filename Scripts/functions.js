@@ -204,6 +204,7 @@ let locationsModified = [];
 let monstersModified = []
 let npcsModified = []
 let itemsModified = []
+let narrationsModified = []
 
 
 // #endregion
@@ -242,7 +243,7 @@ function initializeGame() {
     else {
 
         if (showDebugLog) console.log("Save game doesn't exist");        
-
+        
         insight = 0;
         hpCurrent = 40;
         hpMax = 40;
@@ -273,7 +274,7 @@ function initializeGame() {
             storedLocation: -1
         }
         corpseLocation = -1;
-
+        
         // Using JSON to create deep clones of our starting data arrays
         formatData();
 
@@ -409,7 +410,7 @@ function updateContext() {
             
             if (locationsModified[currentContext].narration != undefined && locationsModified[currentContext].narration != "") {
                 // Check if this narration has already been seen                
-                if (narrations[getElementFromKeyword(locationsModified[currentContext].narration, narrations)].seen === false) {
+                if (narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)] != undefined && narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)].seen === false) {
 
                     displayNarration(locationsModified[currentContext].narration);
                     return;
@@ -570,7 +571,7 @@ function updateButtons()  {
                 
                 items = locationsModified[currentContext].items;
                 monsters = locationsModified[currentContext].monsters;
-                npcs = locationsModified[currentContext];
+                npcs = locationsModified[currentContext].npcs;
                 break;
             case 3://Monster            
 
@@ -616,244 +617,245 @@ function updateButtons()  {
     }    
 
     // Setup buttons based on actions within the action array
-    if (!inventoryOpen && contextActions.length > 0) {
+    if (!inventoryOpen) {
 
-        contextActions.forEach((element, index) => {
-            
-            let additionalButtonString = "";        // If any additional text needs to be appended to a button
-            let button = button1;
-            
-            switch (index) {
-                case 0:
-                    button = button1;
-                    break;
-                case 1:
-                    button = button2;
-                    break;
-                case 2:
-                    button = button3;
-                    break;
-                case 3:
-                    button = button4;
-                    break;
-                case 4:
-                    button = button5;
-                    break;
-                case 5:
-                    button = button6;
-                    break; 
-                case 6:
-                    button = button7;
-                    break;
-                case 7:
-                    button = button8;
-                    break; 
-            }
-            
-            switch (element.type) {
+        if (contextActions.length > 0) {
+
+            contextActions.forEach((element, index) => {
                 
-                // There is no type 0
-                case 0:
-                    console.error("updateLocation() - Error " + element.title + " action[ "+ index + "] has type 0");
-                    break;
-                // Location
-                case 1:
-                                        
-                    // Check whether this is a location that may be blocked by a monster
-                    let exitBlocked = false;
-                    if (element.blocked != undefined && element.blocked != "") {
-                        
-                        // Loop through all actions to see if there is a monster with a matching keyword
-                        contextActions.forEach((actionElement, index) => {                            
-                            if (element.blocked == actionElement.keyword) {
-                                
-                                exitBlocked = true;                            
-                                additionalButtonString += " [Blocked]";
-                            }
-                        });
-                    }
+                let additionalButtonString = "";        // If any additional text needs to be appended to a button
+                let button = button1;
+                
+                switch (index) {
+                    case 0:
+                        button = button1;
+                        break;
+                    case 1:
+                        button = button2;
+                        break;
+                    case 2:
+                        button = button3;
+                        break;
+                    case 3:
+                        button = button4;
+                        break;
+                    case 4:
+                        button = button5;
+                        break;
+                    case 5:
+                        button = button6;
+                        break; 
+                    case 6:
+                        button = button7;
+                        break;
+                    case 7:
+                        button = button8;
+                        break; 
+                }
+                
+                switch (element.type) {
                     
-                    // Locked locations, need to check the player's inventory for the key
-                    let doorLocked = false;
-                    if (element.locked != undefined && element.locked != "") {
+                    // There is no type 0
+                    case 0:
+                        console.error("updateLocation() - Error " + element.title + " action[ "+ index + "] has type 0");
+                        break;
+                    // Location
+                    case 1:
                                             
-                        if (inventoryIndexOf(element.locked) != -1) {
-                            doorLocked = false;
-                            additionalButtonString += " [Unlocked]";
+                        // Check whether this is a location that may be blocked by a monster
+                        let exitBlocked = false;
+                        if (element.blocked != undefined && element.blocked != "") {
+                            
+                            // Loop through all actions to see if there is a monster with a matching keyword
+                            contextActions.forEach((actionElement, index) => {                            
+                                if (element.blocked == actionElement.keyword) {
+                                    
+                                    exitBlocked = true;                            
+                                    additionalButtonString += " [Blocked]";
+                                }
+                            });
                         }
-                        else {                            
-                            doorLocked = true;
-                            additionalButtonString += " [Locked]";
+                        
+                        // Locked locations, need to check the player's inventory for the key
+                        let doorLocked = false;
+                        if (element.locked != undefined && element.locked != "") {
+                                                
+                            if (inventoryIndexOf(element.locked) != -1) {
+                                doorLocked = false;
+                                additionalButtonString += " [Unlocked]";
+                            }
+                            else {                            
+                                doorLocked = true;
+                                additionalButtonString += " [Locked]";
+                            }
                         }
-                    }
-                    
-                    // Active location action button
-                    if (!doorLocked && !exitBlocked) {
                         
-                        activeDirections.push(index);
-                        button.classList = "nav-button can-hover location-button";
+                        // Active location action button
+                        if (!doorLocked && !exitBlocked) {
+                            
+                            activeDirections.push(index);
+                            button.classList = "nav-button can-hover location-button";
 
-                        button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined && element.func != "") doAction(element.func, true); playClick(); playerActionComplete(false); };
-                    }
-                    // If door is locked, or blocked by a monster then disable it
-                    else if (doorLocked || exitBlocked) {
-                        
-                        button.classList = "nav-button locked-button";
-                    }
-
-                    break;
-                // Locked Action
-                case 2:                                        
-                    button.classList = "nav-button locked-button";
-                    break;
-                // Monster
-                case 3:                    
-                    //
-                    // MONSTERS ARE NOW CREATED BELOW
-                    //
-                    break;
-                // ITEM
-                case 4:                    
-                    // ITEMS ARE NOW CREATED BELOW
-                    break;
-                // NPC
-                case 5:                    
-                    // NPCS ARE NOW CREATED BELOW
-                    break;
-                // Misc Action - Styled the same as a location, but will call a custom function instead of moving to another context
-                // Type 7 = misc action with a stamina cost
-                case 6:
-                case 7:
-
-                    let buttonActive = true;
-                    
-                    // If there is a stamina cost, activate that
-                    if (element.type === 7) {
-
-                        let staminaCost = parseInt(element.func.split("|")[1]);
-                        if (staminaCost > currentStamina) {
-                            buttonActive = false;                                                
-                            button.querySelector('.stamina-cost-text').classList = "stamina-cost-text inactive";
+                            button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined && element.func != "") doAction(element.func, true); playClick(); playerActionComplete(false); };
                         }
-                        else
-                            button.querySelector('.stamina-cost-text').classList = "stamina-cost-text active";
-                        
-                        button.querySelector('.stamina-cost-section').style.display = "flex";
-                        button.querySelector('.stamina-cost-text').innerText = staminaCost;
-                    }
-
-                    if (buttonActive) {
-                        button.classList = "nav-button can-hover location-button";
-                        button.onclick = function() {doAction(element.func); playClick();};
-                    }
-                    else
-                        button.classList = "nav-button locked-button";
-
-                    // Let's check for an edge cases where this is a talk button, because talk buttons should actually be locked, if there isn't a dialogue available
-                    if (element.func === "talk") {
-                        
-                        if (!npcsModified[currentContext].dialogueAvailable) {                            
+                        // If door is locked, or blocked by a monster then disable it
+                        else if (doorLocked || exitBlocked) {
+                            
                             button.classList = "nav-button locked-button";
                         }
-                    }
-                    break;                
-            }        
 
-            button.querySelector('.button-text').innerText = element.title + additionalButtonString;
-            button.style.display = "flex";
-        });
-    }
+                        break;
+                    // Locked Action
+                    case 2:                                        
+                        button.classList = "nav-button locked-button";
+                        break;
+                    // Monster
+                    case 3:                    
+                        //
+                        // MONSTERS ARE NOW CREATED BELOW
+                        //
+                        break;
+                    // ITEM
+                    case 4:                    
+                        // ITEMS ARE NOW CREATED BELOW
+                        break;
+                    // NPC
+                    case 5:                    
+                        // NPCS ARE NOW CREATED BELOW
+                        break;
+                    // Misc Action - Styled the same as a location, but will call a custom function instead of moving to another context
+                    // Type 7 = misc action with a stamina cost
+                    case 6:
+                    case 7:
 
-    //  MONSTERS
-    // Set up any new buttons, starting where we left off
-    let nextButton = contextActions.length;
+                        let buttonActive = true;
+                        
+                        // If there is a stamina cost, activate that
+                        if (element.type === 7) {
 
-    if (monsters != undefined && monsters.length > 0) {
-        
-        monsters.forEach((element, index) => {
+                            let staminaCost = parseInt(element.func.split("|")[1]);
+                            if (staminaCost > currentStamina) {
+                                buttonActive = false;                                                
+                                button.querySelector('.stamina-cost-text').classList = "stamina-cost-text inactive";
+                            }
+                            else
+                                button.querySelector('.stamina-cost-text').classList = "stamina-cost-text active";
+                            
+                            button.querySelector('.stamina-cost-section').style.display = "flex";
+                            button.querySelector('.stamina-cost-text').innerText = staminaCost;
+                        }
 
-            switch (nextButton) {
-                case 0:
-                    button = button1;
-                    break;
-                case 1:
-                    button = button2;
-                    break;
-                case 2:
-                    button = button3;
-                    break;
-                case 3:
-                    button = button4;
-                    break;
-                case 4:
-                    button = button5;
-                    break;
-                case 5:
-                    button = button6;
-                    break; 
-                case 6:
-                    button = button7;
-                    break;
-                case 7:
-                    button = button8;
-                    break; 
-            }
+                        if (buttonActive) {
+                            button.classList = "nav-button can-hover location-button";
+                            button.onclick = function() {doAction(element.func); playClick();};
+                        }
+                        else
+                            button.classList = "nav-button locked-button";
 
-            button.classList = "nav-button can-hover monster-button";
-            button.querySelector('#button-level-icon').style.display = "block";
-            button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].level;
+                        // Let's check for an edge cases where this is a talk button, because talk buttons should actually be locked, if there isn't a dialogue available
+                        if (element.func === "talk") {
+                            
+                            if (!npcsModified[currentContext].dialogueAvailable) {                            
+                                button.classList = "nav-button locked-button";
+                            }
+                        }
+                        break;                
+                }        
+
+                button.querySelector('.button-text').innerText = element.title + additionalButtonString;
+                button.style.display = "flex";
+            });
+        }
+
+        //  MONSTERS
+        // Set up any new buttons, starting where we left off
+        let nextButton = contextActions.length;
+
+        if (monsters != undefined && monsters.length > 0) {
             
-            button.onclick = function() {changeContext(element, 3); playClick();};   
-            button.querySelector('.button-text').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].title;
-            button.style.display = "flex";
-            nextButton++;
-        });
-    }
+            monsters.forEach((element, index) => {
 
-    //  NPCS
-    // Set up any new buttons, starting where we left off
-    if (npcs != undefined && npcs.length > 0) {
+                switch (nextButton) {
+                    case 0:
+                        button = button1;
+                        break;
+                    case 1:
+                        button = button2;
+                        break;
+                    case 2:
+                        button = button3;
+                        break;
+                    case 3:
+                        button = button4;
+                        break;
+                    case 4:
+                        button = button5;
+                        break;
+                    case 5:
+                        button = button6;
+                        break; 
+                    case 6:
+                        button = button7;
+                        break;
+                    case 7:
+                        button = button8;
+                        break; 
+                }
+
+                button.classList = "nav-button can-hover monster-button";
+                button.querySelector('#button-level-icon').style.display = "block";
+                button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].level;
+                
+                button.onclick = function() {changeContext(element, 3); playClick();};   
+                button.querySelector('.button-text').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].title;
+                button.style.display = "flex";
+                nextButton++;
+            });
+        }
+
+        //  NPCS
+        // Set up any new buttons, starting where we left off
+        if (npcs != undefined && npcs.length > 0) {
+            
+            npcs.forEach((element, index) => {
+
+                switch (nextButton) {
+                    case 0:
+                        button = button1;
+                        break;
+                    case 1:
+                        button = button2;
+                        break;
+                    case 2:
+                        button = button3;
+                        break;
+                    case 3:
+                        button = button4;
+                        break;
+                    case 4:
+                        button = button5;
+                        break;
+                    case 5:
+                        button = button6;
+                        break; 
+                    case 6:
+                        button = button7;
+                        break;
+                    case 7:
+                        button = button8;
+                        break; 
+                }
+
+                button.classList = "nav-button can-hover npc-button";
+                button.onclick = function() { changeContext(element, 5); playClick(); };
+                button.querySelector('.button-text').innerText = npcsModified[getContextIndexFromKeyword(element, 5)].title;
+                button.style.display = "flex";
+                nextButton++;
+            });
+        }
+    }
+    else  if (inventoryOpen) {
         
-        npcs.forEach((element, index) => {
-
-            switch (nextButton) {
-                case 0:
-                    button = button1;
-                    break;
-                case 1:
-                    button = button2;
-                    break;
-                case 2:
-                    button = button3;
-                    break;
-                case 3:
-                    button = button4;
-                    break;
-                case 4:
-                    button = button5;
-                    break;
-                case 5:
-                    button = button6;
-                    break; 
-                case 6:
-                    button = button7;
-                    break;
-                case 7:
-                    button = button8;
-                    break; 
-            }
-
-            button.classList = "nav-button can-hover npc-button";
-            button.onclick = function() { changeContext(element, 5); playClick(); };
-            button.querySelector('.button-text').innerText = npcsModified[getContextIndexFromKeyword(element, 5)].title;
-            button.style.display = "flex";
-            nextButton++;
-        });
-    }
-
-
-    if (inventoryOpen) {
-        console.log("inventory open - green herbs: " + greenHerb);
         items = JSON.parse(JSON.stringify(inventory));
         if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", 4)].quantity = ore; items.splice(0,0, "ore"); }
         if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }
@@ -1128,6 +1130,9 @@ function updateButtons()  {
 // 0 = North 1 = West 2 = East 3 = South 4 = Next
 function go(direction) {
 
+    const buttonList = [button1, button2, button3, button4, button5, button6, button7, button8];
+    let dir = "";
+
     // This function only works while in a location context
     if (currentContextType === 1) {
 
@@ -1135,22 +1140,27 @@ function go(direction) {
                 
         switch (direction) {
             case 0:
-                button1.onclick();
+                dir = "North";                
                 break;
             case 1:
-                button2.onclick();
+                dir = "West";                
                 break;
             case 2:
-                button3.onclick();
+                dir = "East";                
                 break;
             case 3:
-                button4.onclick();
+                dir = "South";                
                 break;
             case 4:
-                if (locationsModified[currentContext].actions.length > 0 && locationsModified[currentContext].actions[0].title === "Next")
-                    button1.onclick();
+                dir = "Next";                
                 break;        
         }
+
+        buttonList.forEach((element) => {
+
+            if (element.innerText.includes(dir))
+                element.onclick();
+        });
     }
 }
 
@@ -1277,11 +1287,11 @@ function displayNarration(narrationKeyword) {
     mainTitleText.innerText = "";
     secondaryTitle.style.display = "none";
     
-    if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex) {    
-        mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
+    if (narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length > currentNarrationIndex) {    
+        mainText.innerText = narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text[currentNarrationIndex];
     }
     else
-        console.error("displayNarrative - Narration index [" + currentNarrationIndex + "] is higher than text length [" + narrations[getElementFromKeyword(currentNarration, narrations)].text.length + "]");
+        console.error("displayNarrative - Narration index [" + currentNarrationIndex + "] is higher than text length [" + narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length + "]");
 }
 
 function continueNarration() {
@@ -1289,10 +1299,10 @@ function continueNarration() {
     if (showDebugLog) console.log("displayNarration() - ");
 
     currentNarrationIndex++;
-    if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex)
-        mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
+    if (narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length > currentNarrationIndex)
+        mainText.innerText = narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text[currentNarrationIndex];
     else {
-        narrations[getElementFromKeyword(currentNarration, narrations)].seen = true;
+        narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].seen = true;
         closeNarration();
     }
 }
@@ -1689,42 +1699,42 @@ function playerActionComplete(monsterCanAttack) {
     if (showDebugLog) console.log("playerActionComplete() - monsterCanAttack " + monsterCanAttack);
 
     let monstersPresent = false;
-    let monstersActionString = "";
-    let contextActions = [];
+    let monstersActionString = "";    
+    let monsters = [];
 
     if (monsterCanAttack) {
 
         // If current context is a location, search it's actions for monsters and tell them to attack
         if (currentContextType === 1)
-            contextActions = locationsModified[currentContext].actions;
+            monsters = locationsModified[currentContext].monsters;
         // If we're already fighting a monster, use the stored location to search for monsters
         else if (currentContextType === 3)
-            contextActions = locationsModified[storedLocation].actions;
+            monsters = locationsModified[storedLocation].monsters;
 
-        contextActions.forEach((element, index) => {
-            
-            if (element.type === 3) {
-                
-                monstersPresent = true;
-                
-                let index = getContextIndexFromKeyword(element.keyword, 3);
+        if (monsters.length > 0) {
+
+            monstersPresent = true;
+
+            monsters.forEach((element, index) => {
+
+                let monster = monstersModified[getElementFromKeyword(element, monstersModified)];
 
                 // Evasion chance
                 let evasionNumber = Math.floor(Math.random() * 101);                
 
                 if (evasionNumber <= evasion) {
 
-                    monstersActionString +=  "You evade the " + monstersModified[index].shortTitle + "'s attack."                    
+                    monstersActionString +=  "You evade the " + monster.shortTitle + "'s attack."                    
                 }
                 else {      
 
-                    let monsterDamage = Math.max(0, monstersModified[index].power - defence);        
+                    let monsterDamage = Math.max(0, monster.power - defence);        
                     hpCurrent -= monsterDamage;
                     if (monstersActionString != "") monstersActionString += "\n";
-                    monstersActionString += "The " + monstersModified[index].shortTitle + " does " + monsterDamage + " damage to you.";
+                    monstersActionString += "The " + monster.shortTitle + " does " + monsterDamage + " damage to you.";
                 }
-            }
-        });    
+            });            
+        }        
     }
 
     if (!monstersPresent)
@@ -1940,9 +1950,9 @@ function runAway() {
 
 function monsterDeath() {
     
-    let monsterIndex = getActionIndexFromKeyword(monstersModified[currentContext].keyword, storedLocation, 1); // We're looking for the index of the monster, it will always be in the storedLocation which will always be type 1, storedLocation is the primary context, and the monster we are fighting is the secondary context
+    let monsterIndex = locationsModified[storedLocation].monsters.indexOf(monstersModified[currentContext].keyword);
+    locationsModified[storedLocation].monsters.splice(monsterIndex,1);
 
-    locationsModified[storedLocation].actions.splice(monsterIndex, 1);   // Remove the monster from the location array that it was contained in
     let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].insight + " insight and " +  monstersModified[currentContext].gold + " gold";
 
     insight += monstersModified[currentContext].insight;
@@ -2396,10 +2406,9 @@ function save() {
         let item = itemsModified[getContextIndexFromKeyword(element,4)];
         if (item.canEquip && item.equipped) {
             
-            if (item.actions != null && item.actions != undefined && item.actions != "") {
-                let actionArray = item.actions.split(',');
+            if (item.actions.length > 0) {
                 
-                actionArray.forEach((element, index) => {
+                item.actions.forEach((element, index) => {
                         
                     array.push(actions[getElementFromKeyword(element, actions)]);            
                 });            
@@ -2446,7 +2455,7 @@ function save() {
   }
 
   function formatData() {
-
+    
     locationsModified = JSON.parse(JSON.stringify(locations));
 
     locationsModified.forEach((element,index) => {
@@ -2458,6 +2467,7 @@ function save() {
     
     npcsModified = JSON.parse(JSON.stringify(npcs));
     monstersModified = JSON.parse(JSON.stringify(monsters));
+    narrationsModified = JSON.parse(JSON.stringify(narrations));
 
     itemsModified = JSON.parse(JSON.stringify(items));
 
