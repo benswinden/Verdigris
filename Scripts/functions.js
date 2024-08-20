@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.021;
+let version = 0.022;
 
 let insight = 0;
 let hpCurrent = 10;
