@@ -1,8 +1,8 @@
 keyword,title,description,narration,update,items,monsters,npcs,north,west,east,south
 edge_wood,Edge of the Woods,The darkened woods have slowly given way to shrubs and saplings where the forest meets the fields. A well-worn trail leads downhill to the ruins of an ancient city.,beginning,You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.,green_herb_pickup,,default_camp,,,city_outskirts,
-city_outskirts,City Outskirts,An old cobbled road leads you in among the ruined settlement. The buildings here are nothing more than cadaverous moss-covered remains.,outskirts,,green_herb_pickup,goblin_01,,,edge_wood,crossroads,
+city_outskirts,City Outskirts,An old cobbled road leads you in among the ruined settlement. The buildings here are nothing more than cadaverous moss-covered remains.,outskirts,,,goblin_01,,,edge_wood,crossroads,
 crossroads,The Crossroads,All roads in this great city once came together here. Pathways spread forth from here to all corners of the ruins.,city_enter,,green_herb_pickup,,,kings_road,city_outskirts,lake_shore,temple_market
-temple_market,The Temple Market,"A winding street, that once lead to a place of worship. The stones here are covered in rich green and purple mosses.\n\nPropped up inside a ruined wall is a makeshift tent, providing some respite from the dripping rain. From within, a small campfire is flickering away.",,A soft rain sifts through the gray clouds above.,,,"descendent,messenger",crossroads,,,templefront
+temple_market,The Temple Market,"A winding street, that once lead to a place of worship. The stones here are covered in rich green and purple mosses.<br>Propped up inside a ruined wall is a makeshift tent, providing some respite from the dripping rain. From within, a small campfire is flickering away.",,A soft rain sifts through the gray clouds above.,,,"descendent,messenger",crossroads,,,templefront
 templefront,The Templefront,"A great temple stands before, it's walls have stood the test of time much better than most of this place.\n\nIt's made of a white stone that gleams under the moistness in the air.",,Standing imposingly to the south is an ancient stone golem. It's head turns to face you.,green_herb_pickup,temple_golem,,temple_market,,,temple_arcades
 temple_arcades,The Temple Arcades,TO DO,,,,,,templefront,,,
 kings_road,The King's Road,What was once a wide causeway for traders heading to the Temple Market is now home to the fallen remains of the tall stone buildings that once lined it.,,,,,,kings_gate,lamplit_ruin,sheltered_nook,crossroads
@@ -10,7 +10,8 @@ lamplit_ruin,A Lamplit Ruin,"A damp, mucky interior lit by the glow of a gently 
 kings_gate,King's Gate,A crumbling wall still stands holding the arch of the old King's Gate.,,,green_herb_pickup,,thornhood_kijil,gate_stairwell,,,kings_road
 gate_stairwell,The Gate Stairwell,The interior of the King's Gate foritifications hold a collapsed stone staircase that once lead up into the battlements.,,,,,thornhood_soja,,,,kings_gate
 sheltered_nook,A Sheltered Nook,You managed to find a cranny amongst the ruins with four walls and some degree of shelter from the rain.,,,green_herb_pickup,large_rat,,,kings_road,,
-lake_shore,Shore of the Black Lake,The city ruins collapse away into the perfectly still waters of the Black Lake.\n\nPainted deep in the water's depths is a vision of the castle. It calls to you.,approach_lake,,,,,,crossroads,,
+lake_shore,Shore of the Black Lake,The city ruins collapse away into the perfectly still waters of the Black Lake.<br>Painted deep in the water's depths is a vision of the castle. It calls to you.,approach_lake,,,,,,crossroads,,
+,,,,,,,,,,,
 ,,,,,,,,,,,
 ,,,,,,,,,,,
 ,,,,,,,,,,,

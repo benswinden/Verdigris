@@ -117,7 +117,6 @@ const mainTitleActive = '#8F871E';
 const secondaryTitleActive = '#363718';
 
 // #region Containers
-let locations = [];
 
 let narrations = [
     {
@@ -128,6 +127,23 @@ let narrations = [
 ]
 
 let monsters = [];
+
+let locations = [    
+    {
+        keyword: "",
+        title: "",        
+        description: "",
+        narration: "",        
+        update: "",        
+        items: [],
+        monsters: [],
+        npcs: [],
+        north: "",
+        west: "",
+        east: "",
+        south: ""        
+    }
+]
 
 let npcs = [
     {
@@ -160,7 +176,7 @@ let items = [];
 let actions = [];
 
 var config = 
-{
+{    
 	header: true,
 	dynamicTyping: true,
 	skipEmptyLines: true
@@ -434,8 +450,7 @@ function updateContext() {
         secondaryTitle.style.display = "none";
         
         mainTitleText.innerText = locationsModified[currentContext].title;        
-        mainText.innerText = locationsModified[currentContext].description; 
-         
+        mainText.innerText = locationsModified[currentContext].description;         
     }
     // If currentLocationType != 1 - We are currently in a secondary context
     else if (currentContextType != 1) {
@@ -914,7 +929,7 @@ function updateButtons()  {
             // ITEM NAME
             let itemTitle = item.title;
             if (item.level != undefined && item.level > 0) itemTitle += " +" + item.level;
-            if (item.quantity != undefined && item.quantity > 0) itemTitle += " [ " + item.quantity + " ]";
+            if (inventoryOpen && item.quantity != undefined && item.quantity > 0) itemTitle += " [ " + item.quantity + " ]";
             clone.querySelector('.button-text').innerText = itemTitle;
             
             // ITEM DESCRIPTION
@@ -2454,17 +2469,9 @@ function save() {
     audio.play();      
   }
 
-  function formatData() {
-    
+  function formatData() {    
+
     locationsModified = JSON.parse(JSON.stringify(locations));
-
-    locationsModified.forEach((element,index) => {
-
-        element.items != null ? element.items = element.items.split(',') : element.items = [];
-        element.monsters != null ? element.monsters = element.monsters.split(',') : element.monsters = [];
-        element.npcs != null ? element.npcs = element.npcs.split(',') : element.npcs = [];
-    });    
-    
     npcsModified = JSON.parse(JSON.stringify(npcs));
     monstersModified = JSON.parse(JSON.stringify(monsters));
     narrationsModified = JSON.parse(JSON.stringify(narrations));

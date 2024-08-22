@@ -16,7 +16,7 @@ relic,"Broken piece of stone, etched with lines of power",relic,,pickupInsight,F
 corpse,"Your remains, aged and decayed down to bone",corpse,,pickupCorpse,FALSE,FALSE,FALSE,0,0,0,0,0,0,,
 green_herb,Young Green Herb,herb,,healGreenHerb,FALSE,FALSE,FALSE,0,0,0,0,0,0,,
 green_herb_pickup,Young Green Herb,herb,,pickupGreenHerb,FALSE,FALSE,FALSE,0,0,0,0,0,1,,
-,,,,,,,,,,,,,,,
+thorny_bramble,Thorny Bramble,bramble,"At the end of a winding garden pathway, a long row of thorny bramble blocks any further progress. It's almost odd in it's uniformity.",misc,FALSE,FALSE,FALSE,0,0,0,0,0,0,,
 ,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
