@@ -1,20 +1,23 @@
 
 locations = [
-
-    // Helow World
+    //----------------------//
+    //-- The Old Monastery 
+    //----------------------//
     {
         keyword: "east_gate",
-        title: "Eastgate",        
+        title: "The East Gate",        
         description: "A wide arched passage stood between two crumbling pieces of wall. It offered the Monastery little in terms of protection but the worn footpath leading outwards showed it still marked the border between the interior and the Valley beyond.",
-        narration: "",        
+        narration: "arrive_monastery",        
         update: "",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
+        npcs: ["ryth"],
         north: "",
-        west: "",
+        west: "shrouded_plaza",
         east: "",
-        south: ""        
+        south: "",
+        up: "",
+        down: ""        
     },
     {
         keyword: "shrouded_plaza",
@@ -22,13 +25,15 @@ locations = [
         description: "A field of grass and flowers sat at the feet of an ancient looking Monastery. Tall grass and leaves overhead formed a tight canopy, giving this place a feeling of comfort and protection.",
         narration: "",        
         update: "",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
-        north: "",
-        west: "",
-        east: "",
-        south: ""        
+        npcs: ["plaza_camp"],
+        north: "sanctum_steps",
+        west: "western_gardens",
+        east: "east_gate",
+        south: "library",
+        up: "",
+        down: ""        
     },
     {
         keyword: "sanctum_steps",
@@ -36,13 +41,15 @@ locations = [
         description: "The steps leading up toward the Monastery Sanctum meandered back and forth making the trip up to the ancient building unneccsarily long.\n\nSmooth stone appeared in patches among the clinging moss and lichen that covered it.",
         narration: "",        
         update: "",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
-        north: "",
+        npcs: [],
+        north: "sanctum_hall",
         west: "",
         east: "",
-        south: ""        
+        south: "shrouded_plaza",
+        up: "",
+        down: "western_gardens"        
     },
     {
         keyword: "sanctum_hall",
@@ -50,13 +57,15 @@ locations = [
         description: "Shafts of light shone through old glass windows, illuminating a cavernous space inside the Monastery Sanctum.",
         narration: "",        
         update: "",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
-        north: "",
+        npcs: [],
+        north: "sanctum_altar",
         west: "",
         east: "",
-        south: ""        
+        south: "sanctum_steps",
+        up: "",
+        down: "kitchen"        
     },
     {
         keyword: "sanctum_altar",
@@ -64,13 +73,15 @@ locations = [
         description: "At the back of the Sanctum Hall was a low altar covered with ceramic dishes containing various offerings.\n\nDraped in shadow and standing watch over the altar was a large guardian-dog statue.\n\nIt's eyes were fierce and you swore you could see a flicker of flame within them.",
         narration: "",        
         update: "",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
+        npcs: [],
         north: "",
         west: "",
         east: "",
-        south: ""        
+        south: "sanctum_hall",
+        up: "",
+        down: ""        
     },
     {
         keyword: "kitchen",
@@ -78,41 +89,31 @@ locations = [
         description: "A series of low vaulted chambers meant to hold countless stocks of food and preserves, though they had been emptied long ago and never re-stocked.\n\nA warm light illuminated the chambers where a make shift kitchen had been constructed.",
         narration: "cellar",        
         update: "The smell of spices caught your nose and drew you to a dark stairway.",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
+        npcs: ["oryan"],
         north: "",
         west: "",
         east: "",
-        south: ""        
-    },
-    {
-        keyword: "sanctum_hall",
-        title: "The Sanctum Hall",
-        description: "Shafts of light shone through old glass windows, illuminating a cavernous space inside the Monastery Sanctum.",
-        narration: "",        
-        update: "",        
-        items: [""],
-        monsters: [],
-        npcs: [""],
-        north: "",
-        west: "",
-        east: "",
-        south: ""        
+        south: "",
+        up: "sanctum_hall",
+        down: ""        
     },
     {
         keyword: "library",
         title: "The Forest Library",
-        description: "Once a place of gathered knowledge, it had long since been left to the earth.\n\nThe floor sunken away to grass and soil, vines crawled up the clay walls and the stalk of a flower pushed it's way up and out of large hole in the ceiling.\n\nAt the back of the chamber, a staircase spiraled it's way upwards",
+        description: "Once a place of gathered knowledge, it had long since been left to the earth, the floor sunken away to grass and soil, vines crawled up the clay walls.\n\nAt the back of the chamber, a staircase spiraled it's way upwards",
         narration: "library",        
         update: "",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
-        north: "",
+        npcs: [],
+        north: "shrouded_plaza",
         west: "",
         east: "",
-        south: ""        
+        south: "",
+        up: "workshop",
+        down: ""        
     },
     {
         keyword: "workshop",
@@ -120,13 +121,15 @@ locations = [
         description: "A circular room at the uppermost floor of the Library with windows overlooking the surrounding Monastery grounds.\n\nA collection of work benches and strange contraptions sat in the middle of the room looking somewhat out of place.",
         narration: "workshop",        
         update: "",        
-        items: [""],
+        items: [],
         monsters: [],
-        npcs: [""],
+        npcs: [],
         north: "",
         west: "",
         east: "",
-        south: ""        
+        south: "",
+        up: "",
+        down: "library"        
     },
     {
         keyword: "western_gardens",
@@ -136,11 +139,13 @@ locations = [
         update: "",        
         items: ["thorny_bramble"],
         monsters: [],
-        npcs: [""],
+        npcs: ["morgan"],
         north: "",
         west: "",
-        east: "",
-        south: ""        
+        east: "shrouded_plaza",
+        south: "",
+        up: "sanctum_steps",
+        down: ""        
     },
     
 
@@ -154,11 +159,13 @@ locations = [
         update: "You awaken as if from a stupor. The last weeks blur together in your mind and where they've lead you is not entirely clear.",        
         items: ["green_herb_pickup"],
         monsters: [],
-        npcs: ["default_camp"],
+        npcs: ["plaza_camp"],
         north: "",
         west: "",
         east: "city_outskirts",
-        south: ""        
+        south: "",
+        up: "",
+        down: ""        
     },
     {
         keyword: "city_outskirts",
@@ -172,7 +179,9 @@ locations = [
         north: "",
         west: "edge_wood",
         east: "crossroads",
-        south: ""
+        south: "",
+        up: "",
+        down: ""
     },        
     {
         keyword: "crossroads",
@@ -185,7 +194,9 @@ locations = [
         north: "kings_road",
         west: "city_outskirts",
         east: "lake_shore",
-        south: "temple_market"
+        south: "temple_market",
+        up: "",
+        down: ""
     },
     {
         keyword: "temple_market",
@@ -199,7 +210,9 @@ locations = [
         north: "crossroads",
         west: "",
         east: "",
-        south: "templefront"
+        south: "templefront",
+        up: "",
+        down: ""
     },    
     {
         keyword: "templefront",
@@ -213,7 +226,9 @@ locations = [
         north: "temple_market",
         west: "",
         east: "",
-        south: "temple_arcades"
+        south: "temple_arcades",
+        up: "",
+        down: ""
     },
     {
         keyword: "temple_arcades",
@@ -226,7 +241,9 @@ locations = [
         north: "templefront",
         west: "",
         east: "",
-        south: ""
+        south: "",
+        up: "",
+        down: ""
     },
     {
         keyword: "kings_road",
@@ -239,7 +256,9 @@ locations = [
         north: "kings_gate",
         west: "lamplit_ruin",
         east: "sheltered_nook",
-        south: ""
+        south: "",
+        up: "",
+        down: ""
     },
     {
         keyword: "lamplit_ruin",
@@ -252,7 +271,9 @@ locations = [
         north: "",
         west: "",
         east: "kings_road",
-        south: ""
+        south: "",
+        up: "",
+        down: ""
     },
     {
         keyword: "kings_gate",
@@ -265,7 +286,9 @@ locations = [
         north: "gate_stairwell",
         west: "",
         east: "",
-        south: "kings_road"
+        south: "kings_road",
+        up: "",
+        down: ""
     },
     {
         keyword: "gate_stairwell",
@@ -278,7 +301,9 @@ locations = [
         north: "",
         west: "",
         east: "",
-        south: "kings_gate"
+        south: "kings_gate",
+        up: "",
+        down: ""
     },
     {
         keyword: "sheltered_nook",
@@ -291,7 +316,9 @@ locations = [
         north: "",
         west: "kings_road",
         east: "",
-        south: ""
+        south: "",
+        up: "",
+        down: ""
     },
     {
         keyword: "lake_shore",
@@ -304,7 +331,9 @@ locations = [
         north: "",
         west: "crossroads",
         east: "",
-        south: ""
+        south: "",
+        up: "",
+        down: ""
     }
 
 ];

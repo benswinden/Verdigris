@@ -39,6 +39,20 @@ narrations = [
             "The retched waters sit like a scar where once Balmora's great castle stood.\n\nThe water is so still you feel as though you could stride into the image within."
         ]        
     },
+
+
+    //----------------------//
+    //-- The Old Monastery 
+    //----------------------//
+    {
+        keyword: "arrive_monastery",
+        seen: false,
+        text: [
+            "Through the vine and brush, up from the river's shore to the north and west.\n\nYou walked for what remained of the day, arriving finally on a well worn path as the sun fell.",
+            "The trail meandered slowly, back and forth until the foliage broke, leaving a wide clearing in front of you and looming at the far end, the Eastern Gate of the Old Monastery.",
+            "Older than most things man-made in this place. Once a flourishing place of worship, it had been left to decay and to slowly sink into the soft earth."
+        ]        
+    },
     {
         keyword: "cellar",
         seen: false,
@@ -75,4 +89,38 @@ narrations = [
             "You eventually arrive at a dead end. A long wall of thorns and leaves, in a shape that strikes you as odd."
         ]        
     },
+
+    //----------------------//
+    //-- The Old Monastery - Dialogue
+    //----------------------//
+
+    {
+        keyword: "groundskeeper_0",
+        seen: false,
+        text: [
+            "You met the Keeper who tended the Monastery's grounds amongst the blooming vine tangles.",
+            "They stood tall, ducking slightly to pass beneath the arches of reaching stem. Somehow managing to avoid the thorns that had been snagging you every few steps.",
+            "Around their waist, a heavy smock held a pair of shears, a spade and a length of rope. Dirt ran all the way up their arms to the elbow.",
+            "You couldn't tell what exactly they were tending to as the bushes and flowers here looked as unkept as anywhere else."
+        ]        
+    },
+    {
+        keyword: "oryan_0",
+        seen: false,
+        text: [
+            "\"I've got to stay busy. It's the only thing that keeps my mind off of, well you know.\""            
+        ]        
+    },
+    {
+        keyword: "ryth_0",
+        seen: false,
+        text: [
+            "She struck such a handsome figure there, reclining casually in the grass with the old Monastery walls rising behind her.",
+            "Clever words came easily to her lips in a way that elicited both your admiration and consternation, unsure whether you were her co-conspirator or the butt of her jokes.",
+            "Her laughter was enchanting and soon enough you found yourself laughing alongside her.",
+            "She drew you close and spoke to you in a hushed whisper.\n\nShe told you of the extraordinary treasure that could be had in the ancient city to the east.",            
+            "If you were looking for a way into the city, she could certainly help, she said.\n\nFor a price."
+        ]        
+    }
+    
 ]

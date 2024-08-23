@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.022;
+let version = 0.023;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -49,8 +49,7 @@ let corpseLocation = -1;
 
 // Debug
 let showDebugLog = true;
-let debugStartContext = 0;
-let debugStartType = 1;
+let debugStartContext = "east_gate";
 let debugWindowActive = false;
 
 // Stats
@@ -141,7 +140,9 @@ let locations = [
         north: "",
         west: "",
         east: "",
-        south: ""        
+        south: "",
+        up: "",
+        down: "",        
     }
 ]
 
@@ -162,12 +163,6 @@ let npcs = [
                 keyword: "",
                 func: ""
             }            
-        ],
-        dialogue: [
-            {                                            
-                text: "",                
-                func: ""
-            }
         ]
     }
 ];
@@ -204,14 +199,6 @@ const promise3 = fetch('Data/actions.csv')
     actions = Papa.parse(data, config).data;
     // Filter out empty rows
     actions = actions.filter(({ keyword }) => keyword != null);
-});
-
-const promise4 = fetch('Data/locations.csv')
-  .then((response) => response.text())
-  .then((data) => { 
-    locations = Papa.parse(data, config).data;
-    // Filter out empty rows
-    locations = locations.filter(({ keyword }) => keyword != null);
 });
 
 
@@ -260,6 +247,9 @@ function initializeGame() {
 
         if (showDebugLog) console.log("Save game doesn't exist");        
         
+        // Using JSON to create deep clones of our starting data arrays
+        formatData();
+
         insight = 0;
         hpCurrent = 40;
         hpMax = 40;
@@ -289,13 +279,12 @@ function initializeGame() {
             contextType: 1,
             storedLocation: -1
         }
-        corpseLocation = -1;
-        
-        // Using JSON to create deep clones of our starting data arrays
-        formatData();
+        corpseLocation = -1;            
 
         save();
-        changeContextDirect(debugStartContext, debugStartType);
+
+        let startContext = getContextIndexFromKeyword(debugStartContext, 1);
+        changeContextDirect(startContext, 1);
     }
 }
 
@@ -375,6 +364,8 @@ function changeContext(keyword, contextType) {
 // Used to go directly to a known context
 function changeContextDirect(contextIndex, contextType) {
     
+    narrationOpen = false;
+
     let keyword = "";
     switch (contextType) {
         case 1://Location
@@ -424,9 +415,11 @@ function updateContext() {
         // First time visiting this location, check whether there is a narration to play first
         if (!locationVisited) {
             
+            // Check whether this location has a narration keyword
             if (locationsModified[currentContext].narration != undefined && locationsModified[currentContext].narration != "") {
-                // Check if this narration has already been seen                
-                if (narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)] != undefined && narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)].seen === false) {
+                
+                // Check if the matching narration to this keyword has already been seen                
+                if (narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)] != undefined && !narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)].seen) {
 
                     displayNarration(locationsModified[currentContext].narration);
                     return;
@@ -561,28 +554,44 @@ function updateButtons()  {
                 
                 // NORTH            
                 contextActions.push({
-                    type: locationsModified[currentContext].north === null ?  2 : 1,
-                    title: locationsModified[currentContext].north === null ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,
+                    type: locationsModified[currentContext].north === "" ?  2 : 1,
+                    title: locationsModified[currentContext].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,
                     keyword: locationsModified[currentContext].north
                 });
                 // WEST
                 contextActions.push({
-                    type: locationsModified[currentContext].west === null ? 2 : 1,
-                    title: locationsModified[currentContext].west === null ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
+                    type: locationsModified[currentContext].west === "" ? 2 : 1,
+                    title: locationsModified[currentContext].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
                     keyword: locationsModified[currentContext].west
                 });
                 // EAST
                 contextActions.push({
-                    type: locationsModified[currentContext].east === null ? 2 : 1,
-                    title: locationsModified[currentContext].east === null ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
+                    type: locationsModified[currentContext].east === "" ? 2 : 1,
+                    title: locationsModified[currentContext].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
                     keyword: locationsModified[currentContext].east
                 });
                 // SOUTH
                 contextActions.push({
-                    type: locationsModified[currentContext].south === null ? 2 : 1,
-                    title: locationsModified[currentContext].south === null ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
+                    type: locationsModified[currentContext].south === "" ? 2 : 1,
+                    title: locationsModified[currentContext].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
                     keyword: locationsModified[currentContext].south
                 });
+                // UP
+                if (locationsModified[currentContext].up != "") {
+                    contextActions.push({
+                        type: 1,
+                        title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].up, locationsModified)].title,
+                        keyword: locationsModified[currentContext].up
+                    });
+                }
+                // Down
+                if (locationsModified[currentContext].down != "") {
+                    contextActions.push({
+                        type: 1,
+                        title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].down, locationsModified)].title,
+                        keyword: locationsModified[currentContext].down
+                    });
+                }
                 
                 items = locationsModified[currentContext].items;
                 monsters = locationsModified[currentContext].monsters;
@@ -594,8 +603,24 @@ function updateButtons()  {
                 break;
             case 4://Item            
                 break;
-            case 5://NPC            
-                contextActions = npcsModified[currentContext].actions;
+            case 5://NPC
+
+                contextActions = JSON.parse(JSON.stringify(npcsModified[currentContext].actions));
+
+                // Add the default actions for all NPCs
+                if (npcsModified[currentContext].dialogueAvailable != null) {
+                    contextActions.push({
+                        type: 6,
+                        title: "Talk",
+                        func: "talk"
+                    });
+                }
+                contextActions.push({
+                    type: 6,
+                    title: "Leave",
+                    func: "returnToPrimaryContext"
+                });
+
                 items = npcsModified[currentContext].items;
                 break;
         }     
@@ -830,6 +855,7 @@ function updateButtons()  {
 
         //  NPCS
         // Set up any new buttons, starting where we left off
+        
         if (npcs != undefined && npcs.length > 0) {
             
             npcs.forEach((element, index) => {
@@ -963,23 +989,29 @@ function updateButtons()  {
                 // 1: Location = Take 
                 case 1:
                     document.querySelector("nav").appendChild(clone);
-                    secondaryButtonDisplayed = true;
-                    secondaryButtonText.innerText = "Take";
-                    let _currentContext = currentContext;       // Storing this value as it changes before we can use it to remove the item
 
-                    if (item.itemType != undefined && item.itemType === "pickupGold")
-                        secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
-                    else if (item.itemType != undefined && item.itemType === "pickupInsight")
-                        secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
-                    else if (item.itemType != undefined && item.itemType === "pickupCorpse")
-                        // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
-                        secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
-                    else if (item.itemType != undefined && item.itemType === "pickupHeal")
-                        secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
-                    else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
-                        secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
+                    if (item.canTake) {
+                        secondaryButtonDisplayed = true;
+                        secondaryButtonText.innerText = "Take";
+
+                        let _currentContext = currentContext;       // Storing this value as it changes before we can use it to remove the item
+
+                        if (item.itemType != undefined && item.itemType === "pickupGold")
+                            secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupInsight")
+                            secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupCorpse")
+                            // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
+                            secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupHeal")
+                            secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
+                            secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
+                        else
+                            secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
+                    }
                     else
-                        secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
+                        secondaryButtonDisplayed = false;
 
                     break;
 
@@ -1149,7 +1181,7 @@ function go(direction) {
     let dir = "";
 
     // This function only works while in a location context
-    if (currentContextType === 1) {
+    if (currentContextType === 1 || narrationOpen) {
 
         if (direction != 4 && activeDirections.indexOf(direction) === -1) { if (showDebugLog) console.log("go - [" + direction + "] is not an active direction."); return; }
                 
@@ -1170,9 +1202,9 @@ function go(direction) {
                 dir = "Next";                
                 break;        
         }
-
+        
         buttonList.forEach((element) => {
-
+        
             if (element.innerText.includes(dir))
                 element.onclick();
         });
@@ -1284,7 +1316,7 @@ function replaceAction(context, contextType, action, index) {
 function displayNarration(narrationKeyword) {
     
     if (showDebugLog) console.log("displayNarration() - ");
-    
+        
     if (narrationKeyword != undefined) {
         currentNarration = narrationKeyword;
         currentNarrationIndex = 0;
@@ -1296,6 +1328,7 @@ function displayNarration(narrationKeyword) {
     narrationOpen = true;
     updateButtons();
 
+    saleTitle.style.display = "none";
     narrationText.style.display = "none";    
     monsterHpSection.style.display = "none";
     mainTitleText.style.color = mainTitleActive;
@@ -1311,7 +1344,7 @@ function displayNarration(narrationKeyword) {
 
 function continueNarration() {
 
-    if (showDebugLog) console.log("displayNarration() - ");
+    if (showDebugLog) console.log("continueNarration() - ");
 
     currentNarrationIndex++;
     if (narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length > currentNarrationIndex)
@@ -2002,26 +2035,13 @@ function returnToPrimaryContext() {
 }
 
 function talk() {
-    resetUpdateText();
 
     if (currentContextType == 5) {
 
-        // Check to make sure there is a dialogue to play
-        if (npcsModified[currentContext].dialogue.length > npcsModified[currentContext].currentDialogue) {
-            
-            addUpdateText(npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].text);
-            npcsModified[currentContext].dialogueAvailable = false;
-            
-            // Check if there is a function call attached to this dialogue
-            if (npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].func != "") {
-                doAction(npcsModified[currentContext].dialogue[npcsModified[currentContext].currentDialogue].func, false);
-            }
-
-            save();
-            updateButtons();
-        }
-
-        playerActionComplete(true);
+        let dialogueString = npcsModified[currentContext].keyword + "_" + npcsModified[currentContext].currentDialogue;
+        
+        displayNarration(dialogueString);
+        npcsModified[currentContext].dialogueAvailable = false;
     }
     else
         console.error("talk - Somehow this was called but the current context is not an NPC")
@@ -2368,22 +2388,27 @@ function save() {
   function getContextIndexFromKeyword(keyword, contextType) {
     
     ar = [];
+    let cType = ""
     switch (contextType) {
         case 1://Location
         
             ar = locationsModified;
+            cType = "locations";
             break;
         case 3://Monster
             ar = monstersModified;
+            cType = "monsters";
             break;
         case 4://Item
             ar = itemsModified;
+            cType = "items";
             break;
         case 5://NPC
             ar = npcsModified;
+            cType = "npcs";
             break;
     }
-
+    
     let index = -1;
     
     ar.forEach((element, i) => {        
@@ -2393,7 +2418,7 @@ function save() {
         }
     });
     
-    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] of context type [" + contextType + "]");
+    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] of context type [" + cType + "]");
     return index;
   }
 
@@ -2479,7 +2504,7 @@ function save() {
     itemsModified = JSON.parse(JSON.stringify(items));
 
     itemsModified.forEach((element,index) => {
-
+        
         element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
         element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
     }); 

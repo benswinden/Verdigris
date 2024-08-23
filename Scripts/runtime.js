@@ -84,7 +84,7 @@ resetLocationsCheckbox.onclick = function() {
 };
 
 // We wait till all async processes have completed before starting the game
-Promise.all([promise1, promise2, promise3, promise4]).then((values) => {
+Promise.all([promise1, promise2, promise3]).then((values) => {
     
     initializeGame();
   });
