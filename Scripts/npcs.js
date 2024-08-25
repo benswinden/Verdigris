@@ -12,6 +12,7 @@ npcs = [
         description: "The Monastery's Keeper was tall and slender, standing among the roses and climbing vines of the Western Garden.",
         dialogueAvailable: true,
         currentDialogue: 0,
+        items: [],
         actions: [         
         ]
     },    
@@ -32,18 +33,18 @@ npcs = [
         ]
     },
     {
-        keyword: "Ryth",
-        title: "Ryth",
+        keyword: "ryth",
+        title: "Ryth, the Vagrant",
         shortTitle: "ryth",        
         description: "A long jacket, hung to the top of her heavy boots. Thick hair and rough cut bangs framed a face you didn't trust from the very beginning.",
         dialogueAvailable: true,
         currentDialogue: 0,
-        items: [],
+        items: ["town_map"],
         actions: [            
         ]
     },
     {
-        keyword: "plaza_camp",
+        keyword: "camp",
         title: "Camp",
         shortTitle: "camp",
         description: "You take out your bedroll and make a small cookfire. This is as good a place as any to take stock of your situation, and prepare for the journey ahead.",

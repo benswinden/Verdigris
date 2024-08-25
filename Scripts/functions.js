@@ -27,10 +27,12 @@ let currentContext = 0;         // Index of the current displayed context. Index
 let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
+let areasVisited = [];          // A list of areas we have already visited
 
 let currentNarration = "";
 let currentNarrationIndex = 0;
 let narrationOpen = false;
+let titleOpen = false;
 
 let activeDirections = [];      // Array that contains which directions (0=north, 1=west, 2=east, 3=south ) have active buttons currently
 
@@ -49,7 +51,8 @@ let corpseLocation = -1;
 
 // Debug
 let showDebugLog = true;
-let debugStartContext = "east_gate";
+let debugStartContext = "edge_garden";
+let debugRespawn = "edge_garden";
 let debugWindowActive = false;
 
 // Stats
@@ -58,6 +61,7 @@ const hpText = document.querySelector('#hp-text');
 const goldText = document.querySelector('#gold-text');
 const inventoryIcon = document.querySelector('#inventory-icon');
 // Main Content
+const mainTitle =  document.querySelector('#main-title');
 const mainTitleText =  document.querySelector('#main-title-text');
 const secondaryTitle =  document.querySelector('#secondary-title');
 const secondaryTitleText =  document.querySelector('#secondary-title-text');
@@ -111,10 +115,6 @@ let resetLocations = false;     // We use this for debug, when selected on reloa
 
 let createdItemButtons = [];
 
-//Colors
-const mainTitleActive = '#8F871E';
-const secondaryTitleActive = '#363718';
-
 // #region Containers
 
 let narrations = [
@@ -129,6 +129,7 @@ let monsters = [];
 
 let locations = [    
     {
+        area: "",
         keyword: "",
         title: "",        
         description: "",
@@ -265,17 +266,19 @@ function initializeGame() {
         baseEvasion = 20;
                         
         updateStats();
-
-        currentStamina = maxStamina;        
+        
+        currentStamina = maxStamina;
 
         inventory = [];
         inventory.push("straight_sword","worn_shield","green_cloak","curse_mark", "silver_locket","strange_stone");
 
         storedLocation = -1;
         locationsVisited = [];
+        areasVisited = [];
 
+        let respawnIndex = getContextIndexFromKeyword(debugRespawn, 1);
         respawnLocation = {
-            context: 0,
+            context: respawnIndex,
             contextType: 1,
             storedLocation: -1
         }
@@ -390,13 +393,11 @@ function updateContext() {
     
     if (showDebugLog) console.log("updateContext - currentContext: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
 
-    narrationText.style.display = "none";
     resetUpdateText();
+    collapseStats();
+    narrationText.style.display = "none";
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
-
-    collapseStats();
-
     inventoryTitle.style.display = "none";
     equipmentTitle.style.display = "none";
     saleTitle.style.display = "none";
@@ -404,13 +405,18 @@ function updateContext() {
     // If we are updating to a location type - 
     if (currentContextType === 1) {    
 
-        // Check if we've already visited this location
-        let locationVisited = false;
-        locationsVisited.forEach((element, index) => {
+        // Check if we are entering a new area and should show the title card first
+        if (locationsModified[currentContext].area != "") {
 
-            if (currentContext == element)
-                locationVisited = true;
-        });
+            let areaVisited = areasVisited.indexOf(locationsModified[currentContext].area) != -1;
+            if (!areaVisited) {
+                displayTitle();
+                return;
+            }
+        }
+
+        // Check if we've already visited this location
+        let locationVisited = locationsVisited.indexOf(locationsModified[currentContext].keyword) != -1;        
 
         // First time visiting this location, check whether there is a narration to play first
         if (!locationVisited) {
@@ -439,7 +445,8 @@ function updateContext() {
             }
         }
 
-        mainTitleText.style.color = mainTitleActive;
+        mainTitle.classList = "";        
+        mainTitleText.classList = "";
         secondaryTitle.style.display = "none";
         
         mainTitleText.innerText = locationsModified[currentContext].title;        
@@ -449,7 +456,7 @@ function updateContext() {
     else if (currentContextType != 1) {
         
         mainTitleText.innerText = locationsModified[storedLocation].title;
-        mainTitleText.style.color = secondaryTitleActive;
+        mainTitleText.classList = "secondary";        
         secondaryTitle.style.display = "flex";
         
         // Change the array of actions we are looking at depending on the context type
@@ -538,6 +545,8 @@ function updateButtons()  {
     let items = [];
     let monsters = [];
     let npcs = [];
+
+    let lastButtonConfigured = null;          // We will store each button we configure as this, so that when we reach the right point, we can add special formatting to it
     
     if (narrationOpen) {
 
@@ -545,6 +554,14 @@ function updateButtons()  {
             type: 6,
             title: "Next",
             func: "continueNarration"
+            });
+    }
+    else if (titleOpen) {
+
+        contextActions.push({
+            type: 6,
+            title: "Continue",
+            func: "closeTitle"
             });
     }
     else {
@@ -656,17 +673,388 @@ function updateButtons()  {
         });
     }    
 
+    // Create buttons for items contained here
+    if (inventoryOpen) {
+        
+        items = JSON.parse(JSON.stringify(inventory));
+        if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", 4)].quantity = ore; items.splice(0,0, "ore"); }
+        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }
+        if (greenHerb > 0) { itemsModified[getContextIndexFromKeyword("green_herb", 4)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
+    }    
+    if (items != undefined && items.length > 0 && items != "") {
+                
+        // Functionality is defined by the context this button is in:
+        // 1: Location    2: Inventory Normal     3: Inventory + Monster      4: Vendor Buy        5: Vendor Upgrade
+        let buttonContext = -1;
+        // Location
+        if (currentContextType === 1) {
+            buttonContext = 1;
+        }    
+        if (currentContextType === 5) {
+            buttonContext = 4;
+        }
+        if (currentContextType != 3 && inventoryOpen) {
+            buttonContext = 2;
+        }
+        if (currentContextType === 3 && inventoryOpen) {
+            buttonContext = 3;
+        }
+        if (!inventoryOpen && upgradeMenuOpen)
+            buttonContext = 5;
+
+        // Create a button for each item contained in our array
+        items.forEach((element,index) => {
+            
+            let item = itemsModified[getContextIndexFromKeyword(element, 4)];
+            
+            let itemCostActive = false;            
+            let descriptionTextActive = false;
+            let upgradeMaterialCostActive = false
+
+            // Get all the elements for this specific button, deactivate things as though it was toggled off
+            const clone = itemButtonMaster.cloneNode(true);
+            lastButtonConfigured = clone;
+
+            const itemCostSection = clone.querySelector('.item-cost-section');        
+            const itemCostText = clone.querySelector('.item-cost-text');
+            const buttonChevron = clone.querySelector('.button-chevron');
+            const descriptionText = clone.querySelector('.description-section');            
+            const buttonStatSection = clone.querySelector('.button-stat-section');
+            const secondaryButton = clone.querySelector('.secondary-action-button');
+            const secondaryButtonText = clone.querySelector('.secondary-button-text');
+            const upgradeMaterialCost = clone.querySelector('.upgrade-material-cost');
+            clone.classList.remove('active');
+            itemCostSection.style.display = "none";
+            descriptionText.style.display = "none";
+            buttonStatSection.style.display = "none";
+            secondaryButton.style.display = "none";            
+            upgradeMaterialCost.style.display = "none";
+
+            // ITEM NAME
+            let itemTitle = item.title;
+            if (item.level != undefined && item.level > 0) itemTitle += " +" + item.level;
+            if (inventoryOpen && item.quantity != undefined && item.quantity > 0) itemTitle += " [ " + item.quantity + " ]";
+            clone.querySelector('.button-text').innerText = itemTitle;
+            
+            // ITEM DESCRIPTION
+            if (item.description != undefined && item.description != "") {
+                descriptionText.innerText = item.description;            
+                descriptionTextActive = true;
+            }
+            clone.style.display = "flex";
+            clone.onmouseover = (event) => { buttonChevron.querySelector('img').classList.add('hover'); };
+            clone.onmouseleave = (event) => { buttonChevron.querySelector('img').classList.remove('hover'); };        
+            createdItemButtons.push(clone);
+
+            clone.classList = "nav-button item-button can-hover";
+
+            let statSectionActive = false;
+            if (item.power != 0 || item.stamina != 0  || item.defence != 0 ) {
+                
+                statSectionActive = true;
+                clone.querySelector('.button-power-text').innerText = item.power;
+                clone.querySelector('.button-stamina-text').innerText = item.stamina;
+                clone.querySelector('.button-defence-text').innerText = item.defence;
+            }
+                    
+
+            // Context specific changes - items behave and display differently depending on the context we find them in, below are the contexts that can contain items          
+            // 1: Location = Take    2: Inventory = Equip / Unequip     3: Inventory + Monster = Use     4: Vendor Buy = Purchase        5: Vendor Upgrade = Upgrade
+            let secondaryButtonDisplayed = false;
+            let secondaryButtonActive = true;  
+            switch (buttonContext) {
+
+                // 1: Location = Take 
+                case 1:                    
+                    document.querySelector("nav").insertBefore(clone, button1);
+
+                    if (item.canTake) {
+                        secondaryButtonDisplayed = true;
+                        secondaryButtonText.innerText = "Take";
+
+                        let _currentContext = currentContext;       // Storing this value as it changes before we can use it to remove the item
+
+                        if (item.itemType != undefined && item.itemType === "pickupGold")
+                            secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupInsight")
+                            secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupCorpse")
+                            // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
+                            secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupHeal")
+                            secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                        else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
+                            secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
+                        else
+                            secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
+                    }
+                    else
+                        secondaryButtonDisplayed = false;
+
+                    break;
+
+                    // 2: Inventory = Equip / Unequip
+                case 2:
+
+                    // The healing item we can use from our inventory
+                    if (item.itemType != undefined && item.itemType === "healGreenHerb") {
+                        secondaryButtonDisplayed = true;
+                        secondaryButtonText.innerText = "Eat";
+                        secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(); playClick(); };                        
+                        inventorySection.appendChild(clone);
+                    }
+                    else {
+
+                        if (item.equipped)
+                            equipmentSection.appendChild(clone);                    
+                        else
+                            inventorySection.appendChild(clone);
+
+                        if (item.canEquip) {
+                            if (item.equipped)
+                                secondaryButtonText.innerText = "Unequip";                        
+                            else
+                                secondaryButtonText.innerText = "Equip";
+                        
+                            secondaryButtonDisplayed = true;                    
+                            secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
+                        }
+                    }
+                    break;
+
+                    // 3: Inventory + Monster = Use
+                case 3:
+                    
+                    break;
+
+                    // 4: Vendor Buy = Purchase 
+                case 4:
+                    itemCostActive = true;
+                    itemCostSection.style.display = "flex";
+                    itemCostText.innerText = item.cost;
+
+                    // Check if we can afford this item, style text red if we can't
+                    if (item.cost < gold) {
+                        itemCostText.classList = "item-cost-text active";  
+                        secondaryButtonActive = true;                      
+                    }
+                    else {
+                        itemCostText.classList = "item-cost-text inactive";
+                        secondaryButtonActive = false;
+                    }
+
+                    saleTitle.style.display = "block";
+                    saleSection.appendChild(clone);
+                    secondaryButtonDisplayed = true;
+                    secondaryButtonText.innerText = "Purchase";
+                    secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); };
+                    break;
+
+                    // 5: Vendor Upgrade = Upgrade
+                case 5:
+                    
+                    let costToUpgrade = item.level * 50 + 100;
+                    itemCostActive = true;
+                    itemCostSection.style.display = "flex";
+                    itemCostText.innerText = costToUpgrade;
+                    let notEnoughGold = false;
+
+                    // Check if we can afford this item, style text red if we can't
+                    if (costToUpgrade < gold) {
+                        itemCostText.classList = "item-cost-text active";  
+                        secondaryButtonActive = true;                      
+                    }
+                    else {
+                        itemCostText.classList = "item-cost-text inactive";
+                        notEnoughGold = true;
+                        secondaryButtonActive = false;
+                    }
+
+                    // Check if we have the necessary materials for this item
+                    let oreCost = 0; let leatherCost = 0;
+                    if (item.upgradeMaterial != undefined && item.upgradeMaterial.includes("ore"))
+                        oreCost = item.level * 3 + 1;
+                    if (item.upgradeMaterial != undefined && item.upgradeMaterial.includes("leather"))
+                        leatherCost = item.level * 5 + 3;
+
+                    if (oreCost === 0 && leatherCost === 0) {
+
+                        upgradeMaterialCostActive = false;
+                    }
+                    else {
+
+                        upgradeMaterialCostActive = true;
+                        let upgradeMaterialString = "";
+                        if (oreCost > 0) upgradeMaterialString += oreCost + " Refined Ore";
+                        if (leatherCost > 0) upgradeMaterialString += leatherCost + " Hardened Leather";
+                        upgradeMaterialCost.innerText = upgradeMaterialString;
+
+                        if (!notEnoughGold && ore > oreCost && leather > leatherCost) {
+                            upgradeMaterialCost.classList = "upgrade-material-cost active";                            
+                            secondaryButtonActive = true;
+                        }
+                        else {
+                            upgradeMaterialCost.classList = "upgrade-material-cost inactive";                        
+                            secondaryButtonActive = false;
+                        }
+                    }
+
+                    document.querySelector("nav").insertBefore(clone, button1);
+                    statSectionActive = false;                
+                    secondaryButtonDisplayed = true;
+                    secondaryButtonText.innerText = "Upgrade";
+                    secondaryButton.onclick = function() {  upgrade(item.keyword, costToUpgrade, oreCost, leatherCost); playClick(); };
+                    break;
+            }
+
+            // The function for opening and collapsing the button
+            let buttonOpened = false;
+            clone.onclick = function() { toggleButton(); playClick(); };           
+
+            function toggleButton() {
+
+                if (buttonOpened) {
+                    
+                    buttonOpened = false;
+                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
+                    clone.classList.remove('active');
+                    descriptionText.style.display = "none";
+                    buttonStatSection.style.display = "none";
+                    secondaryButton.style.display = "none";
+                    upgradeMaterialCost.style.display = "none";
+
+                    buttonChevron.querySelector('img').classList.add('chevron-closed');
+                    buttonChevron.querySelector('img').classList.remove('chevron-open');
+                }
+                else {
+                                        
+                    buttonOpened = true;
+                    clone.classList.add('active');
+                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
+                    if (descriptionTextActive) descriptionText.style.display = "block";
+                    if (statSectionActive) buttonStatSection.style.display = "block";
+                    if (secondaryButtonDisplayed) secondaryButton.style.display = "block";
+                    if (upgradeMaterialCostActive) upgradeMaterialCost.style.display = "block";
+                    if (secondaryButtonActive) { secondaryButton.classList.add('item-button'); secondaryButton.classList.remove('locked-item-button'); }
+                    else { secondaryButton.classList.remove('item-button'); secondaryButton.classList.add('locked-item-button'); }
+
+                    buttonChevron.querySelector('img').classList.add('chevron-open');
+                    buttonChevron.querySelector('img').classList.remove('chevron-closed');
+                }
+            }
+
+            if (!descriptionTextActive && !statSectionActive && !secondaryButtonDisplayed) {
+                buttonChevron.style.display = "none";
+                clone.classList = "nav-button locked-item-button";
+            }
+        });
+    }
+
     // Setup buttons based on actions within the action array
     if (!inventoryOpen) {
+        
+        //  MONSTERS
+        // Set up any new buttons, starting where we left off
+        let nextButton = 0;
 
+        if (monsters != undefined && monsters.length > 0 && monsters != "") {
+            
+            monsters.forEach((element, index) => {
+
+                switch (nextButton) {
+                    case 0:
+                        button = button1;
+                        break;
+                    case 1:
+                        button = button2;
+                        break;
+                    case 2:
+                        button = button3;
+                        break;
+                    case 3:
+                        button = button4;
+                        break;
+                    case 4:
+                        button = button5;
+                        break;
+                    case 5:
+                        button = button6;
+                        break; 
+                    case 6:
+                        button = button7;
+                        break;
+                    case 7:
+                        button = button8;
+                        break; 
+                }
+
+                button.classList = "nav-button can-hover monster-button";
+                button.querySelector('#button-level-icon').style.display = "block";
+                button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].level;
+                
+                button.onclick = function() {changeContext(element, 3); playClick();};   
+                button.querySelector('.button-text').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].title;
+                button.style.display = "flex";
+                lastButtonConfigured = button;
+                nextButton++;
+            });
+        }
+
+        //  NPCS
+        // Set up any new buttons, starting where we left off
+        
+        if (npcs != undefined && npcs.length > 0 && npcs != "") {
+            
+            npcs.forEach((element, index) => {
+
+                switch (nextButton) {
+                    case 0:
+                        button = button1;
+                        break;
+                    case 1:
+                        button = button2;
+                        break;
+                    case 2:
+                        button = button3;
+                        break;
+                    case 3:
+                        button = button4;
+                        break;
+                    case 4:
+                        button = button5;
+                        break;
+                    case 5:
+                        button = button6;
+                        break; 
+                    case 6:
+                        button = button7;
+                        break;
+                    case 7:
+                        button = button8;
+                        break; 
+                }
+
+                button.classList = "nav-button can-hover npc-button";
+                button.onclick = function() { changeContext(element, 5); playClick(); };
+                button.querySelector('.button-text').innerText = npcsModified[getContextIndexFromKeyword(element, 5)].title;
+                button.style.display = "flex";
+                lastButtonConfigured = button;
+                nextButton++;
+            });
+        }
+
+        // Add in the rest of context specific actions (i.e. Buttons for leaving the location etc.)
         if (contextActions.length > 0) {
+
+            if (lastButtonConfigured != null)
+                lastButtonConfigured.classList += " spacer";         // Before we create the rest of the buttons, we add some spacing in the list to separate the two categories of buttons
 
             contextActions.forEach((element, index) => {
                 
                 let additionalButtonString = "";        // If any additional text needs to be appended to a button
                 let button = button1;
                 
-                switch (index) {
+                switch (nextButton) {
                     case 0:
                         button = button1;
                         break;
@@ -804,385 +1192,21 @@ function updateButtons()  {
 
                 button.querySelector('.button-text').innerText = element.title + additionalButtonString;
                 button.style.display = "flex";
-            });
-        }
-
-        //  MONSTERS
-        // Set up any new buttons, starting where we left off
-        let nextButton = contextActions.length;
-
-        if (monsters != undefined && monsters.length > 0) {
-            
-            monsters.forEach((element, index) => {
-
-                switch (nextButton) {
-                    case 0:
-                        button = button1;
-                        break;
-                    case 1:
-                        button = button2;
-                        break;
-                    case 2:
-                        button = button3;
-                        break;
-                    case 3:
-                        button = button4;
-                        break;
-                    case 4:
-                        button = button5;
-                        break;
-                    case 5:
-                        button = button6;
-                        break; 
-                    case 6:
-                        button = button7;
-                        break;
-                    case 7:
-                        button = button8;
-                        break; 
-                }
-
-                button.classList = "nav-button can-hover monster-button";
-                button.querySelector('#button-level-icon').style.display = "block";
-                button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].level;
-                
-                button.onclick = function() {changeContext(element, 3); playClick();};   
-                button.querySelector('.button-text').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].title;
-                button.style.display = "flex";
                 nextButton++;
             });
         }
-
-        //  NPCS
-        // Set up any new buttons, starting where we left off
-        
-        if (npcs != undefined && npcs.length > 0) {
-            
-            npcs.forEach((element, index) => {
-
-                switch (nextButton) {
-                    case 0:
-                        button = button1;
-                        break;
-                    case 1:
-                        button = button2;
-                        break;
-                    case 2:
-                        button = button3;
-                        break;
-                    case 3:
-                        button = button4;
-                        break;
-                    case 4:
-                        button = button5;
-                        break;
-                    case 5:
-                        button = button6;
-                        break; 
-                    case 6:
-                        button = button7;
-                        break;
-                    case 7:
-                        button = button8;
-                        break; 
-                }
-
-                button.classList = "nav-button can-hover npc-button";
-                button.onclick = function() { changeContext(element, 5); playClick(); };
-                button.querySelector('.button-text').innerText = npcsModified[getContextIndexFromKeyword(element, 5)].title;
-                button.style.display = "flex";
-                nextButton++;
-            });
-        }
-    }
-    else  if (inventoryOpen) {
-        
-        items = JSON.parse(JSON.stringify(inventory));
-        if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", 4)].quantity = ore; items.splice(0,0, "ore"); }
-        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }
-        if (greenHerb > 0) { itemsModified[getContextIndexFromKeyword("green_herb", 4)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
-    }
-
-    // Create buttons for items contained here    
-    if (items != undefined && items.length > 0) {
-                
-        // Functionality is defined by the context this button is in:
-        // 1: Location    2: Inventory Normal     3: Inventory + Monster      4: Vendor Buy        5: Vendor Upgrade
-        let buttonContext = -1;
-        // Location
-        if (currentContextType === 1) {
-            buttonContext = 1;
-        }    
-        if (currentContextType === 5) {
-            buttonContext = 4;
-        }
-        if (currentContextType != 3 && inventoryOpen) {
-            buttonContext = 2;
-        }
-        if (currentContextType === 3 && inventoryOpen) {
-            buttonContext = 3;
-        }
-        if (!inventoryOpen && upgradeMenuOpen)
-            buttonContext = 5;
-
-        // Create a button for each item contained in our array
-        items.forEach((element,index) => {
-            
-            let item = itemsModified[getContextIndexFromKeyword(element, 4)];
-            
-            let itemCostActive = false;            
-            let descriptionTextActive = false;
-            let upgradeMaterialCostActive = false
-
-            // Get all the elements for this specific button, deactivate things as though it was toggled off
-            const clone = itemButtonMaster.cloneNode(true);
-
-            const itemCostSection = clone.querySelector('.item-cost-section');        
-            const itemCostText = clone.querySelector('.item-cost-text');
-            const buttonChevron = clone.querySelector('.button-chevron');
-            const descriptionText = clone.querySelector('.description-section');            
-            const buttonStatSection = clone.querySelector('.button-stat-section');
-            const secondaryButton = clone.querySelector('.secondary-action-button');
-            const secondaryButtonText = clone.querySelector('.secondary-button-text');
-            const upgradeMaterialCost = clone.querySelector('.upgrade-material-cost');
-            clone.classList.remove('active');
-            itemCostSection.style.display = "none";
-            descriptionText.style.display = "none";
-            buttonStatSection.style.display = "none";
-            secondaryButton.style.display = "none";            
-            upgradeMaterialCost.style.display = "none";
-
-            // ITEM NAME
-            let itemTitle = item.title;
-            if (item.level != undefined && item.level > 0) itemTitle += " +" + item.level;
-            if (inventoryOpen && item.quantity != undefined && item.quantity > 0) itemTitle += " [ " + item.quantity + " ]";
-            clone.querySelector('.button-text').innerText = itemTitle;
-            
-            // ITEM DESCRIPTION
-            if (item.description != undefined && item.description != "") {
-                descriptionText.innerText = item.description;            
-                descriptionTextActive = true;
-            }
-            clone.style.display = "flex";
-            clone.onmouseover = (event) => { buttonChevron.querySelector('img').classList.add('hover'); };
-            clone.onmouseleave = (event) => { buttonChevron.querySelector('img').classList.remove('hover'); };        
-            createdItemButtons.push(clone);
-
-            clone.classList = "nav-button item-button can-hover";
-
-            let statSectionActive = false;
-            if (item.power != 0 || item.stamina != 0  || item.defence != 0 ) {
-                
-                statSectionActive = true;
-                clone.querySelector('.button-power-text').innerText = item.power;
-                clone.querySelector('.button-stamina-text').innerText = item.stamina;
-                clone.querySelector('.button-defence-text').innerText = item.defence;
-            }
-                    
-
-            // Context specific changes - items behave and display differently depending on the context we find them in, below are the contexts that can contain items          
-            // 1: Location = Take    2: Inventory = Equip / Unequip     3: Inventory + Monster = Use     4: Vendor Buy = Purchase        5: Vendor Upgrade = Upgrade
-            let secondaryButtonDisplayed = false;
-            let secondaryButtonActive = true;  
-            switch (buttonContext) {
-
-                // 1: Location = Take 
-                case 1:
-                    document.querySelector("nav").appendChild(clone);
-
-                    if (item.canTake) {
-                        secondaryButtonDisplayed = true;
-                        secondaryButtonText.innerText = "Take";
-
-                        let _currentContext = currentContext;       // Storing this value as it changes before we can use it to remove the item
-
-                        if (item.itemType != undefined && item.itemType === "pickupGold")
-                            secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
-                        else if (item.itemType != undefined && item.itemType === "pickupInsight")
-                            secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
-                        else if (item.itemType != undefined && item.itemType === "pickupCorpse")
-                            // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
-                            secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
-                        else if (item.itemType != undefined && item.itemType === "pickupHeal")
-                            secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
-                        else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
-                            secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
-                        else
-                            secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
-                    }
-                    else
-                        secondaryButtonDisplayed = false;
-
-                    break;
-
-                    // 2: Inventory = Equip / Unequip
-                case 2:
-
-                    // The healing item we can use from our inventory
-                    if (item.itemType != undefined && item.itemType === "healGreenHerb") {
-                        secondaryButtonDisplayed = true;
-                        secondaryButtonText.innerText = "Eat";
-                        secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(); playClick(); };
-
-                        inventorySection.appendChild(clone);
-                    }
-                    else {
-
-                        if (item.equipped)
-                            equipmentSection.appendChild(clone);                    
-                        else
-                            inventorySection.appendChild(clone);
-
-                        if (item.canEquip) {
-                            if (item.equipped)
-                                secondaryButtonText.innerText = "Unequip";                        
-                            else
-                                secondaryButtonText.innerText = "Equip";
-                        
-                            secondaryButtonDisplayed = true;                    
-                            secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
-                        }
-                    }
-                    break;
-
-                    // 3: Inventory + Monster = Use
-                case 3:
-                    
-                    break;
-
-                    // 4: Vendor Buy = Purchase 
-                case 4:
-                    itemCostActive = true;
-                    itemCostSection.style.display = "flex";
-                    itemCostText.innerText = item.cost;
-
-                    // Check if we can afford this item, style text red if we can't
-                    if (item.cost < gold) {
-                        itemCostText.classList = "item-cost-text active";  
-                        secondaryButtonActive = true;                      
-                    }
-                    else {
-                        itemCostText.classList = "item-cost-text inactive";
-                        secondaryButtonActive = false;
-                    }
-
-                    saleTitle.style.display = "block";
-                    saleSection.appendChild(clone);
-                    secondaryButtonDisplayed = true;
-                    secondaryButtonText.innerText = "Purchase";
-                    secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); };
-                    break;
-
-                    // 5: Vendor Upgrade = Upgrade
-                case 5:
-                    
-                    let costToUpgrade = item.level * 50 + 100;
-                    itemCostActive = true;
-                    itemCostSection.style.display = "flex";
-                    itemCostText.innerText = costToUpgrade;
-                    let notEnoughGold = false;
-
-                    // Check if we can afford this item, style text red if we can't
-                    if (costToUpgrade < gold) {
-                        itemCostText.classList = "item-cost-text active";  
-                        secondaryButtonActive = true;                      
-                    }
-                    else {
-                        itemCostText.classList = "item-cost-text inactive";
-                        notEnoughGold = true;
-                        secondaryButtonActive = false;
-                    }
-
-                    // Check if we have the necessary materials for this item
-                    let oreCost = 0; let leatherCost = 0;
-                    if (item.upgradeMaterial != undefined && item.upgradeMaterial.includes("ore"))
-                        oreCost = item.level * 3 + 1;
-                    if (item.upgradeMaterial != undefined && item.upgradeMaterial.includes("leather"))
-                        leatherCost = item.level * 5 + 3;
-
-                    if (oreCost === 0 && leatherCost === 0) {
-
-                        upgradeMaterialCostActive = false;
-                    }
-                    else {
-
-                        upgradeMaterialCostActive = true;
-                        let upgradeMaterialString = "";
-                        if (oreCost > 0) upgradeMaterialString += oreCost + " Refined Ore";
-                        if (leatherCost > 0) upgradeMaterialString += leatherCost + " Hardened Leather";
-                        upgradeMaterialCost.innerText = upgradeMaterialString;
-
-                        if (!notEnoughGold && ore > oreCost && leather > leatherCost) {
-                            upgradeMaterialCost.classList = "upgrade-material-cost active";                            
-                            secondaryButtonActive = true;
-                        }
-                        else {
-                            upgradeMaterialCost.classList = "upgrade-material-cost inactive";                        
-                            secondaryButtonActive = false;
-                        }
-                    }
-
-                    document.querySelector("nav").appendChild(clone);                    
-                    statSectionActive = false;                
-                    secondaryButtonDisplayed = true;
-                    secondaryButtonText.innerText = "Upgrade";
-                    secondaryButton.onclick = function() {  upgrade(item.keyword, costToUpgrade, oreCost, leatherCost); playClick(); };
-                    break;
-            }
-
-            // The function for opening and collapsing the button
-            let buttonOpened = false;
-            clone.onclick = function() { toggleButton(); playClick(); };           
-
-            function toggleButton() {
-
-                if (buttonOpened) {
-                    
-                    buttonOpened = false;
-                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
-                    clone.classList.remove('active');
-                    descriptionText.style.display = "none";
-                    buttonStatSection.style.display = "none";
-                    secondaryButton.style.display = "none";
-                    upgradeMaterialCost.style.display = "none";
-
-                    buttonChevron.querySelector('img').classList.add('chevron-closed');
-                    buttonChevron.querySelector('img').classList.remove('chevron-open');
-                }
-                else {
-                                        
-                    buttonOpened = true;
-                    clone.classList.add('active');
-                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
-                    if (descriptionTextActive) descriptionText.style.display = "block";
-                    if (statSectionActive) buttonStatSection.style.display = "block";
-                    if (secondaryButtonDisplayed) secondaryButton.style.display = "block";
-                    if (upgradeMaterialCostActive) upgradeMaterialCost.style.display = "block";
-                    if (secondaryButtonActive) { secondaryButton.classList.add('item-button'); secondaryButton.classList.remove('locked-item-button'); }
-                    else { secondaryButton.classList.remove('item-button'); secondaryButton.classList.add('locked-item-button'); }
-
-                    buttonChevron.querySelector('img').classList.add('chevron-open');
-                    buttonChevron.querySelector('img').classList.remove('chevron-closed');
-                }
-            }
-
-            if (!descriptionTextActive && !statSectionActive && !secondaryButtonDisplayed) {
-                buttonChevron.style.display = "none";
-                clone.classList = "nav-button locked-item-button";
-            }
-        });
-    }
+    }    
 }
 
 // 0 = North 1 = West 2 = East 3 = South 4 = Next
 function go(direction) {
-
+    
     const buttonList = [button1, button2, button3, button4, button5, button6, button7, button8];
     let dir = "";
 
     // This function only works while in a location context
     if (currentContextType === 1 || narrationOpen) {
-
+        
         if (direction != 4 && activeDirections.indexOf(direction) === -1) { if (showDebugLog) console.log("go - [" + direction + "] is not an active direction."); return; }
                 
         switch (direction) {
@@ -1197,17 +1221,33 @@ function go(direction) {
                 break;
             case 3:
                 dir = "South";                
-                break;
-            case 4:
-                dir = "Next";                
-                break;        
+                break;            
         }
         
+        let buttonToClick = null;
         buttonList.forEach((element) => {
-        
-            if (element.innerText.includes(dir))
-                element.onclick();
+            
+            if (direction != 4) {
+
+                if (element.innerText.includes(dir)) {
+                    if (element.style.display === "flex")
+                        buttonToClick = element;
+                }
+            }
+            else {
+                
+                if (element.innerText.includes("Next") || element.innerText.includes("Continue")) {
+                    if (element.style.display === "flex")
+                        buttonToClick = element;
+                }
+            }                                    
         });
+
+        if (buttonToClick != null) {            
+            buttonToClick.onclick();
+        }
+        else
+            console.error("go - didn't find the right button");
     }
 }
 
@@ -1331,7 +1371,7 @@ function displayNarration(narrationKeyword) {
     saleTitle.style.display = "none";
     narrationText.style.display = "none";    
     monsterHpSection.style.display = "none";
-    mainTitleText.style.color = mainTitleActive;
+    mainTitleText.classList = "";;
     mainTitleText.innerText = "";
     secondaryTitle.style.display = "none";
     
@@ -1361,6 +1401,32 @@ function closeNarration() {
     changeContextDirect(currentContext, currentContextType);
 }
 
+function displayTitle() {
+    
+    if (showDebugLog) console.log("displayTitle() - ");
+    
+    titleOpen = true;
+    updateButtons();
+
+    areasVisited += locationsModified[currentContext].area;
+    let contextKeyword = locationsModified[currentContext].area + "_title";        
+
+    saleTitle.style.display = "none";
+    narrationText.style.display = "none";    
+    monsterHpSection.style.display = "none";
+    mainTitle.classList = "centered";
+    mainTitleText.classList = "";
+    mainTitleText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, 1)].title;
+    secondaryTitle.style.display = "none";        
+    mainText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, 1)].description;
+}
+
+function closeTitle() {
+
+    titleOpen = false;
+    changeContextDirect(currentContext, currentContextType);
+}
+
 function displayInventory() {
     
     if (showDebugLog) console.log("displayInventory() - ");
@@ -1375,7 +1441,7 @@ function displayInventory() {
 
     narrationText.style.display = "none";    
     monsterHpSection.style.display = "none";
-    mainTitleText.style.color = mainTitleActive;
+    mainTitleText.classList = "";
     secondaryTitle.style.display = "none";
 
     mainTitleText.innerText = "Traveler";        
@@ -1451,7 +1517,7 @@ function displayTrain() {
     narrationText.style.display = "none";
     updateText.style.display = "none";
     monsterHpSection.style.display = "none";
-    mainTitleText.style.color = mainTitleActive;
+    mainTitleText.classList = "";
     secondaryTitle.style.display = "none";    
     mainTitleText.innerText = "Seek Guidance";
     mainText.innerText = "You close your eyes and kneel. You feel the earth below and breathe deep the air.";
@@ -1669,11 +1735,14 @@ function doAction(actionString, resetText) {
             rest();
             break;
         case "runAway":
-                runAway();
-                break;
+            runAway();
+            break;
         case "continueNarration":
-                continueNarration();
-                break;
+            continueNarration();
+            break;
+        case "closeTitle":
+            closeTitle();
+            break;
         case "advanceDialogue":
             if (functionArray.length === 2)         // advanceDialogue|npcKeyword
                 advanceDialogue(functionArray[1]);
@@ -1759,7 +1828,7 @@ function playerActionComplete(monsterCanAttack) {
         else if (currentContextType === 3)
             monsters = locationsModified[storedLocation].monsters;
 
-        if (monsters.length > 0) {
+        if (monsters.length > 0 && monsters != "") {
 
             monstersPresent = true;
 
@@ -1833,7 +1902,7 @@ function playerDeath() {
 
     narrationText.style.display = "none";    
     monsterHpSection.style.display = "none";
-    mainTitleText.style.color = mainTitleActive;
+    mainTitleText.classList = "";
     secondaryTitle.style.display = "none";    
     mainTitleText.innerText = "";        
     mainText.innerText = "";
@@ -2274,6 +2343,7 @@ function save() {
     localStorage.setItem('storedLocation', JSON.stringify(storedLocation));
     localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
     localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));    
+    localStorage.setItem('areasVisited', JSON.stringify(areasVisited));    
     localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
     localStorage.setItem('hpMax', JSON.stringify(hpMax));
@@ -2295,6 +2365,7 @@ function save() {
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
     localStorage.setItem('npcsModified', JSON.stringify(npcsModified));
     localStorage.setItem('itemsModified', JSON.stringify(itemsModified));
+    localStorage.setItem('narrationsModified', JSON.stringify(narrationsModified));    
   }
   
   function load() {
@@ -2304,7 +2375,8 @@ function save() {
     currentContext = JSON.parse(localStorage.getItem('currentLocation'));
     storedLocation = JSON.parse(localStorage.getItem('storedLocation'));       
     currentContextType = JSON.parse(localStorage.getItem('currentLocationType'));
-    locationsVisited = JSON.parse(localStorage.getItem('locationsVisited'));    
+    locationsVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
+    areasVisited = JSON.parse(localStorage.getItem('areasVisited'));    
     insight = JSON.parse(localStorage.getItem('insight'));
     hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
     maxStamina = JSON.parse(localStorage.getItem('maxStamina'));
@@ -2324,9 +2396,10 @@ function save() {
     if (!resetLocations) { 
         
         locationsModified = JSON.parse(localStorage.getItem('locationsModified'));       
-        if (localStorage.getItem('monstersModified')) monstersModified = JSON.parse(localStorage.getItem('monstersModified')); else console.error("load - monstersModified entry doesn't exist");
-        if (localStorage.getItem('npcsModified')) npcsModified = JSON.parse(localStorage.getItem('npcsModified')); else console.error("load - npcsModified entry doesn't exist");
-        if (localStorage.getItem('itemsModified')) itemsModified = JSON.parse(localStorage.getItem('itemsModified')); else console.error("load - itemsModified entry doesn't exist");
+        monstersModified = JSON.parse(localStorage.getItem('monstersModified'));
+        npcsModified = JSON.parse(localStorage.getItem('npcsModified'));
+        itemsModified = JSON.parse(localStorage.getItem('itemsModified'));
+        narrationsModified = JSON.parse(localStorage.getItem('narrationsModified'));
     }
     else {
         locationsModified = JSON.parse(JSON.stringify(locations));        
@@ -2334,6 +2407,7 @@ function save() {
         monstersModified = JSON.parse(JSON.stringify(monsters));                
         npcsModified = JSON.parse(JSON.stringify(npcs));
         itemsModified = JSON.parse(JSON.stringify(items));
+        narrationsModified = JSON.parse(JSON.stringify(narrations));
     }
   }
 
@@ -2424,6 +2498,8 @@ function save() {
 
   function getElementFromKeyword(keyword, array) {
     
+    if (array === undefined || array === null) console.error("getElementFromKeyword() - keyword [" + keyword + "] No array provided");
+
     let index = -1;
     
     array.forEach((element, i) => {        
@@ -2433,7 +2509,7 @@ function save() {
         }
     });
     
-    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
+    if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
     return index;
   }
 
@@ -2495,6 +2571,8 @@ function save() {
   }
 
   function formatData() {    
+    
+    if (showDebugLog) console.log("formatData() - ");
 
     locationsModified = JSON.parse(JSON.stringify(locations));
     npcsModified = JSON.parse(JSON.stringify(npcs));

@@ -3,10 +3,11 @@ narrations = [
         keyword: "beginning",
         seen: false,
         text: [
-            "Far off in the misty lands, lies a fallen city. Drowned in darkness.",
+            "Far off in the misty lands, lay a fallen city. Drowned in darkness.",
             "This city was once a great capital. Balmora The Gilded City. Crown of the Lowland Provinces",
-            "The heart of this great city was a grand castle to rival the homes of the gods.\n\nBut within it darkness and shadow festered and eventually swallowed the castle whole.",
-            "A shadow that spread itself into the earth and made it's way slowly across the mortal realms.\n\nWith it came a curse. A calling curse. To the darkness it calls."
+            "Within this city was a royal castle. Built for lords who played at rivalling gods.\n\nBut it's heart was rotten and deep within lived darkness and shadow.",
+            "The rotted wound festered and eventually swallowed the castle in a horrific tempest.\n\nA calamity so great that all those who survived fled to far off lands. From the city and the surrounding provinces they left but the darkness came with them.",
+            "A poisoned diaspora spread to the wind.\n\nWith it came a curse. A calling curse. To the lands of storm and shadow it called."
         ]        
     },
     {
@@ -70,6 +71,7 @@ narrations = [
             "Carved stone shelves still stood, though they were emptied of their original contents and now held dried leaves, and precariously rooting plants."
         ]        
     },
+    // UNUSED
     {
         keyword: "workshop",
         seen: false,
@@ -115,7 +117,7 @@ narrations = [
         keyword: "ryth_0",
         seen: false,
         text: [
-            "She struck such a handsome figure there, reclining casually in the grass with the old Monastery walls rising behind her.",
+            "She a struck handsome figure and the look in her eye told you she knew it.\n\nLeaning casually against the ruins of the old wall she gave you the impression she was waiting for something.", 
             "Clever words came easily to her lips in a way that elicited both your admiration and consternation, unsure whether you were her co-conspirator or the butt of her jokes.",
             "Her laughter was enchanting and soon enough you found yourself laughing alongside her.",
             "She drew you close and spoke to you in a hushed whisper.\n\nShe told you of the extraordinary treasure that could be had in the ancient city to the east.",            

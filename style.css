@@ -178,12 +178,23 @@ main {
         font-family: avara;
         color: #8F871E;
         font-size: 25px;
-        letter-spacing: 2px;
+        letter-spacing: 2px;        
     }
-    
+
+    .centered {
+        justify-content: center;
+
+        #main-title-text {
+            font-family: avara;
+            color: #523294;
+            font-size: 29px;
+            letter-spacing: 2px;        
+        }
+    }
+
     #main-title-icon {        
         margin-right: 25px;
-    }
+    }    
 
     #secondary-title {
         font-family: Eczar;
@@ -219,6 +230,16 @@ main {
         color: #8F871E;        
     }
 }
+    
+#main-title-text.secondary{
+    color: #363718;
+    font-size: 25px;
+}
+
+#main-title-text.title{
+    color: #804FB1;
+    font-size: 29px;
+} 
 
 #monster-hp-section {        
     height: 23px;
@@ -352,6 +373,10 @@ nav {
         background-image: url("Assets/SecondaryIconMonster.svg");
         background-repeat: no-repeat;
     }
+}
+
+.nav-button.spacer {
+    margin-bottom: 50px;
 }
 
 .break {
