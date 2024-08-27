@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.024;
+let version = 0.025;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -248,7 +248,7 @@ function initializeGame() {
 
         if (showDebugLog) console.log("Save game doesn't exist");        
         
-        // Using JSON to create deep clones of our starting data arrays
+        // Using JSON to create deep newButtons of our starting data arrays
         formatData();
 
         insight = 0;
@@ -537,6 +537,25 @@ function clearCreatedButtons() {
     createdItemButtons = [];
 }
 
+function createButton() {
+
+    const clone = itemButtonMaster.cloneNode(true);
+
+    let button = {
+        button: clone,
+        itemCostSection: clone.querySelector('.item-cost-section'),
+        itemCostText: clone.querySelector('.item-cost-text'),
+        buttonChevron: clone.querySelector('.button-chevron'),
+        descriptionText: clone.querySelector('.description-section'),
+        buttonStatSection: clone.querySelector('.button-stat-section'),
+        secondaryButton: clone.querySelector('.secondary-action-button'),
+        secondaryButtonText: clone.querySelector('.secondary-button-text'),
+        upgradeMaterialCost: clone.querySelector('.upgrade-material-cost')
+    }
+
+    return button;
+}
+
 function updateButtons()  {        
     
     if (showDebugLog) console.log("updateButtons() - ");
@@ -712,49 +731,41 @@ function updateButtons()  {
             let upgradeMaterialCostActive = false
 
             // Get all the elements for this specific button, deactivate things as though it was toggled off
-            const clone = itemButtonMaster.cloneNode(true);
-            lastButtonConfigured = clone;
+            const newButton = createButton();
+            lastButtonConfigured = newButton.button;
 
-            const itemCostSection = clone.querySelector('.item-cost-section');        
-            const itemCostText = clone.querySelector('.item-cost-text');
-            const buttonChevron = clone.querySelector('.button-chevron');
-            const descriptionText = clone.querySelector('.description-section');            
-            const buttonStatSection = clone.querySelector('.button-stat-section');
-            const secondaryButton = clone.querySelector('.secondary-action-button');
-            const secondaryButtonText = clone.querySelector('.secondary-button-text');
-            const upgradeMaterialCost = clone.querySelector('.upgrade-material-cost');
-            clone.classList.remove('active');
-            itemCostSection.style.display = "none";
-            descriptionText.style.display = "none";
-            buttonStatSection.style.display = "none";
-            secondaryButton.style.display = "none";            
-            upgradeMaterialCost.style.display = "none";
+            newButton.classList.remove('active');
+            newButton.itemCostSection.style.display = "none";
+            newButton.descriptionText.style.display = "none";
+            newButton.buttonStatSection.style.display = "none";
+            newButton.secondaryButton.style.display = "none";            
+            newButton.upgradeMaterialCost.style.display = "none";
 
             // ITEM NAME
             let itemTitle = item.title;
             if (item.level != undefined && item.level > 0) itemTitle += " +" + item.level;
             if (inventoryOpen && item.quantity != undefined && item.quantity > 0) itemTitle += " [ " + item.quantity + " ]";
-            clone.querySelector('.button-text').innerText = itemTitle;
+            newButton.querySelector('.button-text').innerText = itemTitle;
             
             // ITEM DESCRIPTION
             if (item.description != undefined && item.description != "") {
-                descriptionText.innerText = item.description;            
+                newButton.descriptionText.innerText = item.description;            
                 descriptionTextActive = true;
             }
-            clone.style.display = "flex";
-            clone.onmouseover = (event) => { buttonChevron.querySelector('img').classList.add('hover'); };
-            clone.onmouseleave = (event) => { buttonChevron.querySelector('img').classList.remove('hover'); };        
-            createdItemButtons.push(clone);
+            newButton.style.display = "flex";
+            newButton.onmouseover = (event) => { newButton.buttonChevron.querySelector('img').classList.add('hover'); };
+            newButton.onmouseleave = (event) => { newButton.buttonChevron.querySelector('img').classList.remove('hover'); };        
+            createdItemButtons.push(newButton);
 
-            clone.classList = "nav-button item-button can-hover";
+            newButton.classList = "nav-button item-button can-hover";
 
             let statSectionActive = false;
             if (item.power != 0 || item.stamina != 0  || item.defence != 0 ) {
                 
                 statSectionActive = true;
-                clone.querySelector('.button-power-text').innerText = item.power;
-                clone.querySelector('.button-stamina-text').innerText = item.stamina;
-                clone.querySelector('.button-defence-text').innerText = item.defence;
+                newButton.querySelector('.button-power-text').innerText = item.power;
+                newButton.querySelector('.button-stamina-text').innerText = item.stamina;
+                newButton.querySelector('.button-defence-text').innerText = item.defence;
             }
                     
 
@@ -766,27 +777,28 @@ function updateButtons()  {
 
                 // 1: Location = Take 
                 case 1:                    
-                    document.querySelector("nav").insertBefore(clone, button1);
+                    document.querySelector("nav").insertBefore(newButton, button1);
 
                     if (item.canTake) {
                         secondaryButtonDisplayed = true;
-                        secondaryButtonText.innerText = "Take";
+                        newButton.secondaryButtonText.innerText = "Take";
 
                         let _currentContext = currentContext;       // Storing this value as it changes before we can use it to remove the item
 
+                        // Taking different items can have different outcomes depending on the item type
                         if (item.itemType != undefined && item.itemType === "pickupGold")
-                            secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupInsight")
-                            secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupCorpse")
                             // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
-                            secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupHeal")
-                            secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
-                            secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
+                            newButton.secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
                         else
-                            secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
                     }
                     else
                         secondaryButtonDisplayed = false;
@@ -799,25 +811,25 @@ function updateButtons()  {
                     // The healing item we can use from our inventory
                     if (item.itemType != undefined && item.itemType === "healGreenHerb") {
                         secondaryButtonDisplayed = true;
-                        secondaryButtonText.innerText = "Eat";
-                        secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(); playClick(); };                        
-                        inventorySection.appendChild(clone);
+                        newButton.secondaryButtonText.innerText = "Eat";
+                        newButton.secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(); playClick(); };                        
+                        inventorySection.appendChild(newButton);
                     }
                     else {
 
                         if (item.equipped)
-                            equipmentSection.appendChild(clone);                    
+                            equipmentSection.appendChild(newButton);                    
                         else
-                            inventorySection.appendChild(clone);
+                            inventorySection.appendChild(newButton);
 
                         if (item.canEquip) {
                             if (item.equipped)
-                                secondaryButtonText.innerText = "Unequip";                        
+                                newButton.secondaryButtonText.innerText = "Unequip";                        
                             else
-                                secondaryButtonText.innerText = "Equip";
+                                newButton.secondaryButtonText.innerText = "Equip";
                         
                             secondaryButtonDisplayed = true;                    
-                            secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
+                            newButton.secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
                         }
                     }
                     break;
@@ -830,24 +842,24 @@ function updateButtons()  {
                     // 4: Vendor Buy = Purchase 
                 case 4:
                     itemCostActive = true;
-                    itemCostSection.style.display = "flex";
-                    itemCostText.innerText = item.cost;
+                    newButton.itemCostSection.style.display = "flex";
+                    newButton.itemCostText.innerText = item.cost;
 
                     // Check if we can afford this item, style text red if we can't
                     if (item.cost < gold) {
-                        itemCostText.classList = "item-cost-text active";  
+                        newButton.itemCostText.classList = "item-cost-text active";  
                         secondaryButtonActive = true;                      
                     }
                     else {
-                        itemCostText.classList = "item-cost-text inactive";
+                        newButton.itemCostText.classList = "item-cost-text inactive";
                         secondaryButtonActive = false;
                     }
 
                     saleTitle.style.display = "block";
-                    saleSection.appendChild(clone);
+                    saleSection.appendChild(newButton);
                     secondaryButtonDisplayed = true;
-                    secondaryButtonText.innerText = "Purchase";
-                    secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); };
+                    newButton.secondaryButtonText.innerText = "Purchase";
+                    newButton.secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); };
                     break;
 
                     // 5: Vendor Upgrade = Upgrade
@@ -855,17 +867,17 @@ function updateButtons()  {
                     
                     let costToUpgrade = item.level * 50 + 100;
                     itemCostActive = true;
-                    itemCostSection.style.display = "flex";
-                    itemCostText.innerText = costToUpgrade;
+                    newButton.itemCostSection.style.display = "flex";
+                    newButton.itemCostText.innerText = costToUpgrade;
                     let notEnoughGold = false;
 
                     // Check if we can afford this item, style text red if we can't
                     if (costToUpgrade < gold) {
-                        itemCostText.classList = "item-cost-text active";  
+                        newButton.itemCostText.classList = "item-cost-text active";  
                         secondaryButtonActive = true;                      
                     }
                     else {
-                        itemCostText.classList = "item-cost-text inactive";
+                        newButton.itemCostText.classList = "item-cost-text inactive";
                         notEnoughGold = true;
                         secondaryButtonActive = false;
                     }
@@ -887,65 +899,65 @@ function updateButtons()  {
                         let upgradeMaterialString = "";
                         if (oreCost > 0) upgradeMaterialString += oreCost + " Refined Ore";
                         if (leatherCost > 0) upgradeMaterialString += leatherCost + " Hardened Leather";
-                        upgradeMaterialCost.innerText = upgradeMaterialString;
+                        newButton.upgradeMaterialCost.innerText = upgradeMaterialString;
 
                         if (!notEnoughGold && ore > oreCost && leather > leatherCost) {
-                            upgradeMaterialCost.classList = "upgrade-material-cost active";                            
+                            newButton.upgradeMaterialCost.classList = "upgrade-material-cost active";                            
                             secondaryButtonActive = true;
                         }
                         else {
-                            upgradeMaterialCost.classList = "upgrade-material-cost inactive";                        
+                            newButton.upgradeMaterialCost.classList = "upgrade-material-cost inactive";                        
                             secondaryButtonActive = false;
                         }
                     }
 
-                    document.querySelector("nav").insertBefore(clone, button1);
+                    document.querySelector("nav").insertBefore(newButton, button1);
                     statSectionActive = false;                
                     secondaryButtonDisplayed = true;
-                    secondaryButtonText.innerText = "Upgrade";
-                    secondaryButton.onclick = function() {  upgrade(item.keyword, costToUpgrade, oreCost, leatherCost); playClick(); };
+                    newButton.secondaryButtonText.innerText = "Upgrade";
+                    newButton.secondaryButton.onclick = function() {  upgrade(item.keyword, costToUpgrade, oreCost, leatherCost); playClick(); };
                     break;
             }
 
             // The function for opening and collapsing the button
             let buttonOpened = false;
-            clone.onclick = function() { toggleButton(); playClick(); };           
+            newButton.onclick = function() { toggleButton(); playClick(); };           
 
             function toggleButton() {
 
                 if (buttonOpened) {
                     
                     buttonOpened = false;
-                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
-                    clone.classList.remove('active');
-                    descriptionText.style.display = "none";
-                    buttonStatSection.style.display = "none";
-                    secondaryButton.style.display = "none";
-                    upgradeMaterialCost.style.display = "none";
+                    if (itemCostActive) newButton.itemCostSection.style.display = "flex"; else newButton.itemCostSection.style.display = "none";
+                    newButton.classList.remove('active');
+                    newButton.descriptionText.style.display = "none";
+                    newButton.buttonStatSection.style.display = "none";
+                    newButton.secondaryButton.style.display = "none";
+                    newButton.upgradeMaterialCost.style.display = "none";
 
-                    buttonChevron.querySelector('img').classList.add('chevron-closed');
-                    buttonChevron.querySelector('img').classList.remove('chevron-open');
+                    newButton.buttonChevron.querySelector('img').classList.add('chevron-closed');
+                    newButton.buttonChevron.querySelector('img').classList.remove('chevron-open');
                 }
                 else {
                                         
                     buttonOpened = true;
-                    clone.classList.add('active');
-                    if (itemCostActive) itemCostSection.style.display = "flex"; else itemCostSection.style.display = "none";
-                    if (descriptionTextActive) descriptionText.style.display = "block";
-                    if (statSectionActive) buttonStatSection.style.display = "block";
-                    if (secondaryButtonDisplayed) secondaryButton.style.display = "block";
-                    if (upgradeMaterialCostActive) upgradeMaterialCost.style.display = "block";
-                    if (secondaryButtonActive) { secondaryButton.classList.add('item-button'); secondaryButton.classList.remove('locked-item-button'); }
-                    else { secondaryButton.classList.remove('item-button'); secondaryButton.classList.add('locked-item-button'); }
+                    newButton.classList.add('active');
+                    if (itemCostActive) newButton.itemCostSection.style.display = "flex"; else newButton.itemCostSection.style.display = "none";
+                    if (descriptionTextActive) newButton.descriptionText.style.display = "block";
+                    if (statSectionActive) newButton.buttonStatSection.style.display = "block";
+                    if (secondaryButtonDisplayed) newButton.secondaryButton.style.display = "block";
+                    if (upgradeMaterialCostActive) newButton.upgradeMaterialCost.style.display = "block";
+                    if (secondaryButtonActive) { newButton.secondaryButton.classList.add('item-button'); newButton.secondaryButton.classList.remove('locked-item-button'); }
+                    else { newButton.secondaryButton.classList.remove('item-button'); newButton.secondaryButton.classList.add('locked-item-button'); }
 
-                    buttonChevron.querySelector('img').classList.add('chevron-open');
-                    buttonChevron.querySelector('img').classList.remove('chevron-closed');
+                    newButton.buttonChevron.querySelector('img').classList.add('chevron-open');
+                    newButton.buttonChevron.querySelector('img').classList.remove('chevron-closed');
                 }
             }
 
             if (!descriptionTextActive && !statSectionActive && !secondaryButtonDisplayed) {
-                buttonChevron.style.display = "none";
-                clone.classList = "nav-button locked-item-button";
+                newButton.buttonChevron.style.display = "none";
+                newButton.classList = "nav-button locked-item-button";
             }
         });
     }
@@ -1124,7 +1136,7 @@ function updateButtons()  {
                             activeDirections.push(index);
                             button.classList = "nav-button can-hover location-button";
 
-                            button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined && element.func != "") doAction(element.func, true); playClick(); playerActionComplete(false); };
+                            button.onclick = function() { changeContext(element.keyword, 1); if (element.func != undefined && element.func != "") doAction(element.func, true); playClick(); recoverStamina() };
                         }
                         // If door is locked, or blocked by a monster then disable it
                         else if (doorLocked || exitBlocked) {
@@ -1811,61 +1823,97 @@ function doAction(actionString, resetText) {
     }
 }
 
-function playerActionComplete(monsterCanAttack) {
+function playerActionComplete() {
 
-    if (showDebugLog) console.log("playerActionComplete() - monsterCanAttack " + monsterCanAttack);
-
-    let monstersPresent = false;
-    let monstersActionString = "";    
+    if (showDebugLog) console.log("playerActionComplete() - ");
+          
     let monsters = [];
 
-    if (monsterCanAttack) {
+    // If current context is a location, search it's actions for monsters and tell them to attack
+    if (currentContextType === 1)
+        monsters = locationsModified[currentContext].monsters;
+    // If we're already fighting a monster, use the stored location to search for monsters
+    else if (currentContextType === 3)
+        monsters = locationsModified[storedLocation].monsters;
 
-        // If current context is a location, search it's actions for monsters and tell them to attack
-        if (currentContextType === 1)
-            monsters = locationsModified[currentContext].monsters;
-        // If we're already fighting a monster, use the stored location to search for monsters
-        else if (currentContextType === 3)
-            monsters = locationsModified[storedLocation].monsters;
+    let playerDead = false;
+    if (monsters.length > 0 && monsters != "") {
 
-        if (monsters.length > 0 && monsters != "") {
+        monsters.forEach((element, index) => {
 
-            monstersPresent = true;
+            playerDead = triggerEnemyAttack(element);
+        });            
+    }    
 
-            monsters.forEach((element, index) => {
+    if (playerDead) return;
 
-                let monster = monstersModified[getElementFromKeyword(element, monstersModified)];
+    recoverMax(false);
+    updateStats();
+    save();        
+    updateButtons();    
+}
 
-                // Evasion chance
-                let evasionNumber = Math.floor(Math.random() * 101);                
+function triggerEnemyAttack(monsterKeyword) {
 
-                if (evasionNumber <= evasion) {
+    let monstersActionString = "";  
+    let monster = monstersModified[getElementFromKeyword(monsterKeyword, monstersModified)];
 
-                    monstersActionString +=  "You evade the " + monster.shortTitle + "'s attack."                    
-                }
-                else {      
+    // Evasion chance
+    let evasionNumber = Math.floor(Math.random() * 101);                
 
-                    let monsterDamage = Math.max(0, monster.power - defence);        
-                    hpCurrent -= monsterDamage;
-                    if (monstersActionString != "") monstersActionString += "\n";
-                    monstersActionString += "The " + monster.shortTitle + " does " + monsterDamage + " damage to you.";
-                }
-            });            
-        }        
+    if (evasionNumber <= evasion) {
+
+        monstersActionString +=  "You evade the " + monster.shortTitle + "'s attack."                    
     }
+    else {      
+
+        let monsterDamage = Math.max(0, monster.power - defence);        
+        hpCurrent -= monsterDamage;
+        if (monstersActionString != "") monstersActionString += "\n";
+        monstersActionString += "The " + monster.shortTitle + " does " + monsterDamage + " damage to you.";
+    }
+
+    if (monstersActionString != "") addUpdateText(monstersActionString);
+
+    if (hpCurrent <= 0)
+        playerDeath();
+}
+
+function recoverStamina() {
+
+    let monstersPresent = false;
+    let monsters = [];
+
+    // If current context is a location, search it's actions for monsters and tell them to attack
+    if (currentContextType === 1)
+        monsters = locationsModified[currentContext].monsters;
+    // If we're already fighting a monster, use the stored location to search for monsters
+    else if (currentContextType === 3)
+        monsters = locationsModified[storedLocation].monsters;
+    
+    if (monsters.length > 0 && monsters != "") 
+        monstersPresent = true;
 
     if (!monstersPresent)
         recoverMax(false);
+}
+
+function spendStamina(cost) {
+
+    if (currentStamina >= cost)
+        currentStamina -= cost;
+    else {
+        console.error("spendStamina - Cost [" + cost + "] is greater than currentStamina [" + currentStamina + "]");
+        return;
+    }
 
     updateStats();
-    save();    
-     if (monstersActionString != "") addUpdateText(monstersActionString);
+    save();
 
-    // Check for Player Death
-    if (hpCurrent <= 0)
-        playerDeath();
-    else
-        updateButtons();
+    if (currentStamina === 0) {
+
+        playerActionComplete(true);
+    }    
 }
 
 function playerDeath() {
@@ -1943,107 +1991,64 @@ function respawn() {
 function attack(staminaCost) {
 
     if (showDebugLog) console.log("attack() - Attack Power: " + power + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
-
-    if (currentStamina < staminaCost) {
         
-        addUpdateText("You try to attack, but your completely out of breath.");
+    let monster = monstersModified[currentContext];
+    
+    // Evasion chance
+    let evasionNumber = Math.floor(Math.random() * 101);
+    if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
+
+    if (evasionNumber <= monster.evasion) {
+
+        let updateString = "The " + monster.shortTitle + " evades your attack."
+        addUpdateText(updateString); 
     }
-    else {
-        
-        currentStamina -= staminaCost;
-        updateStats();
-        let monster = monstersModified[currentContext];
-        
-        // Evasion chance
-        let evasionNumber = Math.floor(Math.random() * 101);
-        if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
+    else {            
 
-        if (evasionNumber <= monster.evasion) {
+        // PLAYER ATTACK
+        monster.hpCurrent -= power;
+        updateMonsterUI();
+            
+        let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
+        addUpdateText(updateString);  
 
-            let updateString = "The " + monster.shortTitle + " evades your attack."
-            addUpdateText(updateString); 
-        }
-        else {            
+        // CHECK FOR MONSTER DEATH
+        if (monster.hpCurrent <= 0) {
 
-            // PLAYER ATTACK
-            monster.hpCurrent -= power;
-            updateMonsterUI();
-                
-            let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
-            addUpdateText(updateString);  
-
-            // CHECK FOR MONSTER DEATH
-            if (monster.hpCurrent <= 0) {
-
-                monsterDeath();
-            }
+            monsterDeath();
         }
     }
 
-    save();
-    playerActionComplete(true);
+    spendStamina(staminaCost);    
 }
 
 function block(staminaCost) {
 
     if (showDebugLog) console.log("block() - Defence: " + defence + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
-
-    if (currentStamina < staminaCost) {
-        
-        addUpdateText("You raise your shield to block, but your completely out of breath.");
-    }
-    else {
-        
-        currentStamina -= staminaCost;
-        updateStats();
-        let monster = monstersModified[currentContext];
-        
-        // Evasion chance
-        let evasionNumber = Math.floor(Math.random() * 101);
-        if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
-
-        if (evasionNumber <= monster.evasion) {
-
-            let updateString = "The " + monster.shortTitle + " evades your attack."
-            addUpdateText(updateString); 
-        }
-        else {            
-
-            // PLAYER ATTACK
-            monster.hpCurrent -= power;
-            updateMonsterUI();
                 
-            let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
-            addUpdateText(updateString);  
-
-            // CHECK FOR MONSTER DEATH
-            if (monster.hpCurrent <= 0) {
-
-                monsterDeath();
-            }
-        }
-    }
-
-    save();
-    playerActionComplete(true);
+    let monster = monstersModified[currentContext];
+    
+    console.log("BLOCK NOT IMPLEMENTED");
+    
+    spendStamina(staminaCost);
 }
 
 function recover() {
 
-    let maxRecoverAmount = 3;
-    let recoverAmount = maxRecoverAmount;
+    // let maxRecoverAmount = 3;
+    // let recoverAmount = maxRecoverAmount;
     
-    if ((maxStamina - currentStamina) < maxRecoverAmount)
-        recoverAmount = maxStamina - currentStamina;
+    // if ((maxStamina - currentStamina) < maxRecoverAmount)
+    //     recoverAmount = maxStamina - currentStamina;
     
-    currentStamina += recoverAmount; 
-    if (currentStamina >= maxStamina) currentStamina = maxStamina;
-    playerActionComplete(true);
-    updateStats();
-    save();
+    // currentStamina += recoverAmount; 
+    // if (currentStamina >= maxStamina) currentStamina = maxStamina;
+    // playerActionComplete(true);
+    // updateStats();
+    // save();
 
-    let updateString = "You recover " + recoverAmount + " stamina."
-    addUpdateText(updateString);
+    // let updateString = "You recover " + recoverAmount + " stamina."
+    // addUpdateText(updateString);
 }
 
 function recoverMax(isPlayerAction) {
@@ -2054,15 +2059,18 @@ function recoverMax(isPlayerAction) {
         updateStats();
         save();
 
-        let updateString = "You recover your stamina."
-        addUpdateText(updateString);
+        // let updateString = "You recover your stamina."
+        // addUpdateText(updateString);
     }
 }
 
 function runAway() {
     
-    returnToPrimaryContext();
-    playerActionComplete(true);
+    let monster = monstersModified[currentContext].keyword;
+
+    spendStamina(1);
+    returnToPrimaryContext();    
+    triggerEnemyAttack(monster);
 }
 
 function monsterDeath() {
@@ -2080,6 +2088,9 @@ function monsterDeath() {
         doAction(monstersModified[currentContext].deathFunc, true);
     }
     
+    // If there are no other monsters here, we should recover our stamina
+    recoverStamina();
+
     save();
 
     returnToPrimaryContext();
@@ -2087,8 +2098,8 @@ function monsterDeath() {
 }
 
 function dodge() {
-    if (showDebugLog) console.log("didge() - ");
-    playerActionComplete(true);
+    if (showDebugLog) console.log("didge() - ");    
+    spendStamina(1);
 }
 
 // This is used specifically to return to the context, but isn't counted as a player action itself, so if a function call this that is a player action, it should call playerActionCompleted itself, like runAway
@@ -2117,6 +2128,7 @@ function talk() {
 }
 
 function rest() {
+
     if (showDebugLog) console.log("rest() - ");
 
     hpCurrent = hpMax;
@@ -2192,7 +2204,7 @@ function addToInventory(keyword) {
 
     save();
     addUpdateText("The " + item.shortTitle + " has been added to your inventory.");
-    playerActionComplete(true);
+    spendStamina(1);
 }
 
 function buy(keyword, cost) {
@@ -2252,7 +2264,7 @@ function addGold(amount, updateString) {
 
     updateStats();
     save();
-    playerActionComplete(true);
+    spendStamina(1);
 }
 
 function getCorpse(amount, updateString) {
@@ -2266,7 +2278,7 @@ function getCorpse(amount, updateString) {
 
     updateStats();
     save();
-    playerActionComplete(true);
+    spendStamina(1);
 }
 
 function addInsight(amount, updateString) {
@@ -2277,7 +2289,7 @@ function addInsight(amount, updateString) {
 
     updateStats();
     save();
-    playerActionComplete(true);
+    spendStamina(1);
 }
 
 function addHealth(amount, updateString) {
@@ -2290,7 +2302,7 @@ function addHealth(amount, updateString) {
 
     updateStats();
     save();
-    playerActionComplete(true);
+    spendStamina(1);
 }
 
 function addGreenHerb(amount, updateString) {
@@ -2302,7 +2314,7 @@ function addGreenHerb(amount, updateString) {
 
     updateStats();
     save();
-    playerActionComplete(true);
+    spendStamina(1);
 }
 
 function toggleEquipped(keyword) {
@@ -2324,7 +2336,7 @@ function toggleEquipped(keyword) {
         
         updateStats();
         save();
-        playerActionComplete(true);        
+        spendStamina(1);
     }
     else
         console.error("toggleEquipped() - Inventory doesn't contain [" + keyword + "]");
