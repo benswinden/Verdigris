@@ -298,7 +298,7 @@ locations = [
         keyword: "gg_08",
         area: "gossamer_gardens",
         title: "The Bramble Path",
-        description: "The ancient pathways were overgrown and hard to discern which was was which.",
+        description: "The ancient pathways were overgrown and hard to discern which way was which.",
         narration: "",
         update: "",
         items: ["thorny_bramble"],

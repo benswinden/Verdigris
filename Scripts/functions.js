@@ -99,7 +99,7 @@ const button5 = document.querySelector('#button5');
 const button6 = document.querySelector('#button6');
 const button7 = document.querySelector('#button7');
 const button8 = document.querySelector('#button8');
-const itemButtonMaster = document.querySelector('#item-button');
+const itemButtonMaster = document.querySelector('#button-master');
 //Misc
 const debugWindow = document.querySelector('#debug');
 const debugButton1 = document.querySelector('#debug-button1');
@@ -541,8 +541,9 @@ function createButton() {
 
     const clone = itemButtonMaster.cloneNode(true);
 
-    let button = {
+    let newButton = {
         button: clone,
+        buttonText: clone.querySelector('.button-text'),
         itemCostSection: clone.querySelector('.item-cost-section'),
         itemCostText: clone.querySelector('.item-cost-text'),
         buttonChevron: clone.querySelector('.button-chevron'),
@@ -550,10 +551,26 @@ function createButton() {
         buttonStatSection: clone.querySelector('.button-stat-section'),
         secondaryButton: clone.querySelector('.secondary-action-button'),
         secondaryButtonText: clone.querySelector('.secondary-button-text'),
-        upgradeMaterialCost: clone.querySelector('.upgrade-material-cost')
+        upgradeMaterialCost: clone.querySelector('.upgrade-material-cost'),
+        powerText: clone.querySelector('.button-power-text'),
+        staminaText: clone.querySelector('.button-stamina-text'),
+        defenceText: clone.querySelector('.button-defence-text'),
+        buttonLevelIcon: clone.querySelector('#button-level-icon')
     }
 
-    return button;
+    newButton.button.style.display = "flex";
+    newButton.button.classList.remove('active');
+    newButton.itemCostSection.style.display = "none";
+    newButton.descriptionText.style.display = "none";
+    newButton.buttonStatSection.style.display = "none";
+    newButton.secondaryButton.style.display = "none";            
+    newButton.upgradeMaterialCost.style.display = "none";
+    newButton.buttonLevelIcon.style.display = "none";
+
+    newButton.button.onmouseover = (event) => { newButton.buttonChevron.querySelector('img').classList.add('hover'); };
+    newButton.button.onmouseleave = (event) => { newButton.buttonChevron.querySelector('img').classList.remove('hover'); };
+
+    return newButton;
 }
 
 function updateButtons()  {        
@@ -690,11 +707,12 @@ function updateButtons()  {
             if (itemsModified[getContextIndexFromKeyword(element, 4)].canUpgrade)
                 items.push(element);
         });
-    }    
+    }
 
-    // Create buttons for items contained here
+    // In the inventory - we inject special items that represent our resources, but only if we have any of that resource
     if (inventoryOpen) {
         
+        // We make a deep copy of our inventory to inject these resource items into only while we are viewing the inventory
         items = JSON.parse(JSON.stringify(inventory));
         if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", 4)].quantity = ore; items.splice(0,0, "ore"); }
         if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }
@@ -730,42 +748,31 @@ function updateButtons()  {
             let descriptionTextActive = false;
             let upgradeMaterialCostActive = false
 
-            // Get all the elements for this specific button, deactivate things as though it was toggled off
+            // Create a new button and return an object with all of it's individual elements parameterized
             const newButton = createButton();
-            lastButtonConfigured = newButton.button;
-
-            newButton.classList.remove('active');
-            newButton.itemCostSection.style.display = "none";
-            newButton.descriptionText.style.display = "none";
-            newButton.buttonStatSection.style.display = "none";
-            newButton.secondaryButton.style.display = "none";            
-            newButton.upgradeMaterialCost.style.display = "none";
+            createdItemButtons.push(newButton.button);
+            lastButtonConfigured = newButton.button;                    
+            newButton.button.classList = "nav-button item-button can-hover";
 
             // ITEM NAME
             let itemTitle = item.title;
             if (item.level != undefined && item.level > 0) itemTitle += " +" + item.level;
             if (inventoryOpen && item.quantity != undefined && item.quantity > 0) itemTitle += " [ " + item.quantity + " ]";
-            newButton.querySelector('.button-text').innerText = itemTitle;
+            newButton.buttonText.innerText = itemTitle;
             
             // ITEM DESCRIPTION
             if (item.description != undefined && item.description != "") {
                 newButton.descriptionText.innerText = item.description;            
                 descriptionTextActive = true;
             }
-            newButton.style.display = "flex";
-            newButton.onmouseover = (event) => { newButton.buttonChevron.querySelector('img').classList.add('hover'); };
-            newButton.onmouseleave = (event) => { newButton.buttonChevron.querySelector('img').classList.remove('hover'); };        
-            createdItemButtons.push(newButton);
-
-            newButton.classList = "nav-button item-button can-hover";
-
+            // STAT SECTION
             let statSectionActive = false;
             if (item.power != 0 || item.stamina != 0  || item.defence != 0 ) {
                 
                 statSectionActive = true;
-                newButton.querySelector('.button-power-text').innerText = item.power;
-                newButton.querySelector('.button-stamina-text').innerText = item.stamina;
-                newButton.querySelector('.button-defence-text').innerText = item.defence;
+                newButton.powerText.innerText = item.power;
+                newButton.staminaText.innerText = item.stamina;
+                newButton.defenceText.innerText = item.defence;
             }
                     
 
@@ -777,7 +784,7 @@ function updateButtons()  {
 
                 // 1: Location = Take 
                 case 1:                    
-                    document.querySelector("nav").insertBefore(newButton, button1);
+                    document.querySelector("nav").insertBefore(newButton.button, button1);
 
                     if (item.canTake) {
                         secondaryButtonDisplayed = true;
@@ -813,14 +820,14 @@ function updateButtons()  {
                         secondaryButtonDisplayed = true;
                         newButton.secondaryButtonText.innerText = "Eat";
                         newButton.secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(); playClick(); };                        
-                        inventorySection.appendChild(newButton);
+                        inventorySection.appendChild(newButton.button);
                     }
                     else {
 
                         if (item.equipped)
-                            equipmentSection.appendChild(newButton);                    
+                            equipmentSection.appendChild(newButton.button);                    
                         else
-                            inventorySection.appendChild(newButton);
+                            inventorySection.appendChild(newButton.button);
 
                         if (item.canEquip) {
                             if (item.equipped)
@@ -856,7 +863,7 @@ function updateButtons()  {
                     }
 
                     saleTitle.style.display = "block";
-                    saleSection.appendChild(newButton);
+                    saleSection.appendChild(newButton.button);
                     secondaryButtonDisplayed = true;
                     newButton.secondaryButtonText.innerText = "Purchase";
                     newButton.secondaryButton.onclick = function() {  buy(item.keyword, item.cost); playClick(); };
@@ -911,7 +918,7 @@ function updateButtons()  {
                         }
                     }
 
-                    document.querySelector("nav").insertBefore(newButton, button1);
+                    document.querySelector("nav").insertBefore(newButton.button, button1);
                     statSectionActive = false;                
                     secondaryButtonDisplayed = true;
                     newButton.secondaryButtonText.innerText = "Upgrade";
@@ -921,7 +928,7 @@ function updateButtons()  {
 
             // The function for opening and collapsing the button
             let buttonOpened = false;
-            newButton.onclick = function() { toggleButton(); playClick(); };           
+            newButton.button.onclick = function() { toggleButton(); playClick(); };           
 
             function toggleButton() {
 
@@ -929,7 +936,7 @@ function updateButtons()  {
                     
                     buttonOpened = false;
                     if (itemCostActive) newButton.itemCostSection.style.display = "flex"; else newButton.itemCostSection.style.display = "none";
-                    newButton.classList.remove('active');
+                    newButton.button.classList.remove('active');
                     newButton.descriptionText.style.display = "none";
                     newButton.buttonStatSection.style.display = "none";
                     newButton.secondaryButton.style.display = "none";
@@ -941,7 +948,7 @@ function updateButtons()  {
                 else {
                                         
                     buttonOpened = true;
-                    newButton.classList.add('active');
+                    newButton.button.classList.add('active');
                     if (itemCostActive) newButton.itemCostSection.style.display = "flex"; else newButton.itemCostSection.style.display = "none";
                     if (descriptionTextActive) newButton.descriptionText.style.display = "block";
                     if (statSectionActive) newButton.buttonStatSection.style.display = "block";
@@ -957,7 +964,7 @@ function updateButtons()  {
 
             if (!descriptionTextActive && !statSectionActive && !secondaryButtonDisplayed) {
                 newButton.buttonChevron.style.display = "none";
-                newButton.classList = "nav-button locked-item-button";
+                newButton.button.classList = "nav-button locked-item-button";
             }
         });
     }
@@ -973,88 +980,82 @@ function updateButtons()  {
             
             monsters.forEach((element, index) => {
 
-                switch (nextButton) {
-                    case 0:
-                        button = button1;
-                        break;
-                    case 1:
-                        button = button2;
-                        break;
-                    case 2:
-                        button = button3;
-                        break;
-                    case 3:
-                        button = button4;
-                        break;
-                    case 4:
-                        button = button5;
-                        break;
-                    case 5:
-                        button = button6;
-                        break; 
-                    case 6:
-                        button = button7;
-                        break;
-                    case 7:
-                        button = button8;
-                        break; 
+                const monster = monstersModified[getContextIndexFromKeyword(element, 3)];
+                let descriptionTextActive = false;
+
+                const newButton = createButton();
+                createdItemButtons.push(newButton.button);
+                lastButtonConfigured = newButton.button;
+                newButton.button.classList = "nav-button monster-button can-hover";
+
+                // ITEM NAME
+                newButton.buttonText.innerText = monster.title;
+                // ITEM DESCRIPTION
+                if (monster.description != undefined && monster.description != "") {
+                    newButton.descriptionText.innerText = monster.description;            
+                    descriptionTextActive = true;
                 }
 
-                button.classList = "nav-button can-hover monster-button";
-                button.querySelector('#button-level-icon').style.display = "block";
-                button.querySelector('#button-level-icon').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].level;
-                
-                button.onclick = function() {changeContext(element, 3); playClick();};   
-                button.querySelector('.button-text').innerText = monstersModified[getContextIndexFromKeyword(element, 3)].title;
-                button.style.display = "flex";
-                lastButtonConfigured = button;
-                nextButton++;
+                document.querySelector("nav").insertBefore(newButton.button, button1);
+
+                newButton.buttonLevelIcon.style.display = "block";
+                newButton.buttonLevelIcon.innerText = monster.level;
+                                
+                // The function for opening and collapsing the button
+                let buttonOpened = false;
+                newButton.button.onclick = function() { toggleButton(); playClick(); };           
+
+                function toggleButton() {
+
+                    if (buttonOpened) {
+                        
+                        buttonOpened = false;
+                        newButton.descriptionText.style.display = "none";
+                        newButton.button.classList.remove('active');
+
+                        newButton.buttonChevron.querySelector('img').classList.add('chevron-closed');
+                        newButton.buttonChevron.querySelector('img').classList.remove('chevron-open');
+                    }
+                    else {
+                                            
+                        buttonOpened = true;
+                        newButton.button.classList.add('active');                        
+                        if (descriptionTextActive)
+                            newButton.descriptionText.style.display = "block";
+
+                        newButton.buttonChevron.querySelector('img').classList.add('chevron-open');
+                        newButton.buttonChevron.querySelector('img').classList.remove('chevron-closed');
+                    }
+                }
+
+                // Add changing of action buttons
             });
         }
 
         //  NPCS
         // Set up any new buttons, starting where we left off
-        
         if (npcs != undefined && npcs.length > 0 && npcs != "") {
             
             npcs.forEach((element, index) => {
 
-                switch (nextButton) {
-                    case 0:
-                        button = button1;
-                        break;
-                    case 1:
-                        button = button2;
-                        break;
-                    case 2:
-                        button = button3;
-                        break;
-                    case 3:
-                        button = button4;
-                        break;
-                    case 4:
-                        button = button5;
-                        break;
-                    case 5:
-                        button = button6;
-                        break; 
-                    case 6:
-                        button = button7;
-                        break;
-                    case 7:
-                        button = button8;
-                        break; 
-                }
+                const npc = npcsModified[getContextIndexFromKeyword(element, 5)];                
 
-                button.classList = "nav-button can-hover npc-button";
-                button.onclick = function() { changeContext(element, 5); playClick(); };
-                button.querySelector('.button-text').innerText = npcsModified[getContextIndexFromKeyword(element, 5)].title;
-                button.style.display = "flex";
-                lastButtonConfigured = button;
-                nextButton++;
+                const newButton = createButton();
+                createdItemButtons.push(newButton.button);
+                lastButtonConfigured = newButton.button;
+                newButton.button.classList = "nav-button npc-button can-hover";
+                newButton.buttonChevron.style.display = "none";
+
+                // ITEM NAME
+                newButton.buttonText.innerText = npc.title;                
+                
+                document.querySelector("nav").insertBefore(newButton.button, button1);                
+                                                
+                newButton.button.onclick = function() { changeContext(element, 5); playClick(); };                                                                                
             });
         }
 
+        // CONTEXT ACTIONS
         // Add in the rest of context specific actions (i.e. Buttons for leaving the location etc.)
         if (contextActions.length > 0) {
 

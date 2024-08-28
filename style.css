@@ -373,6 +373,25 @@ nav {
         background-image: url("Assets/SecondaryIconMonster.svg");
         background-repeat: no-repeat;
     }
+
+    .button-chevron {     
+        cursor:pointer;
+        margin-left: auto;        
+        padding-right: 20px;
+        position: relative;
+        top: 50%;
+        transform: translateY(20%);
+    }    
+
+    .description-section {
+        display: block;
+        font-size: 16px;
+        line-height: 1.75em;
+        color: #dd0ec1;
+        padding-top: 10px;
+        padding-bottom: 35px;
+        font-weight: 600;        
+    }
 }
 
 .nav-button.spacer {
@@ -406,6 +425,35 @@ nav {
 .monster-button {
     color: #8F3715;
     border: 3px solid #512018;
+
+    .description-section {
+        margin-left: 23px;
+    }
+
+    .chevron-closed {
+        content:url("Assets/Monster-ChevronClosed.svg");
+    }
+
+    .chevron-closed.hover {
+        content:url("Assets/Monster-ChevronClosedHover.svg");
+    }
+
+    .chevron-open {
+        content:url("Assets/Monster-ChevronOpen.svg");
+    }
+
+    .chevron-open.hover {
+        content:url("Assets/Monster-ChevronOpenHover.svg");
+    }
+
+    .description-section {        
+        color: #877C7A;        
+    }
+}
+
+.item-button.active {    
+    color: #E86E40;
+    border: 3px solid #AE3E2D;
 }
 
 .monster-button.can-hover:hover {    
@@ -413,7 +461,7 @@ nav {
     border: 3px solid #AE3E2D;
 }
 
-#item-button {
+#button-master {
     display: none;
 }
 
@@ -421,13 +469,20 @@ nav {
     color: #7e8186;
     border: 3px solid #32373A;
 
-    .button-chevron {     
-        cursor:pointer;
-        margin-left: auto;        
-        padding-right: 20px;
-        position: relative;
-        top: 50%;
-        transform: translateY(20%);
+    .chevron-closed {
+        content:url("Assets/Item-ChevronClosed.svg");
+    }
+
+    .chevron-closed.hover {
+        content:url("Assets/Item-ChevronClosedHover.svg");
+    }
+
+    .chevron-open {
+        content:url("Assets/Item-ChevronOpen.svg");
+    }
+
+    .chevron-open.hover {
+        content:url("Assets/Item-ChevronOpenHover.svg");
     }
 
     .item-cost-section {
@@ -440,22 +495,6 @@ nav {
     }
     .item-cost-text.inactive {
         color: #8F3715;
-    }
-
-    .chevron-closed {
-        content:url("Assets/ChevronClosed.svg");
-    }
-
-    .chevron-closed.hover {
-        content:url("Assets/ChevronClosedHover.svg");
-    }
-
-    .chevron-open {
-        content:url("Assets/ChevronOpen.svg");
-    }
-
-    .chevron-open.hover {
-        content:url("Assets/ChevronOpenHover.svg");
     }
 
     .description-section {

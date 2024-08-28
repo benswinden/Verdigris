@@ -6,7 +6,7 @@ green_cloak,Long green cloak of the Woodland Protectors,cloak,,armor,TRUE,TRUE,T
 curse_mark,Scarred curse mark,mark,,misc,TRUE,FALSE,TRUE,FALSE,0,5,0,0,0,0,,
 silver_locket,Simple silver locket,locket,,accessory,TRUE,TRUE,FALSE,FALSE,0,0,0,0,0,0,,
 key,Simple brass key,key,,misc,TRUE,FALSE,FALSE,FALSE,0,0,0,0,0,0,,
-iron_longsword,Iron Longsword,longsword,,weapon,TRUE,true,false,TRUE,0,0,0,0,0,0,,
+iron_longsword,Iron Longsword,longsword,,weapon,TRUE,true,false,TRUE,0,0,0,0,0,0,ore,
 eagle_shield,Eagle Shield,shield,,shield,TRUE,TRUE,FALSE,TRUE,0,0,0,0,100,0,,
 deepstone_talisman,Deepstone Talisman,talisman,,accessory,TRUE,TRUE,FALSE,FALSE,0,0,0,0,0,0,,
 ore,Refined Ore,ore,,resource,TRUE,FALSE,FALSE,FALSE,0,0,0,0,0,0,,
