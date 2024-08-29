@@ -28,14 +28,7 @@ function toggleDebugWindow() {
     }
 }
 
-button1.onmouseover = (event) => { if (button1.classList.contains("can-hover")) playClick(); };
-button2.onmouseover = (event) => { if (button2.classList.contains("can-hover")) playClick(); };
-button3.onmouseover = (event) => { if (button3.classList.contains("can-hover")) playClick(); };
-button4.onmouseover = (event) => { if (button4.classList.contains("can-hover")) playClick(); };
-button5.onmouseover = (event) => { if (button5.classList.contains("can-hover")) playClick(); };
-button6.onmouseover = (event) => { if (button6.classList.contains("can-hover")) playClick(); };
-button7.onmouseover = (event) => { if (button7.classList.contains("can-hover")) playClick(); };
-button8.onmouseover = (event) => { if (button8.classList.contains("can-hover")) playClick(); };
+buttonMaster.onmouseover = (event) => { if (button1.classList.contains("can-hover")) playClick(); };
 inventoryIcon.onmouseover = (event) => { playClick(); };
 
 document.addEventListener('keydown', function(event) { if (event.code == 'KeyW') { go(0); playClick(); } });          // North

@@ -25,9 +25,12 @@ npcs = [
         currentDialogue: 0,
         items: ["iron_longsword","eagle_shield","deepstone_talisman"],
         actions: [
-            {
-                type: 6,
+            {                
+                keyword: "reforge",
                 title: "Reforge",
+                active: true,
+                staminaCost: -1,
+                location: "",
                 func: "upgrade"
             }         
         ]
@@ -51,14 +54,20 @@ npcs = [
         dialogueAvailable: null,
         currentDialogue: 0,
         actions: [
-            {
-                type: 6,
+            {                
+                keyword: "train",
                 title: "Seek Guidance",
+                active: true,
+                staminaCost: -1,
+                location: "",
                 func: "train"
             },
-            {
-                type: 6,
+            {                
+                keyword: "rest",
                 title: "Rest",
+                active: true,
+                staminaCost: -1,
+                location: "",
                 func: "rest"
             }
         ]    

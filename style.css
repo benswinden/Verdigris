@@ -412,14 +412,19 @@ nav {
     cursor:pointer;
 }
 
-.location-button {
+.action-button {
     color: #8A8766;
     border: 3px solid #363718;
 }
 
-.location-button.can-hover:hover {    
+.action-button.can-hover:hover {    
     color: #BAB797;
     border: 3px solid #6F7221;
+}
+
+.action-button-inactive {
+    color: #383724;
+    border: 3px solid #1C1D0F;
 }
 
 .monster-button {
@@ -563,11 +568,6 @@ nav {
 .npc-button.can-hover:hover {    
     color: #C4D9B0;
     border: 3px solid #336843;
-}
-
-.locked-button {
-    color: #383724;
-    border: 3px solid #1C1D0F;
 }
 
 .locked-item-button {
