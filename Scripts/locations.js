@@ -315,7 +315,7 @@ locations = [
         keyword: "gg_09",
         area: "gossamer_gardens",
         title: "The Rose Wall",
-        description: "A barrier of twisted briar and thorn, blooming in red and pink roses rose high as a city wall.\n\nA hole leads into the tangle where some large animal broke it's way through.",
+        description: "A barrier of twisted briar and thorn, blooming in red and pink roses climbed high as a city wall.\n\nA hole leads into the tangle where some large animal broke it's way through.",
         narration: "",
         update: "",
         items: ["green_herb_pickup"],
