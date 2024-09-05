@@ -114,6 +114,13 @@ let resetLocations = false;     // We use this for debug, when selected on reloa
 
 let createdButtons = [];
 
+const objectType = {
+    action: 'action',    
+    monster: 'monster',
+    item: 'item',
+    npc: 'npc',    
+}
+
 // #region Containers
 
 // A template for the format of an action object
@@ -405,6 +412,7 @@ function updateContext() {
 
     resetUpdateText();
     collapseStats();
+    currentActiveButton = null;
     narrationText.style.display = "none";
     updateText.style.display = "none";    
     inventoryTitle.style.display = "none";
@@ -509,19 +517,23 @@ function updateContext() {
 
 function clearCreatedButtons() {
 
+    currentActiveButton = null;
+
     createdButtons.forEach((element) => {        
         element.button.remove();
     });
+
     createdButtons = [];
 }
 
-function createButton(objectKeyword) {
+function createButton(objectKeyword, objectType) {
 
     const clone = buttonMaster.cloneNode(true);
 
     let newButton = {
         button: clone,
         keyword: objectKeyword,
+        type: objectType,
         buttonOpened: false,
         buttonText: clone.querySelector('.button-text'),
         staminaCostSection: clone.querySelector('.stamina-cost-section'),
@@ -564,6 +576,17 @@ function createButton(objectKeyword) {
 function updateButtons()  {        
     
     if (showDebugLog) console.log("updateButtons() - ");
+    
+    // Check if there is a current active button
+    // If yes, that means we've just refreshed buttons without changing context and we are checking for unique actions associated with this button
+    let activeMonster = null;
+    
+    if (currentActiveButton != null) {
+
+        if (currentActiveButton.type === objectType.monster) {
+            activeMonster = currentActiveButton.keyword;
+        }
+    }
 
     clearCreatedButtons();
 
@@ -575,7 +598,25 @@ function updateButtons()  {
 
     let lastButtonConfigured = null;          // We will store each button we configure as this, so that when we reach the right point, we can add special formatting to it
     
-    if (narrationOpen) {
+    // If we have a savedActiveMonster, that means we have just opened the button for a monster and we want to see the actions specific to that button
+    if (activeMonster != null) {
+        
+        inventory.forEach((element,index) => {
+            
+            let item = itemsModified[getContextIndexFromKeyword(element,4)];
+            if (item.canEquip && item.equipped) {
+                
+                if (item.actions.length > 0) {
+                    
+                    item.actions.forEach((element, index) => {
+
+                        contextActions.push(actions[getElementFromKeyword(element, actions)]);
+                    });            
+                }
+            }
+        });        
+    }
+    else if (narrationOpen) {
 
         contextActions.push({
             keyword: "next",
@@ -596,75 +637,82 @@ function updateButtons()  {
             location: "",
             func: "closeTitle"
         });
-    }    
-    else if (!narrationOpen && !titleOpen && !trainMenuOpen) {
+    }
+    
+    // If theres nothing special going on, we show the default actions for a location which are the exits
+    if (!narrationOpen && !titleOpen && !trainMenuOpen) {
 
         switch (currentContextType) {
             case 1://Location            
                 
-                // NORTH                            
-                if (locationsModified[currentContext].north != "") activeDirections.push(0);        // This is used for hotkey navigation with the keyboard (go function)
-                contextActions.push({
-                    keyword: "north",                                    
-                    title: locationsModified[currentContext].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,                
-                    active: locationsModified[currentContext].north === "" ?  false : true,
-                    location: locationsModified[currentContext].north,
-                    func: "",
-                });
-                // WEST
-                if (locationsModified[currentContext].west != "") activeDirections.push(1);        // This is used for hotkey navigation with the keyboard (go function)
-                contextActions.push({                
-                    keyword: "west",
-                    title: locationsModified[currentContext].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
-                    active: locationsModified[currentContext].west === "" ? false : true,
-                    location: locationsModified[currentContext].west,
-                    func: "",
-                });
-                // EAST
-                if (locationsModified[currentContext].east != "") activeDirections.push(2);        // This is used for hotkey navigation with the keyboard (go function)
-                contextActions.push({                
-                    keyword: "east",
-                    title: locationsModified[currentContext].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
-                    active: locationsModified[currentContext].east === "" ? false : true,
-                    location: locationsModified[currentContext].east,
-                    func: "",
-                });
-                // SOUTH
-                if (locationsModified[currentContext].south != "") activeDirections.push(3);        // This is used for hotkey navigation with the keyboard (go function)
-                contextActions.push({                
-                    keyword: "south",
-                    title: locationsModified[currentContext].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
-                    active: locationsModified[currentContext].south === "" ? false : true,
-                    location: locationsModified[currentContext].south,
-                    func: "",
-                });
-                
-                // UP
-                if (locationsModified[currentContext].up != "") {
+                // If there is an active monster, we've already define context specific actions to display
+                if (!activeMonster) {
+
+                    // NORTH                            
+                    if (locationsModified[currentContext].north != "") activeDirections.push(0);        // This is used for hotkey navigation with the keyboard (go function)
                     contextActions.push({
-                        keyword: "up",
-                        title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].up, locationsModified)].title,
-                        active: true,
-                        staminaCost: -1,
-                        location: locationsModified[currentContext].up,
-                        func: ""
+                        keyword: "north",                                    
+                        title: locationsModified[currentContext].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,                
+                        active: locationsModified[currentContext].north === "" ?  false : true,
+                        location: locationsModified[currentContext].north,
+                        func: "",
                     });
-                }
-                // Down
-                if (locationsModified[currentContext].down != "") {
-                    contextActions.push({
-                        keyword: "down",
-                        title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].down, locationsModified)].title,
-                        active: true,
-                        staminaCost: -1,
-                        location: locationsModified[currentContext].down,
-                        func: ""
+                    // WEST
+                    if (locationsModified[currentContext].west != "") activeDirections.push(1);        // This is used for hotkey navigation with the keyboard (go function)
+                    contextActions.push({                
+                        keyword: "west",
+                        title: locationsModified[currentContext].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
+                        active: locationsModified[currentContext].west === "" ? false : true,
+                        location: locationsModified[currentContext].west,
+                        func: "",
                     });
+                    // EAST
+                    if (locationsModified[currentContext].east != "") activeDirections.push(2);        // This is used for hotkey navigation with the keyboard (go function)
+                    contextActions.push({                
+                        keyword: "east",
+                        title: locationsModified[currentContext].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
+                        active: locationsModified[currentContext].east === "" ? false : true,
+                        location: locationsModified[currentContext].east,
+                        func: "",
+                    });
+                    // SOUTH
+                    if (locationsModified[currentContext].south != "") activeDirections.push(3);        // This is used for hotkey navigation with the keyboard (go function)
+                    contextActions.push({                
+                        keyword: "south",
+                        title: locationsModified[currentContext].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
+                        active: locationsModified[currentContext].south === "" ? false : true,
+                        location: locationsModified[currentContext].south,
+                        func: "",
+                    });
+                    
+                    // UP
+                    if (locationsModified[currentContext].up != "") {
+                        contextActions.push({
+                            keyword: "up",
+                            title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].up, locationsModified)].title,
+                            active: true,
+                            staminaCost: -1,
+                            location: locationsModified[currentContext].up,
+                            func: ""
+                        });
+                    }
+                    // Down
+                    if (locationsModified[currentContext].down != "") {
+                        contextActions.push({
+                            keyword: "down",
+                            title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].down, locationsModified)].title,
+                            active: true,
+                            staminaCost: -1,
+                            location: locationsModified[currentContext].down,
+                            func: ""
+                        });
+                    }
                 }
                 
                 items = locationsModified[currentContext].items;
                 monsters = locationsModified[currentContext].monsters;
                 npcs = locationsModified[currentContext].npcs;
+
                 break;
             case 5://NPC
 
@@ -695,6 +743,7 @@ function updateButtons()  {
         }     
     }       
 
+    // UPGRADE MENU
     // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
     if (!narrationOpen && !inventoryOpen && !trainMenuOpen && upgradeMenuOpen) {
 
@@ -716,6 +765,7 @@ function updateButtons()  {
         });
     }
 
+    // INVENTORY
     // In the inventory - we inject special items that represent our resources, but only if we have any of that resource
     if (inventoryOpen) {
         
@@ -756,7 +806,7 @@ function updateButtons()  {
             let upgradeMaterialCostActive = false
 
             // Create a new button and return an object with all of it's individual elements parameterized
-            const newButton = createButton(item.keyword);            
+            const newButton = createButton(item.keyword, objectType.item);            
             createdButtons.push(newButton);
             lastButtonConfigured = newButton.button;                    
             newButton.button.classList = "nav-button item-button can-hover";
@@ -984,8 +1034,9 @@ function updateButtons()  {
     }
 
     // Setup buttons based on actions within the action array
+    
     if (!inventoryOpen) {
-        
+            
         //  MONSTERS
         // Set up any new buttons, starting where we left off
         let nextButton = 0;
@@ -993,11 +1044,11 @@ function updateButtons()  {
         if (monsters != undefined && monsters.length > 0 && monsters != "") {
             
             monsters.forEach((element, index) => {
-
+                
                 const monster = monstersModified[getContextIndexFromKeyword(element, 3)];
                 let descriptionTextActive = false;
 
-                const newButton = createButton(monster.keyword);
+                const newButton = createButton(monster.keyword, objectType.monster);
                 createdButtons.push(newButton);
                 lastButtonConfigured = newButton.button;
                 newButton.button.classList = "nav-button monster-button can-hover";
@@ -1017,7 +1068,7 @@ function updateButtons()  {
                 newButton.buttonLevelIcon.innerText = monster.level;
                                 
                 // The function for opening and collapsing the button                
-                newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); };                
+                newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); updateButtons(); };                                                    
 
                 newButton.button.addEventListener(
                     "toggle",
@@ -1044,8 +1095,8 @@ function updateButtons()  {
                         newButton.button.classList.add('active');
 
                         closeOtherButtons(newButton);
-                        currentActiveButton = newButton;                    
-                        updateMonsterUI(currentActiveButton);
+                        currentActiveButton = newButton;
+                        updateMonsterUI(currentActiveButton);                        
 
                         if (descriptionTextActive)
                             newButton.descriptionText.style.display = "block";
@@ -1059,6 +1110,9 @@ function updateButtons()  {
                 false,
                 );
 
+                // If activeMonster is equal to this keyword, that means we just clicked this button to open it and refreshed buttons to get specific actions for this button and now need to re-toggle this button on                
+                if (activeMonster != null && activeMonster === newButton.keyword)
+                    newButton.button.dispatchEvent(new Event("toggle"));         
 
                 // Add changing of action buttons
             });
@@ -1072,7 +1126,7 @@ function updateButtons()  {
 
                 const npc = npcsModified[getContextIndexFromKeyword(element, 5)];                
 
-                const newButton = createButton(npc.keyword);
+                const newButton = createButton(npc.keyword, objectType.npc);
                 createdButtons.push(newButton);
                 lastButtonConfigured = newButton.button;
                 newButton.button.classList = "nav-button npc-button can-hover";                
@@ -1097,7 +1151,7 @@ function updateButtons()  {
                 let additionalButtonString = "";        // If any additional text needs to be appended to a button                                
                 let action = element;
 
-                const newButton = createButton(action.keyword);
+                const newButton = createButton(action.keyword, objectType.action);
                 createdButtons.push(newButton);                       
 
                 // ITEM NAME                            
@@ -1110,20 +1164,20 @@ function updateButtons()  {
                     // Check for Stamina cost, this could modify the button to not be in an active state
                     if (action.staminaCost > 0) {
                         
-                        button.querySelector('.stamina-cost-section').style.display = "flex";
-                        button.querySelector('.stamina-cost-text').innerText = action.staminaCost;
+                        newButton.button.querySelector('.stamina-cost-section').style.display = "flex";
+                        newButton.button.querySelector('.stamina-cost-text').innerText = action.staminaCost;
 
                         if (action.staminaCost > currentStamina) {                        
-                            button.querySelector('.stamina-cost-text').classList = "stamina-cost-text inactive";
-                        }
-                        else {
                             buttonActive = false;
-                            button.querySelector('.stamina-cost-text').classList = "stamina-cost-text active";
+                            newButton.button.querySelector('.stamina-cost-text').classList = "stamina-cost-text inactive";
+                        }
+                        else {                        
+                            newButton.button.querySelector('.stamina-cost-text').classList = "stamina-cost-text active";
                         }                                                                    
                     }
 
                     // Check for talk actions as they have a specific parameter that could make it inactive
-                    if (element.func === "talk") {
+                    if (action.func === "talk") {
 
                         if (!npcsModified[currentContext].dialogueAvailable)                          
                             buttonActive = false;                        
@@ -1133,20 +1187,19 @@ function updateButtons()  {
                         
                         newButton.button.classList = "nav-button action-button can-hover";
 
-                        // If this is a loction action
-                        if (action.location != "") {
+                        // If this is a loction action                        
+                        if (action.location != null && action.location != "") {
 
                             newButton.button.onclick = function() { 
-                                changeContext(action.location, 1); 
-                                if (element.func != undefined && element.func != "") 
-                                    doAction(element.func, true); playClick();
+                                changeContext(action.location, 1);                                
+                                playClick();
                                 recoverStamina() 
                             };
                         }
                         // Otherwise this button is a misc function action
                         else {
 
-                            newButton.button.onclick = function() {doAction(element.func); playClick();};
+                            newButton.button.onclick = function() {doAction(element.func, element.staminaCost, false); playClick();};
                         }
                     }                
                 }
@@ -1168,7 +1221,7 @@ function updateButtons()  {
 
             // INCREASE HP
             let increaseHpCost = 1;
-            newButton = createButton("hp");            
+            newButton = createButton("hp", objectType.action);            
             createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Body (" + increaseHpCost + " insight)";
@@ -1184,7 +1237,7 @@ function updateButtons()  {
             }
             // INCREASE STAMINA
             let increaseStaminaCost = 2;
-            newButton = createButton("stamina");            
+            newButton = createButton("stamina", objectType.action);            
             createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Breathe (" + increaseStaminaCost + " insight)";
@@ -1200,7 +1253,7 @@ function updateButtons()  {
             }
             // INCREASE POWER
             let increasePowerCost = 3;
-            newButton = createButton("curse");            
+            newButton = createButton("curse", objectType.action);            
             createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Curse Mark (" + increasePowerCost + " insight)";
@@ -1215,7 +1268,7 @@ function updateButtons()  {
                 newButton.button.onclick = "";        
             }
             
-            newButton = createButton("misc");            
+            newButton = createButton("misc", objectType.action);            
             createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
@@ -1643,7 +1696,7 @@ function updateMonsterUI(monsterButton) {
     monsterButton.monsterHpText.innerText = monster.hpCurrent + "/" + monster.hpMax;
     let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
     // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
-    monsterButton.monsterHpBar.style.width = (monsterHpCurrentPercent * 2 + 1) + 'px';
+    monsterButton.monsterHpBar.style.width = (monsterHpCurrentPercent + 1) + 'px';
 }
 
 function resetUpdateText() {
@@ -1676,8 +1729,13 @@ function removeItemFromContext(keyword, context) {
 // #region ACTIONS
 
 // Translate a string provided in through the context data into an action
-function doAction(actionString, resetText) {
+function doAction(actionString, staminaCost, resetText) {
     
+    if (staminaCost > currentStamina)
+        console.error("doAction() - staminaCost too high");
+    else        
+        spendStamina(staminaCost);
+
     if (resetText)
         resetUpdateText();
 
@@ -1701,7 +1759,7 @@ function doAction(actionString, resetText) {
     switch (functionString) {
         case "attack":
             if (functionArray.length === 2)     // attack|staminaCost
-                attack(parseInt(functionArray[1]));
+                attack();
             else
                 console.error("doAction - Called attack without an additional argument");        
             break;
@@ -1935,7 +1993,7 @@ function playerDeath() {
     
     // We're going to create a special button to respawn
     clearCreatedButtons();  // Remove all buttons
-    const newButton = createButton("misc");
+    const newButton = createButton("misc", objectType.action);
     createdButtons.push(newButton);    
     newButton.button.classList = "nav-button action-button can-hover";                
     newButton.buttonText.innerText = "Awaken";                    
@@ -1969,11 +2027,13 @@ function respawn() {
         console.error("respawn() - Trying to respawn with an empty respawnLocation");
 }
 
-function attack(staminaCost) {
+function attack() {
 
-    if (showDebugLog) console.log("attack() - Attack Power: " + power + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
-        
-    let monster = monstersModified[currentContext];
+    if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo
+    
+    if (currentActiveButton === null) console.error("Attack() - but no active monster");
+    
+    let monster = monstersModified[getContextIndexFromKeyword(currentActiveButton.keyword, 3)];
     
     // Evasion chance
     let evasionNumber = Math.floor(Math.random() * 101);
@@ -1988,7 +2048,7 @@ function attack(staminaCost) {
 
         // PLAYER ATTACK
         monster.hpCurrent -= power;
-        updateMonsterUI();
+        updateMonsterUI(currentActiveButton);
             
         let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
         addUpdateText(updateString);  
@@ -1996,11 +2056,9 @@ function attack(staminaCost) {
         // CHECK FOR MONSTER DEATH
         if (monster.hpCurrent <= 0) {
 
-            monsterDeath();
+            monsterDeath(currentActiveButton);
         }
-    }
-
-    spendStamina(staminaCost);    
+    }    
 }
 
 function block(staminaCost) {
@@ -2054,27 +2112,26 @@ function runAway() {
     triggerEnemyAttack(monster);
 }
 
-function monsterDeath() {
+function monsterDeath(monsterButton) {
     
-    let monsterIndex = locationsModified[storedLocation].monsters.indexOf(monstersModified[currentContext].keyword);
-    locationsModified[storedLocation].monsters.splice(monsterIndex,1);
+    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword,3)];
+    
+    // Remove this monster from the current location
+    locationsModified[currentContext].monsters.splice(locationsModified[currentContext].monsters.indexOf(monster.keyword),1);
 
-    let storedMonsterString = "The " + monstersModified[currentContext].shortTitle + " falls dead at your feet\nYou receive " + monstersModified[currentContext].insight + " insight and " +  monstersModified[currentContext].gold + " gold";
+    let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monster.insight + " insight and " +  monster.gold + " gold";
 
-    insight += monstersModified[currentContext].insight;
-    gold += monstersModified[currentContext].gold;
-    updateStats();
-        
-    if (monstersModified[currentContext].deathFunc != null) {
-        doAction(monstersModified[currentContext].deathFunc, true);
-    }
+    insight += monster.insight;
+    gold += monster.gold;
+    updateStats();     
     
     // If there are no other monsters here, we should recover our stamina
     recoverStamina();
 
     save();
 
-    returnToPrimaryContext();
+    currentActiveButton = null;
+    updateButtons();
     addUpdateText(storedMonsterString);
 }
 
@@ -2418,38 +2475,6 @@ function save() {
     initializeGame();
   }
 
-  // Get a specific action within a given context
-  // i.e. I want to find the "Leave" action within "dark_grotto"
-  function getActionIndexFromKeyword(keyword, context, contextType) {
-    
-    ar = [];
-    switch (contextType) {
-        case 1://Location
-            ar = locationsModified[context].actions;
-            break;
-        case 3://Monster
-        ar = monstersModified[context].actions;
-            break;
-        case 4://Item
-        ar = itemsModified[context].actions;
-            break;
-        case 5://NPC
-        ar = npcsModified[context].actions;
-            break;
-    }
-
-    let index = -1;
-    ar.forEach((element, i) => {        
-        if (element.keyword === keyword) {
-            
-            index = i;            
-        }
-    });
-
-    if (index === -1) console.error("getActionIndexFromKeyword() - Failed to find keyword [" + keyword + "] in context [" + context + "] of context type [" + contextType + "]");
-    return index;
-  }
-
   // Get a specific context of the given type.
   // i.e. I want to find a location named "keyword"
   function getContextIndexFromKeyword(keyword, contextType) {
@@ -2504,39 +2529,6 @@ function save() {
     
     if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
     return index;
-  }
-
-  // Create an array of actions based on the currently equipped items in the player's inventory
-  function generateItemActions(monsterActions) {
-
-    let array = [];        
-    inventory.forEach((element,index) => {
-        
-        let item = itemsModified[getContextIndexFromKeyword(element,4)];
-        if (item.canEquip && item.equipped) {
-            
-            if (item.actions.length > 0) {
-                
-                item.actions.forEach((element, index) => {
-                        
-                    array.push(actions[getElementFromKeyword(element, actions)]);            
-                });            
-            }
-        }
-    });
-
-    // Add monster specific actions
-    // monsterActions.forEach((element,index) => {        
-    //     array.push(element);
-    // });
-    
-    arralocation: "",y.push({type: 6, title: "Recover", 
-        func: "recover"});
-
-    arralocation: "",y.push({type: 6, title: "Run away", 
-        func: "runAway"});
-
-    return array;
   }
 
   function playClick() {
