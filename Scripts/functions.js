@@ -580,11 +580,15 @@ function updateButtons()  {
     // Check if there is a current active button
     // If yes, that means we've just refreshed buttons without changing context and we are checking for unique actions associated with this button
     let activeMonster = null;
+    let activeItem = null;
     
     if (currentActiveButton != null) {
 
         if (currentActiveButton.type === objectType.monster) {
             activeMonster = currentActiveButton.keyword;
+        }
+        else if (currentActiveButton.type === objectType.item) {
+            activeItem = currentActiveButton.keyword;
         }
     }
 
@@ -985,7 +989,7 @@ function updateButtons()  {
             }
 
             // The function for opening and collapsing the button            
-            newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); };           
+            newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); updateButtons();};           
             
             // Listen for the event.
             newButton.button.addEventListener(
@@ -1030,6 +1034,9 @@ function updateButtons()  {
             false,
             );
 
+            // If there is an activeItem, that means we need to toggle this item as open
+            if (activeItem != null && activeItem === newButton.keyword)
+                newButton.button.dispatchEvent(new Event("toggle")); 
         });
     }
 
@@ -1113,8 +1120,6 @@ function updateButtons()  {
                 // If activeMonster is equal to this keyword, that means we just clicked this button to open it and refreshed buttons to get specific actions for this button and now need to re-toggle this button on                
                 if (activeMonster != null && activeMonster === newButton.keyword)
                     newButton.button.dispatchEvent(new Event("toggle"));         
-
-                // Add changing of action buttons
             });
         }
 
@@ -1141,7 +1146,11 @@ function updateButtons()  {
 
         // CONTEXT ACTIONS
         // Add in the rest of context specific actions (i.e. Buttons for leaving the location etc.)
-        if (contextActions.length > 0) {
+        
+        // We will store action buttons as we create them so we can animate them appearing
+        let createdActionButtons = [];
+        
+        if (contextActions.length > 0) {        
 
             if (lastButtonConfigured != null)
                 lastButtonConfigured.classList += " spacer";         // Before we create the rest of the buttons, we add some spacing in the list to separate the two categories of buttons
@@ -1152,7 +1161,9 @@ function updateButtons()  {
                 let action = element;
 
                 const newButton = createButton(action.keyword, objectType.action);
-                createdButtons.push(newButton);                       
+                newButton.button.style.display = "none";
+                createdButtons.push(newButton);
+                createdActionButtons.push(newButton);
 
                 // ITEM NAME                            
                 document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
@@ -1210,7 +1221,7 @@ function updateButtons()  {
                 }
                 
                 newButton.buttonText.innerText = action.title + additionalButtonString;
-            });                                                
+            });
         }
 
         // Here we will configure our buttons by hand, rather than having previously pushed action objects into contextActions, it's just simpler to be able to define our onclick functions directly and not use the func parameter
@@ -1221,8 +1232,10 @@ function updateButtons()  {
 
             // INCREASE HP
             let increaseHpCost = 1;
-            newButton = createButton("hp", objectType.action);            
+            newButton = createButton("hp", objectType.action);
+            newButton.button.style.display = "none";
             createdButtons.push(newButton);
+            createdActionButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Body (" + increaseHpCost + " insight)";
             if (insight >= increaseHpCost) {        
@@ -1237,8 +1250,10 @@ function updateButtons()  {
             }
             // INCREASE STAMINA
             let increaseStaminaCost = 2;
-            newButton = createButton("stamina", objectType.action);            
+            newButton = createButton("stamina", objectType.action);
+            newButton.button.style.display = "none";
             createdButtons.push(newButton);
+            createdActionButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Breathe (" + increaseStaminaCost + " insight)";
             if (insight >= increaseStaminaCost) {        
@@ -1253,8 +1268,10 @@ function updateButtons()  {
             }
             // INCREASE POWER
             let increasePowerCost = 3;
-            newButton = createButton("curse", objectType.action);            
+            newButton = createButton("curse", objectType.action);
+            newButton.button.style.display = "none";            
             createdButtons.push(newButton);
+            createdActionButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Curse Mark (" + increasePowerCost + " insight)";
             if (insight >= increasePowerCost) {        
@@ -1268,13 +1285,26 @@ function updateButtons()  {
                 newButton.button.onclick = "";        
             }
             
-            newButton = createButton("misc", objectType.action);            
+            newButton = createButton("misc", objectType.action);     
+            newButton.button.style.display = "none";       
             createdButtons.push(newButton);
+            createdActionButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
             newButton.buttonText.innerText = "Exit";
             newButton.button.onclick = function() {trainMenuOpen = false; changeContextDirect(currentContext, currentContextType);};
         }
+
+        
+        // Now we animate in the created action buttons
+        createdActionButtons.forEach((element, index) => {
+
+            setTimeout(function() {
+
+                element.button.style.display = "flex";
+                playClick();
+            }, 100 * (index));
+        });
     }    
 }
 
