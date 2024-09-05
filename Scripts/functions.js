@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.029;
+let version = 0.030;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -1413,6 +1413,7 @@ function continueNarration() {
     if (showDebugLog) console.log("continueNarration() - ");
 
     currentNarrationIndex++;
+
     if (narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length > currentNarrationIndex)
         mainText.innerText = narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text[currentNarrationIndex];
     else {
@@ -1665,10 +1666,12 @@ function removeItemFromContext(keyword, context) {
 // Translate a string provided in through the context data into an action
 function doAction(actionString, staminaCost, resetText) {
     
-    if (staminaCost > currentStamina)
-        console.error("doAction() - staminaCost too high");
-    else        
-        spendStamina(staminaCost);
+    if (staminaCost != -1) {
+        if (staminaCost > currentStamina)
+            console.error("doAction() - staminaCost too high");
+        else        
+            spendStamina(staminaCost);
+    }
 
     if (resetText)
         resetUpdateText();
