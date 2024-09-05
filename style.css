@@ -241,40 +241,6 @@ main {
     font-size: 29px;
 } 
 
-#monster-hp-section {        
-    height: 23px;
-
-    #monster-hp-bar-background {
-        border-radius: 2px;
-        background-color: #01090A;
-        border: 1px solid #512018;
-        width: 200px;
-        height: 23px;
-        margin: 23px 0 0 0;
-        display : flex;
-        align-items : center;
-        justify-content: center;
-        z-index: 1;
-    }
-
-    #monster-hp-bar-current {
-        position: relative;
-        background-color: #512018;    
-        border-radius: 2px;
-        width: 100px;
-        height: 23px;        
-        top: -24px;
-        z-index: 2;
-    }
-
-    #monster-hp-text {
-        color: #E86E40;
-        font-size: 16px;
-        font-weight: 300;    
-        z-index: 3;
-    }
-}
-
 #main-text-section {
     color: #CDCEC6;
     font-size: 20px;
@@ -360,7 +326,7 @@ nav {
         color: #8F3715;
     }
 
-    #button-level-icon {
+    .button-level-icon {
         display: none;
         text-align: center;        
         color: #8F3715;
@@ -387,8 +353,7 @@ nav {
         display: block;
         font-size: 16px;
         line-height: 1.75em;
-        color: #dd0ec1;
-        padding-top: 10px;
+        color: #dd0ec1;        
         padding-bottom: 35px;
         font-weight: 600;        
     }
@@ -412,6 +377,11 @@ nav {
     cursor:pointer;
 }
 
+
+#button-master {
+    display: none;
+}
+
 .action-button {
     color: #8A8766;
     border: 3px solid #363718;
@@ -433,6 +403,7 @@ nav {
 
     .description-section {
         margin-left: 23px;
+        color: #877C7A; 
     }
 
     .chevron-closed {
@@ -450,13 +421,9 @@ nav {
     .chevron-open.hover {
         content:url("Assets/Monster-ChevronOpenHover.svg");
     }
-
-    .description-section {        
-        color: #877C7A;        
-    }
 }
 
-.item-button.active {    
+.monster-button.active {    
     color: #E86E40;
     border: 3px solid #AE3E2D;
 }
@@ -466,13 +433,52 @@ nav {
     border: 3px solid #AE3E2D;
 }
 
-#button-master {
-    display: none;
+
+.monster-hp-section {
+    margin-left: 43px;
+    line-height: 0;    
+
+    .monster-hp-bar-background {        
+        border-radius: 2px;
+        background-color: #01090A;
+        border: 1px solid #512018;
+        width: 160px;
+        height: 23px;
+        margin: 5px 0 0 0;
+        display : flex;
+        align-items : center;
+        justify-content: center;
+        z-index: 1;        
+    }
+
+    .monster-hp-bar-current {
+        position: relative;
+        background-color: #512018;    
+        border-radius: 2px;
+        width: 100px;
+        height: 23px;        
+        top: -24px;
+        z-index: 2;
+    }
+
+    .monster-hp-text {
+        margin: 0;
+        padding: 0;
+        line-height: 0;
+        color: #E86E40;
+        font-size: 13px;
+        font-weight: 300;    
+        z-index: 3;
+    }
 }
 
 .item-button {
     color: #7e8186;
     border: 3px solid #32373A;
+
+    .description-section {        
+        color: #7e8186; 
+    }
 
     .chevron-closed {
         content:url("Assets/Item-ChevronClosed.svg");
@@ -500,17 +506,7 @@ nav {
     }
     .item-cost-text.inactive {
         color: #8F3715;
-    }
-
-    .description-section {
-        display: block;
-        font-size: 16px;
-        line-height: 1.75em;
-        color: #7e8186;
-        padding-top: 10px;
-        padding-bottom: 35px;
-        font-weight: 600;        
-    }
+    }  
 
     .upgrade-material-cost {
         display: none;

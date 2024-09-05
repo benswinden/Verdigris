@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.027;
+let version = 0.028;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -28,6 +28,8 @@ let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = It
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
 let areasVisited = [];          // A list of areas we have already visited
+
+let currentActiveButton;
 
 let currentNarration = "";
 let currentNarrationIndex = 0;
@@ -71,9 +73,13 @@ const monsterLevelText =  document.querySelector('#monster-level-text');
 const mainText =  document.querySelector('#main-text');
 const narrationText =  document.querySelector('#narration-text');
 const updateText =  document.querySelector('#update-text');
+
+
 const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
 const monsterHpText =  document.querySelector('#monster-hp-text');
+
+
 const equipmentTitle =  document.querySelector('#equipment-title');
 const equipmentSection =  document.querySelector('#equipment-section');
 const inventoryTitle =  document.querySelector('#inventory-title');
@@ -400,8 +406,7 @@ function updateContext() {
     resetUpdateText();
     collapseStats();
     narrationText.style.display = "none";
-    updateText.style.display = "none";
-    monsterHpSection.style.display = "none";
+    updateText.style.display = "none";    
     inventoryTitle.style.display = "none";
     equipmentTitle.style.display = "none";
     saleTitle.style.display = "none";
@@ -473,8 +478,7 @@ function updateContext() {
                 mainText.innerText = monstersModified[currentContext].description;
 
                 expandStats();
-
-                monsterHpSection.style.display = "block";
+                
                 updateMonsterUI();
                 
                 // Some contexts have update text that should display when the player enters their context
@@ -506,17 +510,19 @@ function updateContext() {
 function clearCreatedButtons() {
 
     createdButtons.forEach((element) => {        
-        element.remove();
+        element.button.remove();
     });
     createdButtons = [];
 }
 
-function createButton() {
+function createButton(objectKeyword) {
 
     const clone = buttonMaster.cloneNode(true);
 
     let newButton = {
         button: clone,
+        keyword: objectKeyword,
+        buttonOpened: false,
         buttonText: clone.querySelector('.button-text'),
         staminaCostSection: clone.querySelector('.stamina-cost-section'),
         staminaCost: clone.querySelector('.stamina-cost-text'),
@@ -531,7 +537,10 @@ function createButton() {
         powerText: clone.querySelector('.button-power-text'),
         staminaText: clone.querySelector('.button-stamina-text'),
         defenceText: clone.querySelector('.button-defence-text'),
-        buttonLevelIcon: clone.querySelector('#button-level-icon')
+        buttonLevelIcon: clone.querySelector('.button-level-icon'),
+        monsterHpSection: clone.querySelector('.monster-hp-section'),
+        monsterHpBar: clone.querySelector('.monster-hp-bar-current'),
+        monsterHpText: clone.querySelector('.monster-hp-text')
     }
 
     newButton.button.style.display = "flex";
@@ -544,6 +553,7 @@ function createButton() {
     newButton.secondaryButton.style.display = "none";            
     newButton.upgradeMaterialCost.style.display = "none";
     newButton.buttonLevelIcon.style.display = "none";
+    newButton.monsterHpSection.style.display = "none";
 
     newButton.button.onmouseover = (event) => { newButton.buttonChevron.querySelector('img').classList.add('hover'); };
     newButton.button.onmouseleave = (event) => { newButton.buttonChevron.querySelector('img').classList.remove('hover'); };
@@ -746,8 +756,8 @@ function updateButtons()  {
             let upgradeMaterialCostActive = false
 
             // Create a new button and return an object with all of it's individual elements parameterized
-            const newButton = createButton();
-            createdButtons.push(newButton.button);
+            const newButton = createButton(item.keyword);            
+            createdButtons.push(newButton);
             lastButtonConfigured = newButton.button;                    
             newButton.button.classList = "nav-button item-button can-hover";
             newButton.buttonChevron.style.display = "block";
@@ -924,15 +934,19 @@ function updateButtons()  {
                     break;
             }
 
-            // The function for opening and collapsing the button
-            let buttonOpened = false;
-            newButton.button.onclick = function() { toggleButton(); playClick(); };           
-
-            function toggleButton() {
-
-                if (buttonOpened) {
+            // The function for opening and collapsing the button            
+            newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); };           
+            
+            // Listen for the event.
+            newButton.button.addEventListener(
+            "toggle",
+            (e) => {
+                // CLOSE BUTTON
+                if (newButton.buttonOpened) {
                     
-                    buttonOpened = false;
+                    newButton.buttonOpened = false;
+                    currentActiveButton = null;
+
                     if (itemCostActive) newButton.itemCostSection.style.display = "flex"; else newButton.itemCostSection.style.display = "none";
                     newButton.button.classList.remove('active');
                     newButton.descriptionText.style.display = "none";
@@ -943,9 +957,13 @@ function updateButtons()  {
                     newButton.buttonChevron.querySelector('img').classList.add('chevron-closed');
                     newButton.buttonChevron.querySelector('img').classList.remove('chevron-open');
                 }
+                // OPEN BUTTON
                 else {
-                                        
-                    buttonOpened = true;
+                    
+                    newButton.buttonOpened = true;
+                    closeOtherButtons(newButton);
+                    currentActiveButton = newButton;                
+
                     newButton.button.classList.add('active');
                     if (itemCostActive) newButton.itemCostSection.style.display = "flex"; else newButton.itemCostSection.style.display = "none";
                     if (descriptionTextActive) newButton.descriptionText.style.display = "block";
@@ -958,12 +976,10 @@ function updateButtons()  {
                     newButton.buttonChevron.querySelector('img').classList.add('chevron-open');
                     newButton.buttonChevron.querySelector('img').classList.remove('chevron-closed');
                 }
-            }
+            },
+            false,
+            );
 
-            if (!descriptionTextActive && !statSectionActive && !secondaryButtonDisplayed) {
-                newButton.buttonChevron.style.display = "none";
-                newButton.button.classList = "nav-button locked-item-button";
-            }
         });
     }
 
@@ -981,8 +997,8 @@ function updateButtons()  {
                 const monster = monstersModified[getContextIndexFromKeyword(element, 3)];
                 let descriptionTextActive = false;
 
-                const newButton = createButton();
-                createdButtons.push(newButton.button);
+                const newButton = createButton(monster.keyword);
+                createdButtons.push(newButton);
                 lastButtonConfigured = newButton.button;
                 newButton.button.classList = "nav-button monster-button can-hover";
                 newButton.buttonChevron.style.display = "block";
@@ -1000,32 +1016,49 @@ function updateButtons()  {
                 newButton.buttonLevelIcon.style.display = "block";
                 newButton.buttonLevelIcon.innerText = monster.level;
                                 
-                // The function for opening and collapsing the button
-                let buttonOpened = false;
-                newButton.button.onclick = function() { toggleButton(); playClick(); };           
+                // The function for opening and collapsing the button                
+                newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); };                
 
-                function toggleButton() {
+                newButton.button.addEventListener(
+                    "toggle",
+                    (e) => {
 
-                    if (buttonOpened) {
+                    // CLOSE BUTTON
+                    if (newButton.buttonOpened) {
                         
-                        buttonOpened = false;
+                        currentActiveButton = null;
+
+                        newButton.buttonOpened = false;
                         newButton.descriptionText.style.display = "none";
                         newButton.button.classList.remove('active');
+
+                        newButton.monsterHpSection.style.display = "none";
 
                         newButton.buttonChevron.querySelector('img').classList.add('chevron-closed');
                         newButton.buttonChevron.querySelector('img').classList.remove('chevron-open');
                     }
-                    else {
-                                            
-                        buttonOpened = true;
-                        newButton.button.classList.add('active');                        
+                    // OPEN BUTTON
+                    else {                                            
+
+                        newButton.buttonOpened = true;
+                        newButton.button.classList.add('active');
+
+                        closeOtherButtons(newButton);
+                        currentActiveButton = newButton;                    
+                        updateMonsterUI(currentActiveButton);
+
                         if (descriptionTextActive)
                             newButton.descriptionText.style.display = "block";
+
+                        newButton.monsterHpSection.style.display = "block";
 
                         newButton.buttonChevron.querySelector('img').classList.add('chevron-open');
                         newButton.buttonChevron.querySelector('img').classList.remove('chevron-closed');
                     }
-                }
+                },
+                false,
+                );
+
 
                 // Add changing of action buttons
             });
@@ -1039,8 +1072,8 @@ function updateButtons()  {
 
                 const npc = npcsModified[getContextIndexFromKeyword(element, 5)];                
 
-                const newButton = createButton();
-                createdButtons.push(newButton.button);
+                const newButton = createButton(npc.keyword);
+                createdButtons.push(newButton);
                 lastButtonConfigured = newButton.button;
                 newButton.button.classList = "nav-button npc-button can-hover";                
 
@@ -1064,8 +1097,8 @@ function updateButtons()  {
                 let additionalButtonString = "";        // If any additional text needs to be appended to a button                                
                 let action = element;
 
-                const newButton = createButton();
-                createdButtons.push(newButton.button);                       
+                const newButton = createButton(action.keyword);
+                createdButtons.push(newButton);                       
 
                 // ITEM NAME                            
                 document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
@@ -1135,8 +1168,8 @@ function updateButtons()  {
 
             // INCREASE HP
             let increaseHpCost = 1;
-            newButton = createButton();            
-            createdButtons.push(newButton.button);
+            newButton = createButton("hp");            
+            createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Body (" + increaseHpCost + " insight)";
             if (insight >= increaseHpCost) {        
@@ -1151,8 +1184,8 @@ function updateButtons()  {
             }
             // INCREASE STAMINA
             let increaseStaminaCost = 2;
-            newButton = createButton();            
-            createdButtons.push(newButton.button);
+            newButton = createButton("stamina");            
+            createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Breathe (" + increaseStaminaCost + " insight)";
             if (insight >= increaseStaminaCost) {        
@@ -1167,8 +1200,8 @@ function updateButtons()  {
             }
             // INCREASE POWER
             let increasePowerCost = 3;
-            newButton = createButton();            
-            createdButtons.push(newButton.button);
+            newButton = createButton("curse");            
+            createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Curse Mark (" + increasePowerCost + " insight)";
             if (insight >= increasePowerCost) {        
@@ -1182,14 +1215,28 @@ function updateButtons()  {
                 newButton.button.onclick = "";        
             }
             
-            newButton = createButton();            
-            createdButtons.push(newButton.button);
+            newButton = createButton("misc");            
+            createdButtons.push(newButton);
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
             newButton.buttonText.innerText = "Exit";
             newButton.button.onclick = function() {trainMenuOpen = false; changeContextDirect(currentContext, currentContextType);};
         }
     }    
+}
+
+// When we open a button, we need to close all other buttons
+function closeOtherButtons(newButton) {
+
+    if (newButton === null) return;
+
+    createdButtons.forEach((element, index) => {
+        
+        if (element != newButton && element.buttonOpened) {
+
+            element.button.dispatchEvent(new Event("toggle"));
+        }
+    });
 }
 
 // 0 = North 1 = West 2 = East 3 = South 4 = Next
@@ -1222,16 +1269,16 @@ function go(direction) {
             
             if (direction != 4) {
 
-                if (element.innerText.includes(dir)) {
-                    if (element.style.display === "flex")
-                        buttonToClick = element;
+                if (element.button.innerText.includes(dir)) {
+                    if (element.button.style.display === "flex")
+                        buttonToClick = element.button;
                 }
             }
             else {
                 
-                if (element.innerText.includes("Next") || element.innerText.includes("Continue")) {
-                    if (element.style.display === "flex")
-                        buttonToClick = element;
+                if (element.button.innerText.includes("Next") || element.button.innerText.includes("Continue")) {
+                    if (element.button.style.display === "flex")
+                        buttonToClick = element.button;
                 }
             }                                    
         });
@@ -1362,8 +1409,7 @@ function displayNarration(narrationKeyword) {
     updateButtons();
 
     saleTitle.style.display = "none";
-    narrationText.style.display = "none";    
-    monsterHpSection.style.display = "none";
+    narrationText.style.display = "none";        
     mainTitleText.classList = "";;
     mainTitleText.innerText = "";
     secondaryTitle.style.display = "none";
@@ -1405,8 +1451,7 @@ function displayTitle() {
     let contextKeyword = locationsModified[currentContext].area + "_title";        
 
     saleTitle.style.display = "none";
-    narrationText.style.display = "none";    
-    monsterHpSection.style.display = "none";
+    narrationText.style.display = "none";        
     mainTitle.classList = "centered";
     mainTitleText.classList = "";
     mainTitleText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, 1)].title;
@@ -1432,8 +1477,7 @@ function displayInventory() {
     expandStats();    
     updateButtons();
 
-    narrationText.style.display = "none";    
-    monsterHpSection.style.display = "none";
+    narrationText.style.display = "none";        
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";
 
@@ -1476,8 +1520,7 @@ function displayUpgrade() {
     updateButtons();
     expandStats();
 
-    narrationText.style.display = "none";    
-    monsterHpSection.style.display = "none";        
+    narrationText.style.display = "none";        
          
     mainText.innerText = "Not all weapons can become the stuff of legends, but given the right materials any weapon might become functional.";
 
@@ -1507,8 +1550,7 @@ function displayTrain() {
 
     if (showDebugLog) console.log("displayTrain() - ");        
     narrationText.style.display = "none";
-    updateText.style.display = "none";
-    monsterHpSection.style.display = "none";
+    updateText.style.display = "none";    
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";    
     mainTitleText.innerText = "Seek Guidance";
@@ -1594,12 +1636,14 @@ function calculateStats() {
     });
 }
 
-function updateMonsterUI() {
+function updateMonsterUI(monsterButton) {
+    
+    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword,3)];
 
-    monsterHpText.innerText = monstersModified[currentContext].hpCurrent + "/" + monstersModified[currentContext].hpMax;
-    let monsterHpCurrentPercent = monstersModified[currentContext].hpCurrent / monstersModified[currentContext].hpMax * 100;
+    monsterButton.monsterHpText.innerText = monster.hpCurrent + "/" + monster.hpMax;
+    let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
     // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
-    monsterHpBar.style.width = (monsterHpCurrentPercent * 2 + 1) + 'px';
+    monsterButton.monsterHpBar.style.width = (monsterHpCurrentPercent * 2 + 1) + 'px';
 }
 
 function resetUpdateText() {
@@ -1882,8 +1926,7 @@ function playerDeath() {
     corpseLocation = actualContext;    
     locationsModified[corpseLocation].items.push("corpse");
 
-    narrationText.style.display = "none";    
-    monsterHpSection.style.display = "none";
+    narrationText.style.display = "none";        
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";    
     mainTitleText.innerText = "";        
@@ -1892,8 +1935,8 @@ function playerDeath() {
     
     // We're going to create a special button to respawn
     clearCreatedButtons();  // Remove all buttons
-    const newButton = createButton();
-    createdButtons.push(newButton.button);    
+    const newButton = createButton("misc");
+    createdButtons.push(newButton);    
     newButton.button.classList = "nav-button action-button can-hover";                
     newButton.buttonText.innerText = "Awaken";                    
     document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
