@@ -24,7 +24,7 @@ let defence = 0;
 let evasion = 0;
 
 let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
-let currentContextType = 0;     // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
+let currentContextType;
 let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
 let locationsVisited = [];      // A list of locations we have already visited
 let areasVisited = [];          // A list of areas we have already visited
@@ -114,7 +114,10 @@ let resetLocations = false;     // We use this for debug, when selected on reloa
 
 let createdButtons = [];
 
+// enum
 const objectType = {
+    null: 'null',
+    location: 'location',
     action: 'action',    
     monster: 'monster',
     item: 'item',
@@ -258,7 +261,7 @@ function initializeGame() {
         if (currentContext === -99)
             respawn();
         else
-            changeContextDirect(currentContext, currentContextType);
+            changeContext(currentContext, currentContextType);
     }
     // No save game, so start a new game
     else {
@@ -293,7 +296,7 @@ function initializeGame() {
         locationsVisited = [];
         areasVisited = [];
 
-        let respawnIndex = getContextIndexFromKeyword(debugRespawn, 1);
+        let respawnIndex = getContextIndexFromKeyword(debugRespawn, objectType.location);
         respawnLocation = {
             context: respawnIndex,
             contextType: 1,
@@ -303,113 +306,31 @@ function initializeGame() {
 
         save();
 
-        let startContext = getContextIndexFromKeyword(debugStartContext, 1);
-        changeContextDirect(startContext, 1);
+        let startContext = getContextIndexFromKeyword(debugStartContext, objectType.location);
+        changeContext(startContext, objectType.location);
     }
 }
 
-// Change our current context - 
-// Finds the index of the context we want to go to using the keyword and context type pair as different context types will pull data from different arrays
-// We use a keyword instead of relying only on index for human readibility
-function changeContext(keyword, contextType) {
-
-    if (showDebugLog) console.log("changeContext - keyword:" + keyword + "   contextType:" + contextType + "   storedLocation:" + storedLocation);
-
-    let entryFound = false;
-    // If it's not a secondary context, we look for the new location within locations
-    if (contextType === 1) {
-
-        locationsModified.forEach((element, index) => {
-            if (element.keyword == keyword) {
-                currentContext = index;
-                currentContextType = 1;
-                storedLocation = -1;
-                entryFound = true;
-            }
-        });    
-    }
-    else if (contextType > 1) {        
-                
-        // Search for the context we linked within the monsters group        
-        monstersModified.forEach((element, index) => {
-            if (element.keyword == keyword) {
-                
-                if (storedLocation === -1) storedLocation = currentContext;     // Check for null storedLocation, if there is already a value then we are loading directly into this location. The better solution this this issue would be storing the parent context within the child
-                currentContext = index;
-                currentContextType = 3;
-                entryFound = true;
-            }
-        });
-
-        // If we didn't find the entry as a monster we search for it in items
-        if (!entryFound) {
-
-            itemsModified.forEach((element, index) => {
-                if (element.keyword == keyword) {
-                 
-                    if (storedLocation === -1) storedLocation = currentContext;     // Check for null storedLocation, if there is already a value then we are loading directly into this location. The better solution this this issue would be storing the parent context within the child
-                    currentContext = index;
-                    currentContextType = 4;
-                    entryFound = true;
-                }
-            });
-        }
-
-        // If we didn't find the entry as a monster we search for it in npcs
-        if (!entryFound) {
-            
-            npcs.forEach((element, index) => {
-
-                if (element.keyword == keyword) {
-                    
-                    if (storedLocation === -1) storedLocation = currentContext;     // Check for null storedLocation, if there is already a value then we are loading directly into this location. The better solution this this issue would be storing the parent context within the child
-                    currentContext = index;
-                    currentContextType = 5;
-                    entryFound = true;
-                }
-            });
-        }
-    }
-
-    if (entryFound) {
-
-        save();
-        updateContext();
-    }
-    else if (!entryFound) {
-        console.error("ChangeContext() - Couldn't find the keyword [" + keyword + "] as contextType: " + contextType);
-    }
-}
-
-// Used to go directly to a known context
-function changeContextDirect(contextIndex, contextType) {
+function changeContext(newContext, newContextType) {
     
-    narrationOpen = false;
+    if (showDebugLog) console.log("changeContext - newContext:" + newContext + "   contextType:" + newContextType + "   storedLocation:" + storedLocation);
 
-    let keyword = "";
-    switch (contextType) {
-        case 1://Location
-            keyword = locationsModified[contextIndex].keyword;
-            break;
-        case 3://Monster
-            keyword = monstersModified[contextIndex].keyword;
-            break;
-        case 4://Item
-            //Items aren't contexts
-            break;
-        case 5://NPC
-            keyword = npcsModified[contextIndex].keyword;
-            break;                
+    currentContextType = newContextType;
+
+    if (currentContextType === objectType.location)
+        storedLocation = -1;
+    else if (currentContextType === objectType.npc) {
+        if (storedLocation === -1)
+            storedLocation = currentContext;
     }
 
-    changeContext(keyword, contextType);
-}
+    // newContext can be an integer or a keyword value
+    if (Number.isInteger(newContext))
+        currentContext = newContext;
+    else
+        currentContext = getContextIndexFromKeyword(newContext, newContextType);               
 
-// Update the UI to reflect a change in context, or other significant changes in the gameplay state
-function updateContext() {    
-    
-    if (showDebugLog) console.log("updateContext - currentContext: " + currentContext + "       currentContextType: " + currentContextType + "    storedLocation: " + storedLocation);
-
+    save();
     resetUpdateText();
     collapseStats();
     currentActiveButton = null;
@@ -420,9 +341,9 @@ function updateContext() {
     saleTitle.style.display = "none";
 
     // If we are updating to a location type - 
-    if (currentContextType === 1) {    
+    if (currentContextType === objectType.location) {    
 
-        // Check if we are entering a new area and should show the title card first
+        // Check if we are entering a new area and should show the title card first        
         if (locationsModified[currentContext].area != "") {
 
             let areaVisited = areasVisited.indexOf(locationsModified[currentContext].area) != -1;
@@ -470,7 +391,7 @@ function updateContext() {
         mainText.innerText = locationsModified[currentContext].description;         
     }
     // If currentLocationType != 1 - We are currently in a secondary context
-    else if (currentContextType != 1) {
+    else if (currentContextType != objectType.location) {
         
         mainTitleText.innerText = locationsModified[storedLocation].title;
         mainTitleText.classList = "secondary";        
@@ -479,7 +400,7 @@ function updateContext() {
         // Change the array of actions we are looking at depending on the context type
         switch (currentContextType) {
             // 3 = Monster
-            case 3:
+            case objectType.monster:
                 secondaryTitleIcon.classList = "monster";
                 secondaryTitleIcon.innerText = monstersModified[currentContext].level;
                 secondaryTitleText.innerText = monstersModified[currentContext].title;
@@ -495,10 +416,10 @@ function updateContext() {
 
                 break;
             // 4 = Item
-            case 4:
+            case objectType.item:
                 break;
             // 4 = NPC
-            case 5:
+            case objectType.npc:
                 secondaryTitleIcon.classList = "npc";
                 secondaryTitleIcon.innerText = "";
                 secondaryTitleText.innerText = npcsModified[currentContext].title;
@@ -513,6 +434,14 @@ function updateContext() {
     }
 
     updateButtons();
+}
+
+// When we are interacting with an NPC, it's a 'secondary context' so this function will return us to the parent location
+function returnToPrimaryContext() {
+
+    if (showDebugLog) console.log("returnToPrimaryContext() - ");    
+    
+    changeContext(storedLocation, objectType.location);    
 }
 
 function clearCreatedButtons() {
@@ -607,7 +536,7 @@ function updateButtons()  {
         
         inventory.forEach((element,index) => {
             
-            let item = itemsModified[getContextIndexFromKeyword(element,4)];
+            let item = itemsModified[getContextIndexFromKeyword(element, objectType.item)];
             if (item.canEquip && item.equipped) {
                 
                 if (item.actions.length > 0) {
@@ -647,7 +576,7 @@ function updateButtons()  {
     if (!narrationOpen && !titleOpen && !trainMenuOpen) {
 
         switch (currentContextType) {
-            case 1://Location            
+            case objectType.location://Location            
                 
                 // If there is an active monster, we've already define context specific actions to display
                 if (!activeMonster) {
@@ -718,7 +647,7 @@ function updateButtons()  {
                 npcs = locationsModified[currentContext].npcs;
 
                 break;
-            case 5://NPC
+            case objectType.npc://NPC
 
                 contextActions = JSON.parse(JSON.stringify(npcsModified[currentContext].actions));
 
@@ -739,7 +668,7 @@ function updateButtons()  {
                     active: true,
                     staminaCost: -1,
                     location: "",
-                    func: "returnToPrimaryContext"                    
+                    func: "returnToPrimaryContext"
                 });
 
                 items = npcsModified[currentContext].items;
@@ -764,7 +693,7 @@ function updateButtons()  {
         items = [];
         inventory.forEach((element, index) => {
 
-            if (itemsModified[getContextIndexFromKeyword(element, 4)].canUpgrade)
+            if (itemsModified[getContextIndexFromKeyword(element, objectType.item)].canUpgrade)
                 items.push(element);
         });
     }
@@ -775,9 +704,9 @@ function updateButtons()  {
         
         // We make a deep copy of our inventory to inject these resource items into only while we are viewing the inventory
         items = JSON.parse(JSON.stringify(inventory));
-        if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", 4)].quantity = ore; items.splice(0,0, "ore"); }
-        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", 4)].quantity = ore; items.splice(0,0, "leather"); }
-        if (greenHerb > 0) { itemsModified[getContextIndexFromKeyword("green_herb", 4)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
+        if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", objectType.item)].quantity = ore; items.splice(0,0, "ore"); }
+        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", objectType.item)].quantity = ore; items.splice(0,0, "leather"); }
+        if (greenHerb > 0) { itemsModified[getContextIndexFromKeyword("green_herb", objectType.item)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
     }    
     if (items != undefined && items.length > 0 && items != "") {
                 
@@ -785,16 +714,16 @@ function updateButtons()  {
         // 1: Location    2: Inventory Normal     3: Inventory + Monster      4: Vendor Buy        5: Vendor Upgrade
         let buttonContext = -1;
         // Location
-        if (currentContextType === 1) {
+        if (currentContextType === objectType.location) {
             buttonContext = 1;
         }    
-        if (currentContextType === 5) {
+        if (currentContextType === objectType.npc) {
             buttonContext = 4;
         }
-        if (currentContextType != 3 && inventoryOpen) {
+        if (currentContextType != objectType.monster && inventoryOpen) {
             buttonContext = 2;
         }
-        if (currentContextType === 3 && inventoryOpen) {
+        if (currentContextType === objectType.monster && inventoryOpen) {
             buttonContext = 3;
         }
         if (!inventoryOpen && upgradeMenuOpen)
@@ -803,7 +732,7 @@ function updateButtons()  {
         // Create a button for each item contained in our array
         items.forEach((element,index) => {
             
-            let item = itemsModified[getContextIndexFromKeyword(element, 4)];
+            let item = itemsModified[getContextIndexFromKeyword(element, objectType.item)];
             
             let itemCostActive = false;            
             let descriptionTextActive = false;
@@ -1052,7 +981,7 @@ function updateButtons()  {
             
             monsters.forEach((element, index) => {
                 
-                const monster = monstersModified[getContextIndexFromKeyword(element, 3)];
+                const monster = monstersModified[getContextIndexFromKeyword(element, objectType.monster)];
                 let descriptionTextActive = false;
 
                 const newButton = createButton(monster.keyword, objectType.monster);
@@ -1129,7 +1058,7 @@ function updateButtons()  {
             
             npcs.forEach((element, index) => {
 
-                const npc = npcsModified[getContextIndexFromKeyword(element, 5)];                
+                const npc = npcsModified[getContextIndexFromKeyword(element, objectType.npc)];                
 
                 const newButton = createButton(npc.keyword, objectType.npc);
                 createdButtons.push(newButton);
@@ -1140,7 +1069,7 @@ function updateButtons()  {
                 newButton.buttonText.innerText = npc.title;                
                 
                 document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
-                newButton.button.onclick = function() { changeContext(element, 5); playClick(); };                                                                                
+                newButton.button.onclick = function() { changeContext(element, objectType.npc); playClick(); };                                                                                
             });
         }
 
@@ -1202,7 +1131,7 @@ function updateButtons()  {
                         if (action.location != null && action.location != "") {
 
                             newButton.button.onclick = function() { 
-                                changeContext(action.location, 1);                                
+                                changeContext(action.location, objectType.location);                                
                                 playClick();
                                 recoverStamina() 
                             };
@@ -1292,7 +1221,7 @@ function updateButtons()  {
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
             newButton.buttonText.innerText = "Exit";
-            newButton.button.onclick = function() {trainMenuOpen = false; changeContextDirect(currentContext, currentContextType);};
+            newButton.button.onclick = function() {trainMenuOpen = false; changeContext(currentContext, currentContextType);};
         }
 
         
@@ -1328,7 +1257,7 @@ function go(direction) {
     let dir = "";
 
     // This function only works while in a location context
-    if (currentContextType === 1 || narrationOpen) {
+    if (currentContextType === objectType.location || narrationOpen) {
         
         if (direction != 4 && activeDirections.indexOf(direction) === -1) { if (showDebugLog) console.log("go - [" + direction + "] is not an active direction."); return; }
                 
@@ -1520,7 +1449,7 @@ function continueNarration() {
 function closeNarration() {
 
     narrationOpen = false;
-    changeContextDirect(currentContext, currentContextType);
+    changeContext(currentContext, currentContextType);
 }
 
 function displayTitle() {
@@ -1537,15 +1466,15 @@ function displayTitle() {
     narrationText.style.display = "none";        
     mainTitle.classList = "centered";
     mainTitleText.classList = "";
-    mainTitleText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, 1)].title;
+    mainTitleText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, objectType.location)].title;
     secondaryTitle.style.display = "none";        
-    mainText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, 1)].description;
+    mainText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, objectType.location)].description;
 }
 
 function closeTitle() {
 
     titleOpen = false;
-    changeContextDirect(currentContext, currentContextType);
+    changeContext(currentContext, currentContextType);
 }
 
 function displayInventory() {
@@ -1579,7 +1508,7 @@ function exitInventory() {
     inventoryOpen = false;
 
     clearInventory();
-    changeContextDirect(currentContext, currentContextType);
+    changeContext(currentContext, currentContextType);
     if (upgradeMenuOpen)
         displayUpgrade();
     if (narrationOpen)
@@ -1613,7 +1542,7 @@ function displayUpgrade() {
 function exitUpgrade() {
 
     upgradeMenuOpen = false;
-    changeContextDirect(currentContext, currentContextType);
+    changeContext(currentContext, currentContextType);
 }
 
 function inventoryIndexOf(keyword) {
@@ -1661,7 +1590,7 @@ function train(trainType, cost) {
         case "curse":
             insight -= cost;
 
-            let curseMarkIndex = getContextIndexFromKeyword("curse_mark", 4);
+            let curseMarkIndex = getContextIndexFromKeyword("curse_mark", objectType.item);
             itemsModified[curseMarkIndex].power += 5;
             break;        
     }
@@ -1709,7 +1638,7 @@ function calculateStats() {
 
     inventory.forEach((element) => {
         
-        let index = getContextIndexFromKeyword(element, 4);
+        let index = getContextIndexFromKeyword(element, objectType.item);
 
         if (itemsModified[index].equipped) {
             power += itemsModified[index].power;
@@ -1721,7 +1650,7 @@ function calculateStats() {
 
 function updateMonsterUI(monsterButton) {
     
-    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword,3)];
+    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword, objectType.monster)];
 
     monsterButton.monsterHpText.innerText = monster.hpCurrent + "/" + monster.hpMax;
     let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
@@ -1831,7 +1760,7 @@ function doAction(actionString, staminaCost, resetText) {
             break;
         case "goToNPC":
             if (functionArray.length === 2)     // goToNPC|npcKeyword
-                changeContext(functionArray[1], 5);                
+                changeContext(functionArray[1], objectType.npc);                
             else
                 console.error("doAction - Called goToNPC without an additional argument");
             break;
@@ -1898,10 +1827,10 @@ function playerActionComplete() {
     let monsters = [];
 
     // If current context is a location, search it's actions for monsters and tell them to attack
-    if (currentContextType === 1)
+    if (currentContextType === objectType.location)
         monsters = locationsModified[currentContext].monsters;
     // If we're already fighting a monster, use the stored location to search for monsters
-    else if (currentContextType === 3)
+    else if (currentContextType === objectType.monster)
         monsters = locationsModified[storedLocation].monsters;
 
     let playerDead = false;
@@ -1953,10 +1882,10 @@ function recoverStamina() {
     let monsters = [];
 
     // If current context is a location, search it's actions for monsters and tell them to attack
-    if (currentContextType === 1)
+    if (currentContextType === objectType.location)
         monsters = locationsModified[currentContext].monsters;
     // If we're already fighting a monster, use the stored location to search for monsters
-    else if (currentContextType === 3)
+    else if (currentContextType === objectType.monster)
         monsters = locationsModified[storedLocation].monsters;
     
     if (monsters.length > 0 && monsters != "") 
@@ -2001,12 +1930,12 @@ function playerDeath() {
     // We are going to create a corpse in the primary location where we are currently
     // Check if we're fighting a monster, in which case we use the stored location instead of current context
     let actualContext = currentContext;
-    if (currentContextType === 3)
+    if (currentContextType === objectType.monster)
         actualContext = storedLocation;
 
     let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
     // Set the quantity of the corpse item to the amount of gold we are holding
-    itemsModified[getContextIndexFromKeyword("corpse", 4)].quantity = gold;
+    itemsModified[getContextIndexFromKeyword("corpse", objectType.item)].quantity = gold;
     // Remove all our gold
     gold = 0;
     updateStats();
@@ -2047,7 +1976,7 @@ function respawn() {
 
         updateStats();
         storedLocation = respawnLocation.storedLocation;
-        changeContextDirect(respawnLocation.context, respawnLocation.contextType); 
+        changeContext(respawnLocation.context, respawnLocation.contextType); 
         save();
 
         if (!(respawnLocation.context === 0 && respawnLocation.contextType === 1))
@@ -2063,7 +1992,7 @@ function attack() {
     
     if (currentActiveButton === null) console.error("Attack() - but no active monster");
     
-    let monster = monstersModified[getContextIndexFromKeyword(currentActiveButton.keyword, 3)];
+    let monster = monstersModified[getContextIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
     
     // Evasion chance
     let evasionNumber = Math.floor(Math.random() * 101);
@@ -2144,7 +2073,7 @@ function runAway() {
 
 function monsterDeath(monsterButton) {
     
-    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword,3)];
+    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword, objectType.monster)];
     
     // Remove this monster from the current location
     locationsModified[currentContext].monsters.splice(locationsModified[currentContext].monsters.indexOf(monster.keyword),1);
@@ -2170,21 +2099,9 @@ function dodge() {
     spendStamina(1);
 }
 
-// This is used specifically to return to the context, but isn't counted as a player action itself, so if a function call this that is a player action, it should call playerActionCompleted itself, like runAway
-function returnToPrimaryContext() {
-
-    if (showDebugLog) console.log("returnToPrimaryContext() - ");
-    currentContext = storedLocation;
-    storedLocation = -1;
-    currentContextType = 1;
-
-    save();
-    updateContext();    
-}
-
 function talk() {
 
-    if (currentContextType == 5) {
+    if (currentContextType === objectType.npc) {
 
         let dialogueString = npcsModified[currentContext].keyword + "_" + npcsModified[currentContext].currentDialogue;
         
@@ -2239,7 +2156,7 @@ function addToInventory(keyword) {
         return;
     }
 
-    let item = itemsModified[getContextIndexFromKeyword(keyword, 4)];
+    let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("addToInventory() - keyword:" + keyword + " not found in items array");
         return;
@@ -2251,10 +2168,10 @@ function addToInventory(keyword) {
     let items = [];
 
     // Depending on the contextType, we will splice this item out of a different context
-    if (currentContextType === 1) {        
+    if (currentContextType === objectType.location) {        
         items = locationsModified[currentContext].items;
     }    
-    else if (currentContextType === 5) {        
+    else if (currentContextType === objectType.npc) {        
         items = npcsModified[currentContext].items;
     }
     
@@ -2277,7 +2194,7 @@ function addToInventory(keyword) {
 
 function buy(keyword, cost) {
 
-    let item = itemsModified[getContextIndexFromKeyword(keyword, 4)];
+    let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("buy() - keyword:" + keyword + " not found in items array");
         return;
@@ -2296,7 +2213,7 @@ function buy(keyword, cost) {
 
 function upgrade(keyword, cost, oreCost, leatherCost) {
 
-    let item = itemsModified[getContextIndexFromKeyword(keyword, 4)];
+    let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("upgrade() - keyword:" + keyword + " not found in items array");
         return;
@@ -2390,7 +2307,7 @@ function toggleEquipped(keyword) {
     // Double check to make sure this is in our inventory
     if (inventoryIndexOf(keyword) != -1) {
 
-        let item = itemsModified[getContextIndexFromKeyword(keyword,4)];
+        let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
         
         if (item.equipped) {
 
@@ -2509,25 +2426,20 @@ function save() {
   // i.e. I want to find a location named "keyword"
   function getContextIndexFromKeyword(keyword, contextType) {
     
-    ar = [];
-    let cType = ""
+    ar = [];    
     switch (contextType) {
-        case 1://Location
+        case objectType.location://Location
         
-            ar = locationsModified;
-            cType = "locations";
+            ar = locationsModified;            
             break;
-        case 3://Monster
-            ar = monstersModified;
-            cType = "monsters";
+        case objectType.monster://Monster
+            ar = monstersModified;            
             break;
-        case 4://Item
-            ar = itemsModified;
-            cType = "items";
+        case objectType.item:
+            ar = itemsModified;            
             break;
-        case 5://NPC
-            ar = npcsModified;
-            cType = "npcs";
+        case objectType.npc:
+            ar = npcsModified;            
             break;
     }
     
@@ -2540,7 +2452,7 @@ function save() {
         }
     });
     
-    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] of context type [" + cType + "]");
+    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] of context type [" + contextType + "]");
     return index;
   }
 
