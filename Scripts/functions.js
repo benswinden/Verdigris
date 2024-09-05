@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.028;
+let version = 0.029;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -340,7 +340,7 @@ function changeContext(newContext, newContextType) {
     equipmentTitle.style.display = "none";
     saleTitle.style.display = "none";
 
-    // If we are updating to a location type - 
+    // LOCATION
     if (currentContextType === objectType.location) {    
 
         // Check if we are entering a new area and should show the title card first        
@@ -389,48 +389,23 @@ function changeContext(newContext, newContextType) {
         
         mainTitleText.innerText = locationsModified[currentContext].title;        
         mainText.innerText = locationsModified[currentContext].description;         
-    }
-    // If currentLocationType != 1 - We are currently in a secondary context
-    else if (currentContextType != objectType.location) {
+    }    
+    
+    // NPC
+    else if (currentContextType === objectType.npc) {
         
         mainTitleText.innerText = locationsModified[storedLocation].title;
         mainTitleText.classList = "secondary";        
         secondaryTitle.style.display = "flex";
         
-        // Change the array of actions we are looking at depending on the context type
-        switch (currentContextType) {
-            // 3 = Monster
-            case objectType.monster:
-                secondaryTitleIcon.classList = "monster";
-                secondaryTitleIcon.innerText = monstersModified[currentContext].level;
-                secondaryTitleText.innerText = monstersModified[currentContext].title;
-                mainText.innerText = monstersModified[currentContext].description;
+        secondaryTitleIcon.classList = "npc";
+        secondaryTitleIcon.innerText = "";
+        secondaryTitleText.innerText = npcsModified[currentContext].title;
+        mainText.innerText = npcsModified[currentContext].description;                
 
-                expandStats();
-                
-                updateMonsterUI();
-                
-                // Some contexts have update text that should display when the player enters their context
-                if (monstersModified[currentContext].update != undefined && monstersModified[currentContext].update != "")
-                    addUpdateText(monstersModified[currentContext].update);                
-
-                break;
-            // 4 = Item
-            case objectType.item:
-                break;
-            // 4 = NPC
-            case objectType.npc:
-                secondaryTitleIcon.classList = "npc";
-                secondaryTitleIcon.innerText = "";
-                secondaryTitleText.innerText = npcsModified[currentContext].title;
-                mainText.innerText = npcsModified[currentContext].description;                
-
-                // Some contexts have update text that should display when the player enters their context
-                if (npcsModified[currentContext].update != undefined && npcsModified[currentContext].update != "")
-                    addUpdateText(npcsModified[currentContext].update);  
-
-                break;
-        }
+        // Some contexts have update text that should display when the player enters their context
+        if (npcsModified[currentContext].update != undefined && npcsModified[currentContext].update != "")
+            addUpdateText(npcsModified[currentContext].update);
     }
 
     updateButtons();
@@ -1829,8 +1804,8 @@ function playerActionComplete() {
     // If current context is a location, search it's actions for monsters and tell them to attack
     if (currentContextType === objectType.location)
         monsters = locationsModified[currentContext].monsters;
-    // If we're already fighting a monster, use the stored location to search for monsters
-    else if (currentContextType === objectType.monster)
+    // If we're in a secondary context, use the stored location to search for monsters
+    else if (currentContextType === objectType.npc)
         monsters = locationsModified[storedLocation].monsters;
 
     let playerDead = false;
@@ -1930,7 +1905,7 @@ function playerDeath() {
     // We are going to create a corpse in the primary location where we are currently
     // Check if we're fighting a monster, in which case we use the stored location instead of current context
     let actualContext = currentContext;
-    if (currentContextType === objectType.monster)
+    if (currentContextType === objectType.npc)
         actualContext = storedLocation;
 
     let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
