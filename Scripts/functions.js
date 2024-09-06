@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.030;
+let version = 0.031;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -299,7 +299,7 @@ function initializeGame() {
         let respawnIndex = getContextIndexFromKeyword(debugRespawn, objectType.location);
         respawnLocation = {
             context: respawnIndex,
-            contextType: 1,
+            contextType: objectType.location,
             storedLocation: -1
         }
         corpseLocation = -1;            
@@ -354,7 +354,7 @@ function changeContext(newContext, newContextType) {
         }
 
         // Check if we've already visited this location
-        let locationVisited = locationsVisited.indexOf(locationsModified[currentContext].keyword) != -1;        
+        let locationVisited = locationsVisited.indexOf(currentContext) != -1;
 
         // First time visiting this location, check whether there is a narration to play first
         if (!locationVisited) {
@@ -486,6 +486,7 @@ function updateButtons()  {
     let activeMonster = null;
     let activeItem = null;
     
+    // "active button" is a button we have toggled open
     if (currentActiveButton != null) {
 
         if (currentActiveButton.type === objectType.monster) {
@@ -556,64 +557,88 @@ function updateButtons()  {
                 // If there is an active monster, we've already define context specific actions to display
                 if (!activeMonster) {
 
-                    // NORTH                            
-                    if (locationsModified[currentContext].north != "") activeDirections.push(0);        // This is used for hotkey navigation with the keyboard (go function)
-                    contextActions.push({
-                        keyword: "north",                                    
-                        title: locationsModified[currentContext].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,                
-                        active: locationsModified[currentContext].north === "" ?  false : true,
-                        location: locationsModified[currentContext].north,
-                        func: "",
-                    });
-                    // WEST
-                    if (locationsModified[currentContext].west != "") activeDirections.push(1);        // This is used for hotkey navigation with the keyboard (go function)
-                    contextActions.push({                
-                        keyword: "west",
-                        title: locationsModified[currentContext].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
-                        active: locationsModified[currentContext].west === "" ? false : true,
-                        location: locationsModified[currentContext].west,
-                        func: "",
-                    });
-                    // EAST
-                    if (locationsModified[currentContext].east != "") activeDirections.push(2);        // This is used for hotkey navigation with the keyboard (go function)
-                    contextActions.push({                
-                        keyword: "east",
-                        title: locationsModified[currentContext].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
-                        active: locationsModified[currentContext].east === "" ? false : true,
-                        location: locationsModified[currentContext].east,
-                        func: "",
-                    });
-                    // SOUTH
-                    if (locationsModified[currentContext].south != "") activeDirections.push(3);        // This is used for hotkey navigation with the keyboard (go function)
-                    contextActions.push({                
-                        keyword: "south",
-                        title: locationsModified[currentContext].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
-                        active: locationsModified[currentContext].south === "" ? false : true,
-                        location: locationsModified[currentContext].south,
-                        func: "",
-                    });
-                    
-                    // UP
-                    if (locationsModified[currentContext].up != "") {
+                    // Store the directions we are able to move
+                    if (locationsModified[currentContext].north != "") activeDirections.push(0);
+                    if (locationsModified[currentContext].west != "") activeDirections.push(1);
+                    if (locationsModified[currentContext].east != "") activeDirections.push(2);
+                    if (locationsModified[currentContext].south != "") activeDirections.push(3);
+                    if (locationsModified[currentContext].up != "") activeDirections.push(4);
+                    if (locationsModified[currentContext].down != "") activeDirections.push(5);
+
+                    // Check if there are monsters present in this location, if so we don't display exits, only the option to run
+                    if (locationsModified[currentContext].monsters != null && locationsModified[currentContext].monsters != "" && locationsModified[currentContext].monsters.length > 0) {
+                        
                         contextActions.push({
-                            keyword: "up",
-                            title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].up, locationsModified)].title,
+                            keyword: "run",                                    
+                            title: "Run away",                
                             active: true,
-                            staminaCost: -1,
-                            location: locationsModified[currentContext].up,
-                            func: ""
+                            staminaCost: 1,
+                            location: "",
+                            func: "runAway",
                         });
                     }
-                    // Down
-                    if (locationsModified[currentContext].down != "") {
+                    // Otherwise, show the exits actions for this location
+                    else {
+
+                        // NORTH                                                
                         contextActions.push({
-                            keyword: "down",
-                            title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].down, locationsModified)].title,
-                            active: true,
+                            keyword: "north",                                    
+                            title: locationsModified[currentContext].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,                
+                            active: locationsModified[currentContext].north === "" ?  false : true,
                             staminaCost: -1,
-                            location: locationsModified[currentContext].down,
-                            func: ""
+                            location: locationsModified[currentContext].north,
+                            func: "",
                         });
+                        // WEST                        
+                        contextActions.push({                
+                            keyword: "west",
+                            title: locationsModified[currentContext].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
+                            active: locationsModified[currentContext].west === "" ? false : true,
+                            staminaCost: -1,
+                            location: locationsModified[currentContext].west,
+                            func: "",
+                        });
+                        // EAST                        
+                        contextActions.push({                
+                            keyword: "east",
+                            title: locationsModified[currentContext].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
+                            active: locationsModified[currentContext].east === "" ? false : true,
+                            staminaCost: -1,
+                            location: locationsModified[currentContext].east,
+                            func: "",
+                        });
+                        // SOUTH                        
+                        contextActions.push({                
+                            keyword: "south",
+                            title: locationsModified[currentContext].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
+                            active: locationsModified[currentContext].south === "" ? false : true,
+                            staminaCost: -1,
+                            location: locationsModified[currentContext].south,
+                            func: "",
+                        });
+                        // We only show buttons for up and down if those direction exist
+                        // UP
+                        if (locationsModified[currentContext].up != "") {
+                            contextActions.push({
+                                keyword: "up",
+                                title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].up, locationsModified)].title,
+                                active: true,
+                                staminaCost: -1,
+                                location: locationsModified[currentContext].up,
+                                func: ""
+                            });
+                        }
+                        // Down
+                        if (locationsModified[currentContext].down != "") {
+                            contextActions.push({
+                                keyword: "down",
+                                title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].down, locationsModified)].title,
+                                active: true,
+                                staminaCost: -1,
+                                location: locationsModified[currentContext].down,
+                                func: ""
+                            });
+                        }
                     }
                 }
                 
@@ -1673,129 +1698,131 @@ function doAction(actionString, staminaCost, resetText) {
             spendStamina(staminaCost);
     }
 
-    if (resetText)
-        resetUpdateText();
+    // Wait for a short period here so that any outcome of spending stamina can resolve
+    setTimeout(function() {
 
-    if (actionString === undefined) {
-        console.error("doAction() - actionString is undefined");
-        return;
-    }
+        if (resetText)
+            resetUpdateText();
 
-    let functionString = actionString;
-    let functionArray = [];
+        if (actionString === undefined) {
+            console.error("doAction() - actionString is undefined");
+            return;
+        }
 
-    if (actionString.indexOf('|') > -1) {
+        let functionString = actionString;
+        let functionArray = [];
 
-        // Action string can contain the function name, followed by arguments    
-        functionArray = actionString.split("|");
-        functionString = functionArray[0];
-    }
-    
-    if (showDebugLog) console.log("doAction() - functionString: " + functionString);
+        if (actionString.indexOf('|') > -1) {
 
-    switch (functionString) {
-        case "attack":
-            if (functionArray.length === 2)     // attack|staminaCost
-                attack();
-            else
-                console.error("doAction - Called attack without an additional argument");        
-            break;
-        case "upgrade":
-            displayUpgrade();
-            break;
-        case "exitUpgrade":
-            exitUpgrade();
-            break;
-        case "recover":
-            recover();
-            break;
-        case "returnToPrimaryContext":
-            returnToPrimaryContext();
-            break;
-        case "talk":
-            talk();
-            break;
-        case "train":
-            displayTrain();
-            break;
-        case "rest":
-            rest();
-            break;
-        case "runAway":
-            runAway();
-            break;
-        case "continueNarration":
-            continueNarration();
-            break;
-        case "closeTitle":
-            closeTitle();
-            break;
-        case "advanceDialogue":
-            if (functionArray.length === 2)         // advanceDialogue|npcKeyword
-                advanceDialogue(functionArray[1]);
-            else
-                console.error("doAction - Called advanceDialogue without an additional argument");
-            break;
-        case "goToNPC":
-            if (functionArray.length === 2)     // goToNPC|npcKeyword
-                changeContext(functionArray[1], objectType.npc);                
-            else
-                console.error("doAction - Called goToNPC without an additional argument");
-            break;
-        case "addAction":   // addAction() context (keyword or index), contextType, action, index
-            if (functionArray.length === 5) {
-                
-                addActionToContext(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
-            }
-            else
-                console.error("doAction - Called addAction without the correct number of arguments");
-            break;
-        case "removeAction":  // removeAction() context(keyword or index), contextType, index        
-            if (functionArray.length === 4)
+            // Action string can contain the function name, followed by arguments    
+            functionArray = actionString.split("|");
+            functionString = functionArray[0];
+        }
+        
+        if (showDebugLog) console.log("doAction() - functionString: " + functionString);
 
-                removeActionFromContext(functionArray[1],parseInt(functionArray[2]),parseInt(functionArray[3]));
-            else
-                console.error("doAction - Called addAction without the correct number of arguments");
-            break;
-        case "replaceAction":   // replaceAction() context(keyword or index), contextType, action, index
-            if (functionArray.length === 5)
+        switch (functionString) {
+            case "attack":            
+                    attack();            
+                break;
+            case "upgrade":
+                displayUpgrade();
+                break;
+            case "exitUpgrade":
+                exitUpgrade();
+                break;
+            case "recover":
+                recover();
+                break;
+            case "returnToPrimaryContext":
+                returnToPrimaryContext();
+                break;
+            case "talk":
+                talk();
+                break;
+            case "train":
+                displayTrain();
+                break;
+            case "rest":
+                rest();
+                break;
+            case "runAway":
+                runAway();
+                break;
+            case "continueNarration":
+                continueNarration();
+                break;
+            case "closeTitle":
+                closeTitle();
+                break;
+            case "advanceDialogue":
+                if (functionArray.length === 2)         // advanceDialogue|npcKeyword
+                    advanceDialogue(functionArray[1]);
+                else
+                    console.error("doAction - Called advanceDialogue without an additional argument");
+                break;
+            case "goToNPC":
+                if (functionArray.length === 2)     // goToNPC|npcKeyword
+                    changeContext(functionArray[1], objectType.npc);                
+                else
+                    console.error("doAction - Called goToNPC without an additional argument");
+                break;
+            case "addAction":   // addAction() context (keyword or index), contextType, action, index
+                if (functionArray.length === 5) {
+                    
+                    addActionToContext(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
+                }
+                else
+                    console.error("doAction - Called addAction without the correct number of arguments");
+                break;
+            case "removeAction":  // removeAction() context(keyword or index), contextType, index        
+                if (functionArray.length === 4)
 
-                replaceAction(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
-            else
-                console.error("doAction - Called addAction without the correct number of arguments");
-            break;
-        case "addGold":  
-            if (functionArray.length === 3) // addGold|amount|updateString
-                
-                addGold(parseInt(functionArray[1]),functionArray[2]);                            
-            else
-                console.error("doAction - Called addGold without the correct number of arguments");
-            break;
-        case "getCorpse":  
-            if (functionArray.length === 3) // addGold|amount|updateString
-                
-                getCorpse(parseInt(functionArray[1]),functionArray[2]);                            
-            else
-                console.error("doAction - Called addGold without the correct number of arguments");
-            break;
-        case "addInsight":  
-            if (functionArray.length === 3) // addInsight|amount|updateString
-                
-                addInsight(parseInt(functionArray[1]),functionArray[2]);                            
-            else
-                console.error("doAction - Called addGold without the correct number of arguments");
-            break;
-        case "buy":  
-            if (functionArray.length === 3) // buy|item keyword
-                                
-                buy(functionArray[1],parseInt(functionArray[2]));            
-            else
-                console.error("doAction - Called buy without the correct number of arguments");
-            break;
-        case "consoleLog":  // For debug
-            console.log("!!!");
-            break;
-    }
+                    removeActionFromContext(functionArray[1],parseInt(functionArray[2]),parseInt(functionArray[3]));
+                else
+                    console.error("doAction - Called addAction without the correct number of arguments");
+                break;
+            case "replaceAction":   // replaceAction() context(keyword or index), contextType, action, index
+                if (functionArray.length === 5)
+
+                    replaceAction(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
+                else
+                    console.error("doAction - Called addAction without the correct number of arguments");
+                break;
+            case "addGold":  
+                if (functionArray.length === 3) // addGold|amount|updateString
+                    
+                    addGold(parseInt(functionArray[1]),functionArray[2]);                            
+                else
+                    console.error("doAction - Called addGold without the correct number of arguments");
+                break;
+            case "getCorpse":  
+                if (functionArray.length === 3) // addGold|amount|updateString
+                    
+                    getCorpse(parseInt(functionArray[1]),functionArray[2]);                            
+                else
+                    console.error("doAction - Called addGold without the correct number of arguments");
+                break;
+            case "addInsight":  
+                if (functionArray.length === 3) // addInsight|amount|updateString
+                    
+                    addInsight(parseInt(functionArray[1]),functionArray[2]);                            
+                else
+                    console.error("doAction - Called addGold without the correct number of arguments");
+                break;
+            case "buy":  
+                if (functionArray.length === 3) // buy|item keyword
+                                    
+                    buy(functionArray[1],parseInt(functionArray[2]));            
+                else
+                    console.error("doAction - Called buy without the correct number of arguments");
+                break;
+            case "consoleLog":  // For debug
+                console.log("!!!");
+                break;
+        }
+
+    }, 500);
 }
 
 function playerActionComplete() {
@@ -1850,8 +1877,12 @@ function triggerEnemyAttack(monsterKeyword) {
 
     if (monstersActionString != "") addUpdateText(monstersActionString);
 
-    if (hpCurrent <= 0)
+    if (hpCurrent <= 0) {
         playerDeath();
+        return true;
+    }
+
+    return false;
 }
 
 function recoverStamina() {
@@ -1955,7 +1986,7 @@ function respawn() {
         updateStats();
         storedLocation = respawnLocation.storedLocation;
         changeContext(respawnLocation.context, respawnLocation.contextType); 
-        save();
+        save();        
 
         if (!(respawnLocation.context === 0 && respawnLocation.contextType === 1))
             addUpdateText("You wake soaked in sweat and trembling. The terrors of the foglands haunting your mind.");
@@ -2041,12 +2072,55 @@ function recoverMax(isPlayerAction) {
 }
 
 function runAway() {
-    
-    let monster = monstersModified[currentContext].keyword;
-
+        
     spendStamina(1);
-    returnToPrimaryContext();    
-    triggerEnemyAttack(monster);
+    
+    const direction = activeDirections[Math.floor(Math.random() * activeDirections.length)];
+    console.log(direction);
+    
+    let location = "";
+    let locationString = "";
+
+    switch (direction) {
+
+        // North
+        case 0:
+            locationString = "north";
+            location = locationsModified[currentContext].north;
+            break;
+        // West
+        case 1:
+            locationString = "west";
+            location = locationsModified[currentContext].west;
+            break;
+        // East
+        case 2:
+            locationString = "east";
+            location = locationsModified[currentContext].east;
+            break;
+        // South
+        case 3:
+            locationString = "south";
+            location = locationsModified[currentContext].south;
+            break;
+        // Up
+        case 4:
+            locationString = "up";
+            location = locationsModified[currentContext].up;
+            break;
+        // Down
+        case 5:
+            locationString = "down";
+            location = locationsModified[currentContext].down;
+            break;
+
+    }
+
+    changeContext(location, objectType.location);                                
+    playClick();
+    recoverStamina();
+
+    addUpdateText("You run blindly to the " + locationString);
 }
 
 function monsterDeath(monsterButton) {

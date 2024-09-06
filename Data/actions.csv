@@ -1,5 +1,5 @@
 keyword,title,active,staminaCost,location,func
-straight_sword_strike,Attack with a piercing strike,true,1,,attack|1
+straight_sword_strike,Attack with a piercing strike,true,1,,attack
 wooden_shield_block,Block with your wooden shield,true,1,,block|3
 ,,,,,
 ,,,,,

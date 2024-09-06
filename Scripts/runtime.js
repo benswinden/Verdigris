@@ -31,11 +31,11 @@ function toggleDebugWindow() {
 buttonMaster.onmouseover = (event) => { if (button1.classList.contains("can-hover")) playClick(); };
 inventoryIcon.onmouseover = (event) => { playClick(); };
 
-document.addEventListener('keydown', function(event) { if (event.code == 'KeyW') { go(0); playClick(); } });          // North
-document.addEventListener('keydown', function(event) { if (event.code == 'KeyA') { go(1); playClick(); } });        // West
-document.addEventListener('keydown', function(event) { if (event.code == 'KeyD') { go(2); playClick(); } });       // East
-document.addEventListener('keydown', function(event) { if (event.code == 'KeyS') { go(3); playClick(); } });        // South
-document.addEventListener('keydown', function(event) { if (event.code == 'Enter') { go(4); playClick(); } });            // For "Next" buttons
+document.addEventListener('keydown', function(event) { if (event.code == 'KeyW') { go(0); playClick(); } });            // North
+document.addEventListener('keydown', function(event) { if (event.code == 'KeyA') { go(1); playClick(); } });            // West
+document.addEventListener('keydown', function(event) { if (event.code == 'KeyD') { go(2); playClick(); } });            // East
+document.addEventListener('keydown', function(event) { if (event.code == 'KeyS') { go(3); playClick(); } });            // South
+document.addEventListener('keydown', function(event) { if (event.code == 'Enter') { go(4); playClick(); } });           // For "Next" buttons
 
 document.addEventListener('keydown', function(event) {
     if (event.code == 'KeyQ') {

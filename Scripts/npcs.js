@@ -47,10 +47,10 @@ npcs = [
         ]
     },
     {
-        keyword: "camp",
-        title: "Camp",
-        shortTitle: "camp",
-        description: "You take out your bedroll and make a small cookfire. This is as good a place as any to take stock of your situation, and prepare for the journey ahead.",
+        keyword: "shrine",
+        title: "Lost Shrine",
+        shortTitle: "shrine",
+        description: "Simply carved hoarstone worn smooth with the years. A place of offerings to the small gods of this place.",
         dialogueAvailable: null,
         currentDialogue: 0,
         actions: [
