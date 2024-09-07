@@ -104,6 +104,7 @@ const debugWindow = document.querySelector('#debug');
 const debugButton1 = document.querySelector('#debug-button1');
 const debugButton2 = document.querySelector('#debug-button2');
 const debugButton2b = document.querySelector('#debug-button2b');
+const debugButton2c = document.querySelector('#debug-button2c');
 const debugButton3 = document.querySelector('#debug-button3');
 const debugButton4 = document.querySelector('#debug-button4');
 const debugButton5 = document.querySelector('#debug-button5');
@@ -2042,6 +2043,9 @@ function playerDeath() {
 
     corpseLocation = actualContext;    
     locationsModified[corpseLocation].items.push("corpse");
+
+    console.log(locationsModified[corpseLocation].keyword);
+    console.log(locationsModified[corpseLocation].items);
 
     narrationText.style.display = "none";        
     mainTitleText.classList = "";

@@ -48,6 +48,7 @@ document.addEventListener('keydown', function(event) {
 debugButton1.onclick = function() { console.log("Debug: Reset Game"); resetGame(); toggleDebugWindow(); };
 debugButton2.onclick = function() { console.log("Debug: Reset & Resume " + storedLocation); let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame(); storedLocation = z;  changeContext(x,y); toggleDebugWindow();};  
 debugButton2b.onclick = function() { console.log("Debug: Kill Monster"); if (currentContextType == 3) monsterDeath();  toggleDebugWindow();}
+debugButton2c.onclick = function() { console.log("Debug: Die"); playerDeath(); }
 debugButton3.onclick = function() { insight++; save(); updateStats();};
 debugButton4.onclick = function() { hp++; save(); updateStats();};
 debugButton5.onclick = function() { gold++; save(); updateStats();};
