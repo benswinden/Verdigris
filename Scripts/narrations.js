@@ -48,9 +48,8 @@ narrations = [
     {
         keyword: "arrive_monastery",
         seen: false,
-        text: [
-            "Through the vine and brush, up from the river's shore to the north and west.\n\nYou walked for what remained of the day, arriving finally on a well worn path as the sun fell.",
-            "The trail meandered slowly, back and forth until the foliage broke, leaving a wide clearing in front of you and looming at the far end, the Eastern Gate of the Old Monastery.",
+        text: [            
+            "The trail meandered slowly, back and forth until the foliage broke, leaving a wide clearing in front of you and looming at the far end, the grand Plaza of the Old Monastery.",
             "Older than most things man-made in this place. Once a flourishing place of worship, it had been left to decay and to slowly sink into the soft earth."
         ]        
     },
