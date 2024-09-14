@@ -1767,108 +1767,6 @@ function removeItemFromLocation(itemKeyword, locationIndex) {
         updateButtons();
 }
 
-//// NOTE - These functions are broken and would need to be re-written if they are going to be used
-// Add an action to a specified context at the index, index -1 = append to the end of the list
-function addActionToContext(context, contextType, action, index) {
-    
-    // // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
-    // let contextInt = 0;
-    // if (!Number.isInteger(parseInt(context))) {
-
-    //     contextInt = getContextIndexFromKeyword(context, contextType);
-    //     if (contextInt === -1) {
-    //         console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
-    //         return;
-    //     }
-    // }
-    // else
-    //     contextInt = parseInt(context);
-
-
-    // switch (contextType) {
-    //     case 1://Location
-    //         if (index == -1)
-    //             locationsModified[contextInt].actions.push(action);
-    //         else
-    //             locationsModified[contextInt].actions.splice(index, 0, action);            
-    //         break;
-    //     case 3://Monster
-    //         if (index == -1)
-    //             monstersModified[contextInt].actions.push(action);
-    //         else
-    //             monstersModified[contextInt].actions.splice(index, 0, action);
-            
-    //         break;
-    //     case 4://Item
-    //         if (index == -1)
-    //             itemsModified[contextInt].actions.push(action);
-    //         else
-    //             itemsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
-    //         break;
-    //     case 5://NPC
-    //         if (index == -1)
-    //             npcsModified[contextInt].actions.push(action);
-    //         else
-    //             npcsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
-                
-    //         break; 
-    //     }
-        
-    //     save();
-    //     // If this is our current context, we need to update the buttons immediately. Will never be an item
-    //     if (context == currentLocation && contextType == currentContextType)
-    //         updateButtons();
-}
-//// NOTE - These functions are broken and would need to be re-written if they are going to be used
-// Remove an action in a given context at the specified index
-function removeActionFromContext(context, contextType, index) {
-
-    // // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
-    // let contextInt = 0;
-    // if (!Number.isInteger(parseInt(context))) {
-
-    //     contextInt = getContextIndexFromKeyword(context, contextType);
-    //     if (contextInt === -1) {
-    //         console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
-    //         return;
-    //     }
-    // }
-    // else
-    //     contextInt = parseInt(context);
-
-    // switch (contextType) {
-    //     case 1://Location            
-
-    //         locationsModified[contextInt].actions.splice(index, 1);
-
-    //         break;
-    //     case 3://Monster            
-
-    //         monstersModified[contextInt].actions.splice(index, 1);
-    //         break;
-    //     case 4://Item            
-
-    //         itemsModified[contextInt].actions.splice(index, 1);
-    //         break;
-    //     case 5://NPC            
-
-    //         npcsModified[contextInt].actions.splice(index, 1);
-    //         break;
-    //     }
-        
-    //     save();
-    //     // If this is our current context, we need to update the buttons immediately. Will never be an item
-    //     if (contextInt == currentLocation && contextType == currentContextType)
-    //         updateButtons();
-}
-//// NOTE - These functions are broken and would need to be re-written if they are going to be used
-// Remove action at index, add new one in it's place
-function replaceAction(context, contextType, action, index) {
-
-    // removeActionFromContext(context, contextType, index);
-    // addActionToContext(context, contextType, action, index);
-}
-
 // #endregion
 
 // #region ACTIONS
@@ -1941,28 +1839,6 @@ function doAction(actionString, staminaCost, resetText) {
                 displayNPC(getIndexFromKeyword(functionArray[1], objectType.npc));                
             else
                 console.error("doAction - Called goToNPC without an additional argument");
-            break;
-        case "addAction":   // addAction() context (keyword or index), contextType, action, index
-            if (functionArray.length === 5) {
-                
-                addActionToContext(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
-            }
-            else
-                console.error("doAction - Called addAction without the correct number of arguments");
-            break;
-        case "removeAction":  // removeAction() context(keyword or index), contextType, index        
-            if (functionArray.length === 4)
-
-                removeActionFromContext(functionArray[1],parseInt(functionArray[2]),parseInt(functionArray[3]));
-            else
-                console.error("doAction - Called addAction without the correct number of arguments");
-            break;
-        case "replaceAction":   // replaceAction() context(keyword or index), contextType, action, index
-            if (functionArray.length === 5)
-
-                replaceAction(functionArray[1],parseInt(functionArray[2]),JSON.parse(functionArray[3]),parseInt(functionArray[4]));
-            else
-                console.error("doAction - Called addAction without the correct number of arguments");
             break;
         case "addGold":  
             if (functionArray.length === 3) // addGold|amount|updateString
