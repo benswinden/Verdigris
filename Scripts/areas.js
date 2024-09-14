@@ -1,5 +1,6 @@
 areas = [    
     {
+        keyword: "gg",
         title: "Gossamer Gardens",
         description: "Hints of an old garden maze in some age past could be seen in the manicured lines of stone paths. It had long been left to it's own devices; grown into a tangle of briar and thorny roses bushes.\n\nAncient brambles covered ancient secrets.",
         narration: "",

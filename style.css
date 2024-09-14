@@ -285,8 +285,7 @@ main {
     margin:auto;
     margin-bottom: 125px;
 
-    xdisplay: flex;
-    display: none;
+    display: flex;    
     flex-direction: column;    
 
     .row {

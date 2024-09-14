@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.039;
+let version = 0.040;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -314,8 +314,9 @@ function initializeGame() {
 
 // General purpose function when we want to display a location
 // newLocation can be an integer or a keyword value
-function displayLocation(location) {
-    
+function displayLocation(location) {    
+
+    // This should only happen once
     if (!mapInitialize)
         initalizeMap();
 
@@ -326,6 +327,8 @@ function displayLocation(location) {
         currentLocation = location;
     else
         currentLocation = getIndexFromKeyword(location, objectType.location);               
+    
+    updateMap();
 
     save();
     resetUpdateText();
