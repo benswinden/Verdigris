@@ -23,9 +23,7 @@ let currentStamina = 0;
 let defence = 0;
 let evasion = 0;
 
-let currentContext = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
-let currentContextType;
-let storedLocation = 0;         // Anytime we change to a secondary context, store the primary context location
+let currentLocation = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
 let locationsVisited = [];      // A list of locations we have already visited
 let areasVisited = [];          // A list of areas we have already visited
 
@@ -35,6 +33,8 @@ let currentNarration = "";
 let currentNarrationIndex = 0;
 let narrationOpen = false;
 let titleOpen = false;
+let npcActive = false;
+let currentNPC = -1;
 
 let activeDirections = [];      // Array that contains which directions (0=north, 1=west, 2=east, 3=south ) have active buttons currently
 
@@ -43,12 +43,10 @@ let inventoryOpen = false;
 let upgradeMenuOpen = false;
 let trainMenuOpen = false;
 
+let mapInitialize = false;
+
 // Default location for new games is edge_woods
-let respawnLocation = {
-    context: 0,
-    contextType: 0,
-    storedLocation: 0
-}
+let respawnLocation = 0;
 
 let corpseLocation = -1;
 
@@ -73,7 +71,9 @@ const monsterLevelText =  document.querySelector('#monster-level-text');
 const mainText =  document.querySelector('#main-text');
 const narrationText =  document.querySelector('#narration-text');
 const updateText =  document.querySelector('#update-text');
+const mapGridContainer = document.querySelector("#map-grid-container");
 
+const mapGrid =  document.querySelector('#map-grid-container');
 
 const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
@@ -259,10 +259,10 @@ function initializeGame() {
         updateStats();
         save();
 
-        if (currentContext === -99)
+        if (currentLocation === -99)
             respawn();
         else
-            changeContext(currentContext, currentContextType);
+            displayLocation(currentLocation);
     }
     // No save game, so start a new game
     else {
@@ -292,44 +292,38 @@ function initializeGame() {
 
         inventory = [];
         inventory.push("straight_sword","green_cloak","crimson_key");
-
-        storedLocation = -1;
+        
         locationsVisited = [];
         areasVisited = [];
 
+        titleOpen = false;
+        narrationOpen = false;
+        npcActive = false;
+        currentNPC = -1;
+
         let respawnIndex = getContextIndexFromKeyword(debugRespawn, objectType.location);
-        respawnLocation = {
-            context: respawnIndex,
-            contextType: objectType.location,
-            storedLocation: -1
-        }
+        respawnLocation = respawnIndex;
         corpseLocation = -1;            
 
         save();
 
         let startContext = getContextIndexFromKeyword(debugStartContext, objectType.location);
-        changeContext(startContext, objectType.location);
+        displayLocation(startContext, objectType.location);
     }
 }
 
-function changeContext(newContext, newContextType) {
+function displayLocation(newContext) {
     
-    if (showDebugLog) console.log("changeContext - newContext:" + newContext + "   contextType:" + newContextType + "   storedLocation:" + storedLocation);
+    if (!mapInitialize)
+        initalizeMap();
 
-    currentContextType = newContextType;
-
-    if (currentContextType === objectType.location)
-        storedLocation = -1;
-    else if (currentContextType === objectType.npc) {
-        if (storedLocation === -1)
-            storedLocation = currentContext;
-    }
+    if (showDebugLog) console.log("changeContext - newContext:" + newContext);
 
     // newContext can be an integer or a keyword value
     if (Number.isInteger(newContext))
-        currentContext = newContext;
+        currentLocation = newContext;
     else
-        currentContext = getContextIndexFromKeyword(newContext, newContextType);               
+        currentLocation = getContextIndexFromKeyword(newContext, objectType.location);               
 
     save();
     resetUpdateText();
@@ -340,74 +334,54 @@ function changeContext(newContext, newContextType) {
     inventoryTitle.style.display = "none";
     equipmentTitle.style.display = "none";
     saleTitle.style.display = "none";
+        
 
-    // LOCATION
-    if (currentContextType === objectType.location) {    
+    // Check if we are entering a new area and should show the title card first        
+    if (locationsModified[currentLocation].area != "") {
 
-        // Check if we are entering a new area and should show the title card first        
-        if (locationsModified[currentContext].area != "") {
+        let areaVisited = areasVisited.indexOf(locationsModified[currentLocation].area) != -1;
+        if (!areaVisited) {
+            displayTitle();
+            return;
+        }
+    }
 
-            let areaVisited = areasVisited.indexOf(locationsModified[currentContext].area) != -1;
-            if (!areaVisited) {
-                displayTitle();
+    // Check if we've already visited this location
+    let locationVisited = locationsVisited.indexOf(currentLocation) != -1;
+
+    // First time visiting this location, check whether there is a narration to play first
+    if (!locationVisited) {
+        
+        // Check whether this location has a narration keyword
+        if (locationsModified[currentLocation].narration != undefined && locationsModified[currentLocation].narration != "") {
+            
+            // Check if the matching narration to this keyword has already been seen                
+            if (narrationsModified[getElementFromKeyword(locationsModified[currentLocation].narration, narrations)] != undefined && !narrationsModified[getElementFromKeyword(locationsModified[currentLocation].narration, narrations)].seen) {
+
+                displayNarration(locationsModified[currentLocation].narration);
                 return;
             }
         }
 
-        // Check if we've already visited this location
-        let locationVisited = locationsVisited.indexOf(currentContext) != -1;
-
-        // First time visiting this location, check whether there is a narration to play first
-        if (!locationVisited) {
-            
-            // Check whether this location has a narration keyword
-            if (locationsModified[currentContext].narration != undefined && locationsModified[currentContext].narration != "") {
-                
-                // Check if the matching narration to this keyword has already been seen                
-                if (narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)] != undefined && !narrationsModified[getElementFromKeyword(locationsModified[currentContext].narration, narrations)].seen) {
-
-                    displayNarration(locationsModified[currentContext].narration);
-                    return;
-                }
-            }
-
-            // If the description for this context is empty, that means it's only narration and we shouldn't add it to visited. If we did, players could get linked back to it and it would be empty as narration doesn't appear the second time visiting
-            if (locationsModified[currentContext].description != "") {
-                locationsVisited.push(currentContext);
-                save();
-            }
-            
-            // Check if there is narration text, then show it as this is the first time visiting
-            if (locationsModified[currentContext].update != undefined && locationsModified[currentContext].update != "") {
-                narrationText.style.display = "block";
-                narrationText.innerText = locationsModified[currentContext].update;  // Add the narration text so it appears before the main text for the locat                
-            }
+        // If the description for this context is empty, that means it's only narration and we shouldn't add it to visited. If we did, players could get linked back to it and it would be empty as narration doesn't appear the second time visiting
+        if (locationsModified[currentLocation].description != "") {
+            locationsVisited.push(currentLocation);
+            save();
         }
-
-        mainTitle.classList = "";        
-        mainTitleText.classList = "";
-        secondaryTitle.style.display = "none";
         
-        mainTitleText.innerText = locationsModified[currentContext].title;        
-        mainText.innerText = locationsModified[currentContext].description;         
-    }    
-    
-    // NPC
-    else if (currentContextType === objectType.npc) {
-        
-        mainTitleText.innerText = locationsModified[storedLocation].title;
-        mainTitleText.classList = "secondary";        
-        secondaryTitle.style.display = "flex";
-        
-        secondaryTitleIcon.classList = "npc";
-        secondaryTitleIcon.innerText = "";
-        secondaryTitleText.innerText = npcsModified[currentContext].title;
-        mainText.innerText = npcsModified[currentContext].description;                
-
-        // Some contexts have update text that should display when the player enters their context
-        if (npcsModified[currentContext].update != undefined && npcsModified[currentContext].update != "")
-            addUpdateText(npcsModified[currentContext].update);
+        // Check if there is narration text, then show it as this is the first time visiting
+        if (locationsModified[currentLocation].update != undefined && locationsModified[currentLocation].update != "") {
+            narrationText.style.display = "block";
+            narrationText.innerText = locationsModified[currentLocation].update;  // Add the narration text so it appears before the main text for the locat                
+        }
     }
+
+    mainTitle.classList = "";        
+    mainTitleText.classList = "";
+    secondaryTitle.style.display = "none";
+    
+    mainTitleText.innerText = locationsModified[currentLocation].title;        
+    mainText.innerText = locationsModified[currentLocation].description;             
 
     updateButtons();
 }
@@ -417,7 +391,7 @@ function returnToPrimaryContext() {
 
     if (showDebugLog) console.log("returnToPrimaryContext() - ");    
     
-    changeContext(storedLocation, objectType.location);    
+    displayLocation(currentLocation, objectType.location);    
 }
 
 function clearCreatedButtons() {
@@ -548,134 +522,128 @@ function updateButtons()  {
             func: "closeTitle"
         });
     }
+    else if (npcActive) {
+       
+        contextActions = JSON.parse(JSON.stringify(npcsModified[currentNPC].actions));
+
+        // Add the default actions for all NPCs
+        if (npcsModified[currentNPC].dialogueAvailable != null) {
+            contextActions.push({
+                keyword: "talk",
+                title: "Talk",
+                active: true,
+                staminaCost: -1,
+                location: "",
+                func: "talk"
+            });
+        }
+        contextActions.push({
+            keyword: "leave",
+            title: "Leave",
+            active: true,
+            staminaCost: -1,
+            location: "",
+            func: "closeNPC"
+        });
+
+        items = npcsModified[currentNPC].items;
+    }
     
     // If theres nothing special going on, we show the default actions for a location which are the exits
-    if (!narrationOpen && !titleOpen && !trainMenuOpen) {
+    if (!narrationOpen && !titleOpen && !trainMenuOpen && !npcActive) {
+  
+        // If there is an active monster, we've already define context specific actions to display
+        if (!activeMonster) {
 
-        switch (currentContextType) {
-            case objectType.location://Location            
+            // Store the directions we are able to move
+            if (locationsModified[currentLocation].north != "") activeDirections.push(0);
+            if (locationsModified[currentLocation].west != "") activeDirections.push(1);
+            if (locationsModified[currentLocation].east != "") activeDirections.push(2);
+            if (locationsModified[currentLocation].south != "") activeDirections.push(3);
+            if (locationsModified[currentLocation].up != "") activeDirections.push(4);
+            if (locationsModified[currentLocation].down != "") activeDirections.push(5);
+
+            // Check if there are monsters present in this location, if so we don't display exits, only the option to run
+            if (locationsModified[currentLocation].monsters != null && locationsModified[currentLocation].monsters != "" && locationsModified[currentLocation].monsters.length > 0) {
                 
-                // If there is an active monster, we've already define context specific actions to display
-                if (!activeMonster) {
+                contextActions.push({
+                    keyword: "run",                                    
+                    title: "Run away",                
+                    active: true,
+                    staminaCost: 1,
+                    location: "",
+                    func: "runAway",
+                });
+            }
+            // Otherwise, show the exits actions for this location
+            else {
 
-                    // Store the directions we are able to move
-                    if (locationsModified[currentContext].north != "") activeDirections.push(0);
-                    if (locationsModified[currentContext].west != "") activeDirections.push(1);
-                    if (locationsModified[currentContext].east != "") activeDirections.push(2);
-                    if (locationsModified[currentContext].south != "") activeDirections.push(3);
-                    if (locationsModified[currentContext].up != "") activeDirections.push(4);
-                    if (locationsModified[currentContext].down != "") activeDirections.push(5);
-
-                    // Check if there are monsters present in this location, if so we don't display exits, only the option to run
-                    if (locationsModified[currentContext].monsters != null && locationsModified[currentContext].monsters != "" && locationsModified[currentContext].monsters.length > 0) {
-                        
-                        contextActions.push({
-                            keyword: "run",                                    
-                            title: "Run away",                
-                            active: true,
-                            staminaCost: 1,
-                            location: "",
-                            func: "runAway",
-                        });
-                    }
-                    // Otherwise, show the exits actions for this location
-                    else {
-
-                        // NORTH                                                
-                        contextActions.push({
-                            keyword: "north",                                    
-                            title: locationsModified[currentContext].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].north, locationsModified)].title,                
-                            active: locationsModified[currentContext].north === "" ?  false : true,
-                            staminaCost: -1,
-                            location: locationsModified[currentContext].north,
-                            func: "",
-                        });
-                        // WEST                        
-                        contextActions.push({                
-                            keyword: "west",
-                            title: locationsModified[currentContext].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].west, locationsModified)].title,
-                            active: locationsModified[currentContext].west === "" ? false : true,
-                            staminaCost: -1,
-                            location: locationsModified[currentContext].west,
-                            func: "",
-                        });
-                        // EAST                        
-                        contextActions.push({                
-                            keyword: "east",
-                            title: locationsModified[currentContext].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].east, locationsModified)].title,
-                            active: locationsModified[currentContext].east === "" ? false : true,
-                            staminaCost: -1,
-                            location: locationsModified[currentContext].east,
-                            func: "",
-                        });
-                        // SOUTH                        
-                        contextActions.push({                
-                            keyword: "south",
-                            title: locationsModified[currentContext].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].south, locationsModified)].title,
-                            active: locationsModified[currentContext].south === "" ? false : true,
-                            staminaCost: -1,
-                            location: locationsModified[currentContext].south,
-                            func: "",
-                        });
-                        // We only show buttons for up and down if those direction exist
-                        // UP
-                        if (locationsModified[currentContext].up != "") {
-                            contextActions.push({
-                                keyword: "up",
-                                title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].up, locationsModified)].title,
-                                active: true,
-                                staminaCost: -1,
-                                location: locationsModified[currentContext].up,
-                                func: ""
-                            });
-                        }
-                        // Down
-                        if (locationsModified[currentContext].down != "") {
-                            contextActions.push({
-                                keyword: "down",
-                                title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentContext].down, locationsModified)].title,
-                                active: true,
-                                staminaCost: -1,
-                                location: locationsModified[currentContext].down,
-                                func: ""
-                            });
-                        }
-                    }
-                }
-                
-                items = locationsModified[currentContext].items;
-                monsters = locationsModified[currentContext].monsters;
-                npcs = locationsModified[currentContext].npcs;
-
-                break;
-            case objectType.npc://NPC
-
-                contextActions = JSON.parse(JSON.stringify(npcsModified[currentContext].actions));
-
-                // Add the default actions for all NPCs
-                if (npcsModified[currentContext].dialogueAvailable != null) {
+                // NORTH                                                
+                contextActions.push({
+                    keyword: "north",                                    
+                    title: locationsModified[currentLocation].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].north, locationsModified)].title,                
+                    active: locationsModified[currentLocation].north === "" ?  false : true,
+                    staminaCost: -1,
+                    location: locationsModified[currentLocation].north,
+                    func: "",
+                });
+                // WEST                        
+                contextActions.push({                
+                    keyword: "west",
+                    title: locationsModified[currentLocation].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].west, locationsModified)].title,
+                    active: locationsModified[currentLocation].west === "" ? false : true,
+                    staminaCost: -1,
+                    location: locationsModified[currentLocation].west,
+                    func: "",
+                });
+                // EAST                        
+                contextActions.push({                
+                    keyword: "east",
+                    title: locationsModified[currentLocation].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].east, locationsModified)].title,
+                    active: locationsModified[currentLocation].east === "" ? false : true,
+                    staminaCost: -1,
+                    location: locationsModified[currentLocation].east,
+                    func: "",
+                });
+                // SOUTH                        
+                contextActions.push({                
+                    keyword: "south",
+                    title: locationsModified[currentLocation].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].south, locationsModified)].title,
+                    active: locationsModified[currentLocation].south === "" ? false : true,
+                    staminaCost: -1,
+                    location: locationsModified[currentLocation].south,
+                    func: "",
+                });
+                // We only show buttons for up and down if those direction exist
+                // UP
+                if (locationsModified[currentLocation].up != "") {
                     contextActions.push({
-                        keyword: "talk",
-                        title: "Talk",
+                        keyword: "up",
+                        title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].up, locationsModified)].title,
                         active: true,
                         staminaCost: -1,
-                        location: "",
-                        func: "talk"
+                        location: locationsModified[currentLocation].up,
+                        func: ""
                     });
                 }
-                contextActions.push({
-                    keyword: "leave",
-                    title: "Leave",
-                    active: true,
-                    staminaCost: -1,
-                    location: "",
-                    func: "returnToPrimaryContext"
-                });
-
-                items = npcsModified[currentContext].items;
-                break;
-        }     
-    }       
+                // Down
+                if (locationsModified[currentLocation].down != "") {
+                    contextActions.push({
+                        keyword: "down",
+                        title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].down, locationsModified)].title,
+                        active: true,
+                        staminaCost: -1,
+                        location: locationsModified[currentLocation].down,
+                        func: ""
+                    });
+                }
+            }
+        }
+        
+        items = locationsModified[currentLocation].items;
+        monsters = locationsModified[currentLocation].monsters;
+        npcs = locationsModified[currentLocation].npcs;                
+    }         
 
     // UPGRADE MENU
     // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
@@ -713,20 +681,18 @@ function updateButtons()  {
                 
         // Functionality is defined by the context this button is in:
         // 1: Location    2: Inventory Normal     3: Inventory + Monster      4: Vendor Buy        5: Vendor Upgrade
-        let buttonContext = -1;
-        // Location
-        if (currentContextType === objectType.location) {
-            buttonContext = 1;
-        }    
-        if (currentContextType === objectType.npc) {
+        let buttonContext = 1; // Location        
+        
+        if (npcActive) {
             buttonContext = 4;
-        }
-        if (currentContextType != objectType.monster && inventoryOpen) {
+        }        
+        if (inventoryOpen) {
             buttonContext = 2;
         }
-        if (currentContextType === objectType.monster && inventoryOpen) {
-            buttonContext = 3;
-        }
+        // TODO IMPLEMENT CHECK FOR IF MONSTER BUTTON IS ACTIVE
+        // if (inventoryOpen) {
+        //     buttonContext = 3;
+        // }
         if (!inventoryOpen && upgradeMenuOpen)
             buttonContext = 5;
 
@@ -857,7 +823,7 @@ function updateButtons()  {
                         secondaryButtonDisplayed = true;
                         newButton.secondaryButtonText.innerText = "Take";
 
-                        let _currentContext = currentContext;       // Storing this value as it changes before we can use it to remove the item
+                        let _currentContext = currentLocation;       // Storing this value as it changes before we can use it to remove the item
 
                         // Taking different items can have different outcomes depending on the item type
                         if (item.itemType != undefined && item.itemType === "pickupGold")
@@ -883,7 +849,7 @@ function updateButtons()  {
 
                             secondaryButtonActive = true;
                             newButton.secondaryButton.onclick = function() {  
-                                locationsModified[currentContext].items.splice(locationsModified[currentContext].items.indexOf(item.keyword), 1);
+                                locationsModified[currentLocation].items.splice(locationsModified[currentLocation].items.indexOf(item.keyword), 1);
                                 inventory.splice(inventory.indexOf(item.lock), 1);
                                 playClick();
                                 addUpdateText("You unlock the " + item.shortTitle);
@@ -1165,7 +1131,7 @@ function updateButtons()  {
                 newButton.buttonText.innerText = npc.title;                
                 
                 document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
-                newButton.button.onclick = function() { changeContext(element, objectType.npc); playClick(); };                                                                                
+                newButton.button.onclick = function() { displayNPC(getContextIndexFromKeyword(element, objectType.npc)); playClick(); };                                                                                
             });
         }
 
@@ -1215,7 +1181,7 @@ function updateButtons()  {
                     // Check for talk actions as they have a specific parameter that could make it inactive
                     if (action.func === "talk") {
 
-                        if (!npcsModified[currentContext].dialogueAvailable)                          
+                        if (!npcsModified[currentNPC].dialogueAvailable)
                             buttonActive = false;                        
                     }                    
     
@@ -1227,7 +1193,7 @@ function updateButtons()  {
                         if (action.location != null && action.location != "") {
 
                             newButton.button.onclick = function() { 
-                                changeContext(action.location, objectType.location);                                
+                                displayLocation(action.location, objectType.location);                                
                                 playClick();
                                 recoverStamina() 
                             };
@@ -1317,7 +1283,7 @@ function updateButtons()  {
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
             newButton.buttonText.innerText = "Exit";
-            newButton.button.onclick = function() {trainMenuOpen = false; changeContext(currentContext, currentContextType);};
+            newButton.button.onclick = function() {trainMenuOpen = false; displayLocation(currentLocation);};
         }
 
         
@@ -1331,6 +1297,106 @@ function updateButtons()  {
             }, 100 * (index));
         });
     }    
+}
+
+function initalizeMap() {
+
+    const mainGrid = [];            // Grid that will hold our node objects
+    const secondaryGrid = [];       // Grid to hold the refs to the smaller boxes temporarily
+
+    for (let rowIndex = 0; rowIndex < mapGridContainer.children.length; rowIndex++) {
+        
+        const row = mapGridContainer.children[rowIndex];
+        
+        // If even, we are on a row of main squares
+        if (rowIndex % 2 === 0) {
+            
+            const mainRowArray = [];
+            const secondaryRowArray = [];
+
+            for (let elementIndex = 0; elementIndex < row.children.length; elementIndex++) {
+
+                const element = row.children[elementIndex];     // This can be either a main square or a secondary one
+
+                // The even elements are going to be our node squares
+                if (elementIndex % 2 === 0) {                                                        
+
+                    const nodeObject = {
+                        element: element,
+                        north: null,
+                        west: null,
+                        east: null,
+                        south: null,
+                    }
+
+                    mainRowArray.push(nodeObject);
+
+                    // Add an event for hovering over this square
+                    nodeObject.element.addEventListener('mouseover', function(event) {
+                        
+                        nodeObject.element.classList.add("active");
+                        
+                        if (nodeObject.north != null) nodeObject.north.classList.add("active");
+                        if (nodeObject.west != null) nodeObject.west.classList.add("active");
+                        if (nodeObject.east != null) nodeObject.east.classList.add("active");
+                        if (nodeObject.south != null) nodeObject.south.classList.add("active");
+                    });
+
+                    nodeObject.element.addEventListener('mouseout', function(event) {
+                        
+                        nodeObject.element.classList.remove("active");
+                        if (nodeObject.north != null) nodeObject.north.classList.remove("active");
+                        if (nodeObject.west != null) nodeObject.west.classList.remove("active");
+                        if (nodeObject.east != null) nodeObject.east.classList.remove("active");
+                        if (nodeObject.south != null) nodeObject.south.classList.remove("active");
+                    });
+
+                }
+                // Otherwise we are on a vertical smaller square
+                else {
+
+                    secondaryRowArray.push(element);
+                }
+            }
+
+            mainGrid.push(mainRowArray);
+            secondaryGrid.push(secondaryRowArray);
+        } 
+        // Otherwise we're in a row of horizontal connector squares
+        else {
+            
+            const secondaryRowArray = [];
+
+            // Only need to push this to the secondary grid
+            for (let elementIndex = 0; elementIndex < row.children.length; elementIndex++) {
+                
+                const element = row.children[elementIndex];
+
+                secondaryRowArray.push(element);
+            }
+
+            secondaryGrid.push(secondaryRowArray);
+        }
+    }
+
+    for (let y = 0; y < mainGrid.length; y++) {
+        for (let x = 0; x < mainGrid[y].length; x++) {
+            
+            const nodeObj = mainGrid[y][x];
+            
+            if (y > 0) nodeObj.north = secondaryGrid[2*y - 1][x];
+            if (x > 0) nodeObj.west = secondaryGrid[y*2][x-1];            
+            if (x < mainGrid[y].length - 1) nodeObj.east = secondaryGrid[y*2][x];            
+            if (y < mainGrid.length -1) nodeObj.south = secondaryGrid[2*y + 1][x];
+        }
+    }
+
+    mapInitialize = true;
+}
+
+function updateMap() {
+
+    
 }
 
 // When we open a button, we need to close all other buttons
@@ -1353,7 +1419,7 @@ function go(direction) {
     let dir = "";
 
     // This function only works while in a location context
-    if (currentContextType === objectType.location || narrationOpen) {
+    if (!npcActive || narrationOpen) {
         
         if (direction != 4 && activeDirections.indexOf(direction) === -1) { if (showDebugLog) console.log("go - [" + direction + "] is not an active direction."); return; }
                 
@@ -1399,107 +1465,33 @@ function go(direction) {
     }
 }
 
-// Add an action to a specified context at the index, index -1 = append to the end of the list
-function addActionToContext(context, contextType, action, index) {
-    
-    // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
-    let contextInt = 0;
-    if (!Number.isInteger(parseInt(context))) {
+function displayNPC(index) {
 
-        contextInt = getContextIndexFromKeyword(context, contextType);
-        if (contextInt === -1) {
-            console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
-            return;
-        }
-    }
-    else
-        contextInt = parseInt(context);
+        npcActive = true;
+        currentNPC = index;        
 
-
-    switch (contextType) {
-        case 1://Location
-            if (index == -1)
-                locationsModified[contextInt].actions.push(action);
-            else
-                locationsModified[contextInt].actions.splice(index, 0, action);            
-            break;
-        case 3://Monster
-            if (index == -1)
-                monstersModified[contextInt].actions.push(action);
-            else
-                monstersModified[contextInt].actions.splice(index, 0, action);
-            
-            break;
-        case 4://Item
-            if (index == -1)
-                itemsModified[contextInt].actions.push(action);
-            else
-                itemsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
-            break;
-        case 5://NPC
-            if (index == -1)
-                npcsModified[contextInt].actions.push(action);
-            else
-                npcsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
-                
-            break; 
-        }
+        mainTitleText.innerText = locationsModified[currentLocation].title;
+        mainTitleText.classList = "secondary";        
+        secondaryTitle.style.display = "flex";
         
-        save();
-        // If this is our current context, we need to update the buttons immediately. Will never be an item
-        if (context == currentContext && contextType == currentContextType)
-            updateButtons();
+        secondaryTitleIcon.classList = "npc";
+        secondaryTitleIcon.innerText = "";
+        secondaryTitleText.innerText = npcsModified[index].title;
+        mainText.innerText = npcsModified[index].description;
+
+        // Some contexts have update text that should display when the player enters their context
+        if (npcsModified[index].update != undefined && npcsModified[index].update != "")
+            addUpdateText(npcsModified[index].update);
+
+        updateButtons();
 }
 
-// Remove an action in a given context at the specified index
-function removeActionFromContext(context, contextType, index) {
+function closeNPC() {
 
-    // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
-    let contextInt = 0;
-    if (!Number.isInteger(parseInt(context))) {
-
-        contextInt = getContextIndexFromKeyword(context, contextType);
-        if (contextInt === -1) {
-            console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
-            return;
-        }
-    }
-    else
-        contextInt = parseInt(context);
-
-    switch (contextType) {
-        case 1://Location            
-
-            locationsModified[contextInt].actions.splice(index, 1);
-
-            break;
-        case 3://Monster            
-
-            monstersModified[contextInt].actions.splice(index, 1);
-            break;
-        case 4://Item            
-
-            itemsModified[contextInt].actions.splice(index, 1);
-            break;
-        case 5://NPC            
-
-            npcsModified[contextInt].actions.splice(index, 1);
-            break;
-        }
-        
-        save();
-        // If this is our current context, we need to update the buttons immediately. Will never be an item
-        if (contextInt == currentContext && contextType == currentContextType)
-            updateButtons();
+    npcActive = false;
+    currentNPC = -1;
+    displayLocation(currentLocation);
 }
-
-// Remove action at index, add new one in it's place
-function replaceAction(context, contextType, action, index) {
-
-    removeActionFromContext(context, contextType, index);
-    addActionToContext(context, contextType, action, index);
-}
-
 
 function displayNarration(narrationKeyword) {
     
@@ -1546,7 +1538,7 @@ function continueNarration() {
 function closeNarration() {
 
     narrationOpen = false;
-    changeContext(currentContext, currentContextType);
+    displayLocation(currentLocation);
 }
 
 function displayTitle() {
@@ -1556,8 +1548,8 @@ function displayTitle() {
     titleOpen = true;
     updateButtons();
 
-    areasVisited += locationsModified[currentContext].area;
-    let contextKeyword = locationsModified[currentContext].area + "_title";        
+    areasVisited += locationsModified[currentLocation].area;
+    let contextKeyword = locationsModified[currentLocation].area + "_title";        
 
     saleTitle.style.display = "none";
     narrationText.style.display = "none";        
@@ -1571,7 +1563,7 @@ function displayTitle() {
 function closeTitle() {
 
     titleOpen = false;
-    changeContext(currentContext, currentContextType);
+    displayLocation(currentLocation);
 }
 
 function displayInventory() {
@@ -1605,7 +1597,7 @@ function exitInventory() {
     inventoryOpen = false;
 
     clearInventory();
-    changeContext(currentContext, currentContextType);
+    displayLocation(currentLocation);
     if (upgradeMenuOpen)
         displayUpgrade();
     if (narrationOpen)
@@ -1639,7 +1631,7 @@ function displayUpgrade() {
 function exitUpgrade() {
 
     upgradeMenuOpen = false;
-    changeContext(currentContext, currentContextType);
+    displayLocation(currentLocation);
 }
 
 function inventoryIndexOf(keyword) {
@@ -1776,8 +1768,110 @@ function removeItemFromContext(keyword, context) {
     
     save();
 
-    if (context === currentContext)
+    if (context === currentLocation)
         updateButtons();
+}
+
+//// NOTE - These functions are broken and would need to be re-written if they are going to be used
+// Add an action to a specified context at the index, index -1 = append to the end of the list
+function addActionToContext(context, contextType, action, index) {
+    
+    // // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
+    // let contextInt = 0;
+    // if (!Number.isInteger(parseInt(context))) {
+
+    //     contextInt = getContextIndexFromKeyword(context, contextType);
+    //     if (contextInt === -1) {
+    //         console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
+    //         return;
+    //     }
+    // }
+    // else
+    //     contextInt = parseInt(context);
+
+
+    // switch (contextType) {
+    //     case 1://Location
+    //         if (index == -1)
+    //             locationsModified[contextInt].actions.push(action);
+    //         else
+    //             locationsModified[contextInt].actions.splice(index, 0, action);            
+    //         break;
+    //     case 3://Monster
+    //         if (index == -1)
+    //             monstersModified[contextInt].actions.push(action);
+    //         else
+    //             monstersModified[contextInt].actions.splice(index, 0, action);
+            
+    //         break;
+    //     case 4://Item
+    //         if (index == -1)
+    //             itemsModified[contextInt].actions.push(action);
+    //         else
+    //             itemsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
+    //         break;
+    //     case 5://NPC
+    //         if (index == -1)
+    //             npcsModified[contextInt].actions.push(action);
+    //         else
+    //             npcsModified[contextInt].actions.splice(index, 0, action);            // Store this in case this is our current context
+                
+    //         break; 
+    //     }
+        
+    //     save();
+    //     // If this is our current context, we need to update the buttons immediately. Will never be an item
+    //     if (context == currentLocation && contextType == currentContextType)
+    //         updateButtons();
+}
+//// NOTE - These functions are broken and would need to be re-written if they are going to be used
+// Remove an action in a given context at the specified index
+function removeActionFromContext(context, contextType, index) {
+
+    // // First check whether context is an int or a string, if it's a string then we've been given a keyword and must first find the proper index
+    // let contextInt = 0;
+    // if (!Number.isInteger(parseInt(context))) {
+
+    //     contextInt = getContextIndexFromKeyword(context, contextType);
+    //     if (contextInt === -1) {
+    //         console.error("addActionToContext() - Tried to add an action using a keyword [" + context + "] but couldn't find that context in the given contextType [" + contextType +"].");
+    //         return;
+    //     }
+    // }
+    // else
+    //     contextInt = parseInt(context);
+
+    // switch (contextType) {
+    //     case 1://Location            
+
+    //         locationsModified[contextInt].actions.splice(index, 1);
+
+    //         break;
+    //     case 3://Monster            
+
+    //         monstersModified[contextInt].actions.splice(index, 1);
+    //         break;
+    //     case 4://Item            
+
+    //         itemsModified[contextInt].actions.splice(index, 1);
+    //         break;
+    //     case 5://NPC            
+
+    //         npcsModified[contextInt].actions.splice(index, 1);
+    //         break;
+    //     }
+        
+    //     save();
+    //     // If this is our current context, we need to update the buttons immediately. Will never be an item
+    //     if (contextInt == currentLocation && contextType == currentContextType)
+    //         updateButtons();
+}
+//// NOTE - These functions are broken and would need to be re-written if they are going to be used
+// Remove action at index, add new one in it's place
+function replaceAction(context, contextType, action, index) {
+
+    // removeActionFromContext(context, contextType, index);
+    // addActionToContext(context, contextType, action, index);
 }
 
 // #endregion
@@ -1841,6 +1935,9 @@ function doAction(actionString, staminaCost, resetText) {
         case "closeTitle":
             closeTitle();
             break;
+        case "closeNPC":
+            closeNPC();
+            break;
         case "advanceDialogue":
             if (functionArray.length === 2)         // advanceDialogue|npcKeyword
                 advanceDialogue(functionArray[1]);
@@ -1849,7 +1946,7 @@ function doAction(actionString, staminaCost, resetText) {
             break;
         case "goToNPC":
             if (functionArray.length === 2)     // goToNPC|npcKeyword
-                changeContext(functionArray[1], objectType.npc);                
+                displayNPC(getContextIndexFromKeyword(functionArray[1], objectType.npc));                
             else
                 console.error("doAction - Called goToNPC without an additional argument");
             break;
@@ -1920,21 +2017,14 @@ function playerActionComplete() {
 
     if (showDebugLog) console.log("playerActionComplete() - ");
           
-    let monsters = [];
-
-    // If current context is a location, search it's actions for monsters and tell them to attack
-    if (currentContextType === objectType.location)
-        monsters = locationsModified[currentContext].monsters;
-    // If we're in a secondary context, use the stored location to search for monsters
-    else if (currentContextType === objectType.npc)
-        monsters = locationsModified[storedLocation].monsters;
+    let monsters = locationsModified[currentLocation].monsters;    
 
     let playerDead = false;
     if (monsters.length > 0 && monsters != "") {
 
         monsters.forEach((element, index) => {
 
-            if (currentContext != -99)      // Check in case a previous monster already killed us
+            if (currentLocation != -99)      // Check in case a previous monster already killed us
                 playerDead = triggerEnemyAttack(element);
         });            
     }    
@@ -1980,14 +2070,7 @@ function triggerEnemyAttack(monsterKeyword) {
 function recoverStamina() {
 
     let monstersPresent = false;
-    let monsters = [];
-
-    // If current context is a location, search it's actions for monsters and tell them to attack
-    if (currentContextType === objectType.location)
-        monsters = locationsModified[currentContext].monsters;
-    // If we're already fighting a monster, use the stored location to search for monsters
-    else if (currentContextType === objectType.monster)
-        monsters = locationsModified[storedLocation].monsters;
+    let monsters = locationsModified[currentLocation].monsters;
     
     if (monsters.length > 0 && monsters != "") 
         monstersPresent = true;
@@ -2027,12 +2110,7 @@ function playerDeath() {
 
         removeItemFromContext("corpse", corpseLocation);
     }
-
-    // We are going to create a corpse in the primary location where we are currently
-    // Check if we're fighting a monster, in which case we use the stored location instead of current context
-    let actualContext = currentContext;
-    if (currentContextType === objectType.npc)
-        actualContext = storedLocation;
+    
 
     let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
     // Set the quantity of the corpse item to the amount of gold we are holding
@@ -2041,7 +2119,7 @@ function playerDeath() {
     gold = 0;
     updateStats();
 
-    corpseLocation = actualContext;    
+    corpseLocation = currentLocation;    
     locationsModified[corpseLocation].items.push("corpse");
 
     console.log(locationsModified[corpseLocation].keyword);
@@ -2062,13 +2140,13 @@ function playerDeath() {
     newButton.buttonText.innerText = "Awaken";                    
     document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
     newButton.button.onclick = function() { respawn();};        
-    currentContext = -99;   // Save 'dead' state
+    currentLocation = -99;   // Save 'dead' state
     save();
 }
 
 function respawn() {    
 
-    if (respawnLocation != {}) {
+    if (respawnLocation != null && respawnLocation != -1) {
 
         hpCurrent = hpMax;
         currentStamina = maxStamina;
@@ -2078,13 +2156,12 @@ function respawn() {
             element.hpCurrent = element.hpMax;
         });
 
-        updateStats();
-        storedLocation = respawnLocation.storedLocation;
-        changeContext(respawnLocation.context, respawnLocation.contextType); 
+        updateStats();        
+        displayLocation(respawnLocation); 
         save();        
-
-        if (!(respawnLocation.context === 0 && respawnLocation.contextType === 1))
-            addUpdateText("You wake soaked in sweat and trembling. The terrors of the foglands haunting your mind.");
+        
+        // TODO Add variants on this text
+        addUpdateText("You wake soaked in sweat and trembling. The terrors of the foglands haunting your mind.");
     }
     else
         console.error("respawn() - Trying to respawn with an empty respawnLocation");
@@ -2092,7 +2169,7 @@ function respawn() {
 
 function attack() {
 
-    if (currentContext === -99) return;
+    if (currentLocation === -99) return;
 
     if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo
     
@@ -2130,7 +2207,7 @@ function block(staminaCost) {
 
     if (showDebugLog) console.log("block() - Defence: " + defence + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
                 
-    let monster = monstersModified[currentContext];
+    let monster = monstersModified[currentLocation];
     
     console.log("BLOCK NOT IMPLEMENTED");
     
@@ -2173,7 +2250,7 @@ function runAway() {
     // Wait for a short period here so that any outcome of spending stamina can resolve
     setTimeout(function() {
 
-        if (currentContext === -99) return; // In case we died while trying to run away
+        if (currentLocation === -99) return; // In case we died while trying to run away
 
         const direction = activeDirections[Math.floor(Math.random() * activeDirections.length)];
         console.log(direction);
@@ -2186,37 +2263,37 @@ function runAway() {
             // North
             case 0:
                 locationString = "north";
-                location = locationsModified[currentContext].north;
+                location = locationsModified[currentLocation].north;
                 break;
             // West
             case 1:
                 locationString = "west";
-                location = locationsModified[currentContext].west;
+                location = locationsModified[currentLocation].west;
                 break;
             // East
             case 2:
                 locationString = "east";
-                location = locationsModified[currentContext].east;
+                location = locationsModified[currentLocation].east;
                 break;
             // South
             case 3:
                 locationString = "south";
-                location = locationsModified[currentContext].south;
+                location = locationsModified[currentLocation].south;
                 break;
             // Up
             case 4:
                 locationString = "up";
-                location = locationsModified[currentContext].up;
+                location = locationsModified[currentLocation].up;
                 break;
             // Down
             case 5:
                 locationString = "down";
-                location = locationsModified[currentContext].down;
+                location = locationsModified[currentLocation].down;
                 break;
 
         }
 
-        changeContext(location, objectType.location);                                
+        displayLocation(location, objectType.location);                                
         playClick();
         recoverStamina();
 
@@ -2229,7 +2306,7 @@ function monsterDeath(monsterButton) {
     let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword, objectType.monster)];
     
     // Remove this monster from the current location
-    locationsModified[currentContext].monsters.splice(locationsModified[currentContext].monsters.indexOf(monster.keyword),1);
+    locationsModified[currentLocation].monsters.splice(locationsModified[currentLocation].monsters.indexOf(monster.keyword),1);
 
     let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monster.insight + " insight and " +  monster.gold + " gold";
 
@@ -2254,12 +2331,12 @@ function dodge() {
 
 function talk() {
 
-    if (currentContextType === objectType.npc) {
+    if (npcActive) {
 
-        let dialogueString = npcsModified[currentContext].keyword + "_" + npcsModified[currentContext].currentDialogue;
+        let dialogueString = npcsModified[currentNPC].keyword + "_" + npcsModified[currentNPC].currentDialogue;
         
         displayNarration(dialogueString);
-        npcsModified[currentContext].dialogueAvailable = false;
+        npcsModified[currentNPC].dialogueAvailable = false;
     }
     else
         console.error("talk - Somehow this was called but the current context is not an NPC")
@@ -2277,11 +2354,7 @@ function rest() {
         element.hpCurrent = element.hpMax;
     });
 
-    respawnLocation = {
-        context: currentContext,
-        contextType: currentContextType,
-        storedLocation: storedLocation
-    }
+    respawnLocation = currentLocation;        
 
     save();
     updateStats();
@@ -2321,11 +2394,11 @@ function addToInventory(keyword) {
     let items = [];
 
     // Depending on the contextType, we will splice this item out of a different context
-    if (currentContextType === objectType.location) {        
-        items = locationsModified[currentContext].items;
+    if (!npcActive) {        
+        items = locationsModified[currentLocation].items;
     }    
-    else if (currentContextType === objectType.npc) {        
-        items = npcsModified[currentContext].items;
+    else if (npcActive) {        
+        items = npcsModified[currentNPC].items;
     }
     
     // Find and remove the item from the item list that it was contained in
@@ -2411,7 +2484,7 @@ function getCorpse(amount, updateString) {
     if (updateString != "") 
         addUpdateText(updateString + " ( " + amount + " gold )");    
 
-    removeItemFromContext("corpse", currentContext);
+    removeItemFromContext("corpse", currentLocation);
     corpseLocation = -1;
 
     updateStats();
@@ -2489,9 +2562,7 @@ function save() {
     if (showDebugLog) console.log("save");
     localStorage.setItem('saveExists', "!");        // Used to test whether there is a save
     localStorage.setItem('version', JSON.stringify(version));
-    localStorage.setItem('currentLocation', JSON.stringify(currentContext));
-    localStorage.setItem('storedLocation', JSON.stringify(storedLocation));
-    localStorage.setItem('currentLocationType', JSON.stringify(currentContextType));
+    localStorage.setItem('currentLocation', JSON.stringify(currentLocation));
     localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));    
     localStorage.setItem('areasVisited', JSON.stringify(areasVisited));    
     localStorage.setItem('insight', JSON.stringify(insight));
@@ -2522,9 +2593,7 @@ function save() {
 
     if (showDebugLog) console.log("Load");
 
-    currentContext = JSON.parse(localStorage.getItem('currentLocation'));
-    storedLocation = JSON.parse(localStorage.getItem('storedLocation'));       
-    currentContextType = JSON.parse(localStorage.getItem('currentLocationType'));
+    currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
     locationsVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
     areasVisited = JSON.parse(localStorage.getItem('areasVisited'));    
     insight = JSON.parse(localStorage.getItem('insight'));

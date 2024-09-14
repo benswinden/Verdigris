@@ -2,7 +2,80 @@
 locations = [
     
     
-    
+    //----------------------//
+    //-- The Foglands
+    //----------------------//    
+
+    {        
+        keyword: "fl_01",
+        area: "foglands",
+        title: "fl_01",
+        description: "",
+        narration: "",        
+        update: "",        
+        items: [],
+        monsters: [],
+        npcs: [],
+        north: "",
+        west: "",
+        east: "",
+        south: "",
+        up: "",
+        down: ""        
+    },
+    {        
+        keyword: "fl_02",
+        area: "foglands",
+        title: "fl_02",
+        description: "",
+        narration: "",        
+        update: "",        
+        items: [],
+        monsters: [],
+        npcs: [],
+        north: "",
+        west: "",
+        east: "",
+        south: "",
+        up: "",
+        down: ""        
+    },
+    {        
+        keyword: "fl_03",
+        area: "foglands",
+        title: "fl_03",
+        description: "",
+        narration: "",        
+        update: "",        
+        items: [],
+        monsters: [],
+        npcs: [],
+        north: "",
+        west: "",
+        east: "",
+        south: "",
+        up: "",
+        down: ""        
+    },
+    {        
+        keyword: "fl_04",
+        area: "foglands",
+        title: "fl_04",
+        description: "",
+        narration: "",        
+        update: "",        
+        items: [],
+        monsters: [],
+        npcs: [],
+        north: "",
+        west: "",
+        east: "",
+        south: "",
+        up: "",
+        down: ""        
+    },
+
+
     //----------------------//
     //-- The Old Monastery 
     //----------------------//
@@ -220,7 +293,7 @@ locations = [
         monsters: [],
         npcs: [],
         north: "",
-        west: "east_gate",
+        west: "om_01",
         east: "gg_02",
         south: "",
         up: "",
