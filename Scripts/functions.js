@@ -23,7 +23,7 @@ let currentStamina = 0;
 let defence = 0;
 let evasion = 0;
 
-let currentLocation = 0;         // Index of the current displayed context. Index related to a certain array, currentContextType indicates what type of context and therefore which array to sear
+let currentLocation = 0;         
 let locationsVisited = [];      // A list of locations we have already visited
 let areasVisited = [];          // A list of areas we have already visited
 
@@ -52,7 +52,7 @@ let corpseLocation = -1;
 
 // Debug
 let showDebugLog = true;
-let debugStartContext = "edge_garden";
+let debugStartLocation = "edge_garden";
 let debugRespawn = "edge_garden";
 let debugWindowActive = false;
 
@@ -301,29 +301,31 @@ function initializeGame() {
         npcActive = false;
         currentNPC = -1;
 
-        let respawnIndex = getContextIndexFromKeyword(debugRespawn, objectType.location);
+        let respawnIndex = getIndexFromKeyword(debugRespawn, objectType.location);
         respawnLocation = respawnIndex;
         corpseLocation = -1;            
 
         save();
 
-        let startContext = getContextIndexFromKeyword(debugStartContext, objectType.location);
-        displayLocation(startContext, objectType.location);
+        let startLocation = getIndexFromKeyword(debugStartLocation, objectType.location);
+        displayLocation(startLocation, objectType.location);
     }
 }
 
-function displayLocation(newContext) {
+// General purpose function when we want to display a location
+// newLocation can be an integer or a keyword value
+function displayLocation(location) {
     
     if (!mapInitialize)
         initalizeMap();
 
-    if (showDebugLog) console.log("changeContext - newContext:" + newContext);
+    if (showDebugLog) console.log("displayLocation - location:" + location);
 
-    // newContext can be an integer or a keyword value
-    if (Number.isInteger(newContext))
-        currentLocation = newContext;
+    // Check whether newLocation is int or string
+    if (Number.isInteger(location))
+        currentLocation = location;
     else
-        currentLocation = getContextIndexFromKeyword(newContext, objectType.location);               
+        currentLocation = getIndexFromKeyword(location, objectType.location);               
 
     save();
     resetUpdateText();
@@ -363,7 +365,7 @@ function displayLocation(newContext) {
             }
         }
 
-        // If the description for this context is empty, that means it's only narration and we shouldn't add it to visited. If we did, players could get linked back to it and it would be empty as narration doesn't appear the second time visiting
+        // If the description for this location is empty, that means it's only narration and we shouldn't add it to visited. If we did, players could get linked back to it and it would be empty as narration doesn't appear the second time visiting
         if (locationsModified[currentLocation].description != "") {
             locationsVisited.push(currentLocation);
             save();
@@ -384,14 +386,6 @@ function displayLocation(newContext) {
     mainText.innerText = locationsModified[currentLocation].description;             
 
     updateButtons();
-}
-
-// When we are interacting with an NPC, it's a 'secondary context' so this function will return us to the parent location
-function returnToPrimaryContext() {
-
-    if (showDebugLog) console.log("returnToPrimaryContext() - ");    
-    
-    displayLocation(currentLocation, objectType.location);    
 }
 
 function clearCreatedButtons() {
@@ -457,7 +451,7 @@ function updateButtons()  {
     if (showDebugLog) console.log("updateButtons() - ");
     
     // Check if there is a current active button
-    // If yes, that means we've just refreshed buttons without changing context and we are checking for unique actions associated with this button
+    // If yes, that means we've just refreshed buttons without changing location and we are checking for unique actions associated with this button
     let activeMonster = null;
     let activeItem = null;
     
@@ -474,7 +468,7 @@ function updateButtons()  {
 
     clearCreatedButtons();
 
-    let contextActions = [];
+    let contextualActions = [];         // Will be dynamically populated with actions depending on the game state
     let items = [];
     let monsters = [];
     let npcs = [];    
@@ -487,14 +481,14 @@ function updateButtons()  {
         
         inventory.forEach((element,index) => {
             
-            let item = itemsModified[getContextIndexFromKeyword(element, objectType.item)];
+            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
             if (item.canEquip && item.equipped) {
                 
                 if (item.actions.length > 0) {
                     
                     item.actions.forEach((element, index) => {
 
-                        contextActions.push(actions[getElementFromKeyword(element, actions)]);
+                        contextualActions.push(actions[getElementFromKeyword(element, actions)]);
                     });            
                 }
             }
@@ -502,7 +496,7 @@ function updateButtons()  {
     }
     else if (narrationOpen) {
 
-        contextActions.push({
+        contextualActions.push({
             keyword: "next",
             title: "Next",
             active: true,
@@ -513,7 +507,7 @@ function updateButtons()  {
     }
     else if (titleOpen) {
 
-        contextActions.push({
+        contextualActions.push({
             keyword: "continue",
             title: "Continue",
             active: true,
@@ -524,11 +518,11 @@ function updateButtons()  {
     }
     else if (npcActive) {
        
-        contextActions = JSON.parse(JSON.stringify(npcsModified[currentNPC].actions));
+        contextualActions = JSON.parse(JSON.stringify(npcsModified[currentNPC].actions));
 
         // Add the default actions for all NPCs
         if (npcsModified[currentNPC].dialogueAvailable != null) {
-            contextActions.push({
+            contextualActions.push({
                 keyword: "talk",
                 title: "Talk",
                 active: true,
@@ -537,7 +531,7 @@ function updateButtons()  {
                 func: "talk"
             });
         }
-        contextActions.push({
+        contextualActions.push({
             keyword: "leave",
             title: "Leave",
             active: true,
@@ -566,7 +560,7 @@ function updateButtons()  {
             // Check if there are monsters present in this location, if so we don't display exits, only the option to run
             if (locationsModified[currentLocation].monsters != null && locationsModified[currentLocation].monsters != "" && locationsModified[currentLocation].monsters.length > 0) {
                 
-                contextActions.push({
+                contextualActions.push({
                     keyword: "run",                                    
                     title: "Run away",                
                     active: true,
@@ -579,7 +573,7 @@ function updateButtons()  {
             else {
 
                 // NORTH                                                
-                contextActions.push({
+                contextualActions.push({
                     keyword: "north",                                    
                     title: locationsModified[currentLocation].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].north, locationsModified)].title,                
                     active: locationsModified[currentLocation].north === "" ?  false : true,
@@ -588,7 +582,7 @@ function updateButtons()  {
                     func: "",
                 });
                 // WEST                        
-                contextActions.push({                
+                contextualActions.push({                
                     keyword: "west",
                     title: locationsModified[currentLocation].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].west, locationsModified)].title,
                     active: locationsModified[currentLocation].west === "" ? false : true,
@@ -597,7 +591,7 @@ function updateButtons()  {
                     func: "",
                 });
                 // EAST                        
-                contextActions.push({                
+                contextualActions.push({                
                     keyword: "east",
                     title: locationsModified[currentLocation].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].east, locationsModified)].title,
                     active: locationsModified[currentLocation].east === "" ? false : true,
@@ -606,7 +600,7 @@ function updateButtons()  {
                     func: "",
                 });
                 // SOUTH                        
-                contextActions.push({                
+                contextualActions.push({                
                     keyword: "south",
                     title: locationsModified[currentLocation].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].south, locationsModified)].title,
                     active: locationsModified[currentLocation].south === "" ? false : true,
@@ -617,7 +611,7 @@ function updateButtons()  {
                 // We only show buttons for up and down if those direction exist
                 // UP
                 if (locationsModified[currentLocation].up != "") {
-                    contextActions.push({
+                    contextualActions.push({
                         keyword: "up",
                         title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].up, locationsModified)].title,
                         active: true,
@@ -628,7 +622,7 @@ function updateButtons()  {
                 }
                 // Down
                 if (locationsModified[currentLocation].down != "") {
-                    contextActions.push({
+                    contextualActions.push({
                         keyword: "down",
                         title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].down, locationsModified)].title,
                         active: true,
@@ -649,8 +643,8 @@ function updateButtons()  {
     // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
     if (!narrationOpen && !inventoryOpen && !trainMenuOpen && upgradeMenuOpen) {
 
-        contextActions = [];
-        contextActions.push({            
+        contextualActions = [];
+        contextualActions.push({            
             keyword: "back",
             title: "Back",
             active: true,
@@ -662,7 +656,7 @@ function updateButtons()  {
         items = [];
         inventory.forEach((element, index) => {
 
-            if (itemsModified[getContextIndexFromKeyword(element, objectType.item)].canUpgrade)
+            if (itemsModified[getIndexFromKeyword(element, objectType.item)].canUpgrade)
                 items.push(element);
         });
     }
@@ -673,9 +667,9 @@ function updateButtons()  {
         
         // We make a deep copy of our inventory to inject these resource items into only while we are viewing the inventory
         items = JSON.parse(JSON.stringify(inventory));
-        if (ore > 0) { itemsModified[getContextIndexFromKeyword("ore", objectType.item)].quantity = ore; items.splice(0,0, "ore"); }
-        if (leather > 0) { itemsModified[getContextIndexFromKeyword("leather", objectType.item)].quantity = ore; items.splice(0,0, "leather"); }
-        if (greenHerb > 0) { itemsModified[getContextIndexFromKeyword("green_herb", objectType.item)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
+        if (ore > 0) { itemsModified[getIndexFromKeyword("ore", objectType.item)].quantity = ore; items.splice(0,0, "ore"); }
+        if (leather > 0) { itemsModified[getIndexFromKeyword("leather", objectType.item)].quantity = ore; items.splice(0,0, "leather"); }
+        if (greenHerb > 0) { itemsModified[getIndexFromKeyword("green_herb", objectType.item)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
     }    
     if (items != undefined && items.length > 0 && items != "") {
                 
@@ -699,7 +693,7 @@ function updateButtons()  {
         // Create a button for each item contained in our array
         items.forEach((element,index) => {
             
-            let item = itemsModified[getContextIndexFromKeyword(element, objectType.item)];
+            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
             
             // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
             if (item.blocking != null && item.blocking != "") {
@@ -710,7 +704,7 @@ function updateButtons()  {
                     // North
                     case "north":
                         if (activeDirections.indexOf(0) != -1) {            // Check that the provided direction was already activated earlier
-                            contextActions.forEach((element) => {           // Find the right context action
+                            contextualActions.forEach((element) => {           // Find the right context action
                                 if (element.keyword === "north") {
                                     element.title += " [Blocked]";
                                     element.active = false;
@@ -721,7 +715,7 @@ function updateButtons()  {
                     // West
                     case "west":
                         if (activeDirections.indexOf(1) != -1) {
-                            contextActions.forEach((element) => {
+                            contextualActions.forEach((element) => {
                                 if (element.keyword === "west") {
                                     element.title += " [Blocked]";
                                     element.active = false;
@@ -732,7 +726,7 @@ function updateButtons()  {
                     // East
                     case "east":
                         if (activeDirections.indexOf(2) != -1) {
-                            contextActions.forEach((element) => {
+                            contextualActions.forEach((element) => {
                                 if (element.keyword === "east") {
                                     element.title += " [Blocked]";
                                     element.active = false;
@@ -743,7 +737,7 @@ function updateButtons()  {
                     // South
                     case "south":
                         if (activeDirections.indexOf(3) != -1) {
-                            contextActions.forEach((element) => {
+                            contextualActions.forEach((element) => {
                                 if (element.keyword === "south") {
                                     element.title += " [Blocked]";
                                     element.active = false;
@@ -754,7 +748,7 @@ function updateButtons()  {
                     // Up
                     case "up":
                         if (activeDirections.indexOf(4) != -1) {
-                            contextActions.forEach((element) => {
+                            contextualActions.forEach((element) => {
                                 if (element.keyword === "up") {
                                     element.title += " [Blocked]";
                                     element.active = false;
@@ -765,7 +759,7 @@ function updateButtons()  {
                     // Down
                     case "down":
                         if (activeDirections.indexOf(5) != -1) {
-                            contextActions.forEach((element) => {
+                            contextualActions.forEach((element) => {
                                 if (element.keyword === "down") {
                                     element.title += " [Blocked]";
                                     element.active = false;
@@ -823,20 +817,20 @@ function updateButtons()  {
                         secondaryButtonDisplayed = true;
                         newButton.secondaryButtonText.innerText = "Take";
 
-                        let _currentContext = currentLocation;       // Storing this value as it changes before we can use it to remove the item
+                        let _currentLocation = currentLocation;       // Storing this value as it changes before we can use it to remove the item
 
                         // Taking different items can have different outcomes depending on the item type
                         if (item.itemType != undefined && item.itemType === "pickupGold")
-                            newButton.secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  addGold(item.quantity, "You pickup the coins."); removeItemFromLocation(item.keyword, _currentLocation); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupInsight")
-                            newButton.secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  addInsight(item.quantity, "You pick up the relic and feel it's essence move within you."); removeItemFromLocation(item.keyword, _currentLocation); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupCorpse")
                             // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
                             newButton.secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupHeal")
-                            newButton.secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromContext(item.keyword, _currentContext); playClick(); };
+                            newButton.secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromLocation(item.keyword, _currentLocation); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
-                            newButton.secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromContext(item.keyword, _currentContext); playClick(); };                
+                            newButton.secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromLocation(item.keyword, _currentLocation); playClick(); };                
                         else
                             newButton.secondaryButton.onclick = function() {  addToInventory(item.keyword); playClick(); };
                     }
@@ -1043,7 +1037,7 @@ function updateButtons()  {
             
             monsters.forEach((element, index) => {
                 
-                const monster = monstersModified[getContextIndexFromKeyword(element, objectType.monster)];
+                const monster = monstersModified[getIndexFromKeyword(element, objectType.monster)];
                 let descriptionTextActive = false;
 
                 const newButton = createButton(monster.keyword, objectType.monster);
@@ -1120,7 +1114,7 @@ function updateButtons()  {
             
             npcs.forEach((element, index) => {
 
-                const npc = npcsModified[getContextIndexFromKeyword(element, objectType.npc)];                
+                const npc = npcsModified[getIndexFromKeyword(element, objectType.npc)];                
 
                 const newButton = createButton(npc.keyword, objectType.npc);
                 createdButtons.push(newButton);
@@ -1131,22 +1125,22 @@ function updateButtons()  {
                 newButton.buttonText.innerText = npc.title;                
                 
                 document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
-                newButton.button.onclick = function() { displayNPC(getContextIndexFromKeyword(element, objectType.npc)); playClick(); };                                                                                
+                newButton.button.onclick = function() { displayNPC(getIndexFromKeyword(element, objectType.npc)); playClick(); };                                                                                
             });
         }
 
-        // CONTEXT ACTIONS
+        // CONTEXTUAL ACTIONS
         // Add in the rest of context specific actions (i.e. Buttons for leaving the location etc.)
         
         // We will store action buttons as we create them so we can animate them appearing
         let createdActionButtons = [];
         
-        if (contextActions.length > 0) {        
+        if (contextualActions.length > 0) {        
 
             if (lastButtonConfigured != null)
                 lastButtonConfigured.classList += " spacer";         // Before we create the rest of the buttons, we add some spacing in the list to separate the two categories of buttons
 
-            contextActions.forEach((element, index) => {
+            contextualActions.forEach((element, index) => {
                 
                 let additionalButtonString = "";        // If any additional text needs to be appended to a button                                
                 let action = element;
@@ -1555,9 +1549,9 @@ function displayTitle() {
     narrationText.style.display = "none";        
     mainTitle.classList = "centered";
     mainTitleText.classList = "";
-    mainTitleText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, objectType.location)].title;
+    mainTitleText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].title;
     secondaryTitle.style.display = "none";        
-    mainText.innerText = locationsModified[getContextIndexFromKeyword(contextKeyword, objectType.location)].description;
+    mainText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].description;
 }
 
 function closeTitle() {
@@ -1679,7 +1673,7 @@ function train(trainType, cost) {
         case "curse":
             insight -= cost;
 
-            let curseMarkIndex = getContextIndexFromKeyword("curse_mark", objectType.item);
+            let curseMarkIndex = getIndexFromKeyword("curse_mark", objectType.item);
             itemsModified[curseMarkIndex].power += 5;
             break;        
     }
@@ -1713,7 +1707,7 @@ function calculateStats() {
 
     inventory.forEach((element) => {
         
-        let index = getContextIndexFromKeyword(element, objectType.item);
+        let index = getIndexFromKeyword(element, objectType.item);
 
         if (itemsModified[index].equipped) {
             power += itemsModified[index].power;
@@ -1739,7 +1733,7 @@ function collapseStats() {
 
 function updateMonsterUI(monsterButton) {
     
-    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword, objectType.monster)];
+    let monster = monstersModified[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
 
     monsterButton.monsterHpText.innerText = monster.hpCurrent + "/" + monster.hpMax;
     let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
@@ -1762,13 +1756,14 @@ function addUpdateText(text) {
     updateText.innerText += text;
 }
 
-function removeItemFromContext(keyword, context) {
-    console.log("remove item " +keyword);
-    locationsModified[context].items = locationsModified[context].items.filter(item => item !== keyword);    
+function removeItemFromLocation(itemKeyword, locationIndex) {
+
+    console.log("remove item: " + itemKeyword);
+    locationsModified[locationIndex].items = locationsModified[locationIndex].items.filter(item => item !== itemKeyword);    
     
     save();
 
-    if (context === currentLocation)
+    if (locationIndex === currentLocation)
         updateButtons();
 }
 
@@ -1913,10 +1908,7 @@ function doAction(actionString, staminaCost, resetText) {
             break;
         case "recover":
             recover();
-            break;
-        case "returnToPrimaryContext":
-            returnToPrimaryContext();
-            break;
+            break;        
         case "talk":
             talk();
             break;
@@ -1946,7 +1938,7 @@ function doAction(actionString, staminaCost, resetText) {
             break;
         case "goToNPC":
             if (functionArray.length === 2)     // goToNPC|npcKeyword
-                displayNPC(getContextIndexFromKeyword(functionArray[1], objectType.npc));                
+                displayNPC(getIndexFromKeyword(functionArray[1], objectType.npc));                
             else
                 console.error("doAction - Called goToNPC without an additional argument");
             break;
@@ -2108,13 +2100,13 @@ function playerDeath() {
     // Check if a player corpse exists already, if so destroy it
     if (corpseLocation != -1 && locationsModified[corpseLocation].items != null && locationsModified[corpseLocation].items != "" && locationsModified[corpseLocation].items.includes("corpse")) {
 
-        removeItemFromContext("corpse", corpseLocation);
+        removeItemFromLocation("corpse", corpseLocation);
     }
     
 
     let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
     // Set the quantity of the corpse item to the amount of gold we are holding
-    itemsModified[getContextIndexFromKeyword("corpse", objectType.item)].quantity = gold;
+    itemsModified[getIndexFromKeyword("corpse", objectType.item)].quantity = gold;
     // Remove all our gold
     gold = 0;
     updateStats();
@@ -2175,7 +2167,7 @@ function attack() {
     
     if (currentActiveButton === null) console.error("Attack() - but no active monster");
     
-    let monster = monstersModified[getContextIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
+    let monster = monstersModified[getIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
     
     // Evasion chance
     let evasionNumber = Math.floor(Math.random() * 101);
@@ -2303,7 +2295,7 @@ function runAway() {
 
 function monsterDeath(monsterButton) {
     
-    let monster = monstersModified[getContextIndexFromKeyword(monsterButton.keyword, objectType.monster)];
+    let monster = monstersModified[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
     
     // Remove this monster from the current location
     locationsModified[currentLocation].monsters.splice(locationsModified[currentLocation].monsters.indexOf(monster.keyword),1);
@@ -2382,7 +2374,7 @@ function addToInventory(keyword) {
         return;
     }
 
-    let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
+    let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("addToInventory() - keyword:" + keyword + " not found in items array");
         return;
@@ -2420,7 +2412,7 @@ function addToInventory(keyword) {
 
 function buy(keyword, cost) {
 
-    let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
+    let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("buy() - keyword:" + keyword + " not found in items array");
         return;
@@ -2439,7 +2431,7 @@ function buy(keyword, cost) {
 
 function upgrade(keyword, cost, oreCost, leatherCost) {
 
-    let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
+    let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("upgrade() - keyword:" + keyword + " not found in items array");
         return;
@@ -2484,7 +2476,7 @@ function getCorpse(amount, updateString) {
     if (updateString != "") 
         addUpdateText(updateString + " ( " + amount + " gold )");    
 
-    removeItemFromContext("corpse", currentLocation);
+    removeItemFromLocation("corpse", currentLocation);
     corpseLocation = -1;
 
     updateStats();
@@ -2533,7 +2525,7 @@ function toggleEquipped(keyword) {
     // Double check to make sure this is in our inventory
     if (inventoryIndexOf(keyword) != -1) {
 
-        let item = itemsModified[getContextIndexFromKeyword(keyword, objectType.item)];
+        let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
         
         if (item.equipped) {
 
@@ -2644,12 +2636,12 @@ function save() {
     initializeGame();
   }
 
-  // Get a specific context of the given type.
+  // Get an index from an array of the given type.
   // i.e. I want to find a location named "keyword"
-  function getContextIndexFromKeyword(keyword, contextType) {
+  function getIndexFromKeyword(keyword, objType) {
     
     ar = [];    
-    switch (contextType) {
+    switch (objType) {
         case objectType.location://Location
         
             ar = locationsModified;            
@@ -2674,7 +2666,7 @@ function save() {
         }
     });
     
-    if (index === -1) console.error("getContextIndexFromkeyword() - Failed to find keyword [" + keyword + "] of context type [" + contextType + "]");
+    if (index === -1) console.error("getIndexFromkeyword() - Failed to find keyword [" + keyword + "] of object type [" + objType + "]");
     return index;
   }
 
@@ -2742,7 +2734,7 @@ function save() {
     monstersModified.forEach((element,index) => {
         
         if (element.location != null && element.location != "") {            
-            locationsModified[getContextIndexFromKeyword(element.location, objectType.location)].monsters.push(element.keyword);            
+            locationsModified[getIndexFromKeyword(element.location, objectType.location)].monsters.push(element.keyword);            
         }
     });
   }
