@@ -9,9 +9,9 @@ areas = [
             {
                 coordinates: [2,5],
                 visited: false,
-                items: [],
+                items: ["green_herb_pickup"],
                 monsters: [],
-                npcs: [],
+                npcs: ["ryth"],
                 north: [1,5],
                 west: [2,4],
                 east: null,

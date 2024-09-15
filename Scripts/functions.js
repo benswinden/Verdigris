@@ -53,7 +53,7 @@ let respawnLocation = {
   location: []
 };
 
-let corpseLocation = -1;
+let corpseLocation = null;
 
 // Debug
 let showDebugLog = true;
@@ -237,7 +237,6 @@ const promise3 = fetch('Data/actions.csv')
 
 // Store these containers at runtime because they will be modified as the player plays
 let areasModified = [];
-let locationsModified = [];
 let monstersModified = []
 let npcsModified = []
 let itemsModified = []
@@ -313,7 +312,7 @@ function initializeGame() {
         currentNPC = -1;
         
         respawnLocation = debugRespawn;
-        corpseLocation = -1;            
+        corpseLocation = null;
 
         save();
         
@@ -339,7 +338,7 @@ function displayLocation(area, location) {
     else
         currentArea = getIndexFromKeyword(area, objectType.area);               
             
-    const _locationExists = getLocationFromArea(location);
+    const _locationExists = getLocationFromCurrentArea(location);
     if (_locationExists === -1) { console.error("!!!"); return; }
     currentLocation = location;
 
@@ -567,7 +566,7 @@ function updateButtons()  {
         if (!activeMonster) {
 
             // Check if there are monsters present in this location, if so we don't display exits, only the option to run
-            if (getLocationFromArea(currentLocation).monsters != null && getLocationFromArea(currentLocation).monsters != "" && getLocationFromArea(currentLocation).monsters.length > 0) {
+            if (getLocationFromCurrentArea(currentLocation).monsters != null && getLocationFromCurrentArea(currentLocation).monsters != "" && getLocationFromCurrentArea(currentLocation).monsters.length > 0) {
                 
                 contextualActions.push({
                     keyword: "run",                                    
@@ -644,9 +643,9 @@ function updateButtons()  {
             // }
         }
         
-        items = getLocationFromArea(currentLocation).items;
-        monsters = getLocationFromArea(currentLocation).monsters;
-        npcs = getLocationFromArea(currentLocation).npcs;                
+        items = getLocationFromCurrentArea(currentLocation).items;
+        monsters = getLocationFromCurrentArea(currentLocation).monsters;
+        npcs = getLocationFromCurrentArea(currentLocation).npcs;                
     }         
 
     // UPGRADE MENU
@@ -856,7 +855,7 @@ function updateButtons()  {
 
                             secondaryButtonActive = true;
                             newButton.secondaryButton.onclick = function() {  
-                                getLocationFromArea(currentLocation).items.splice(getLocationFromArea(currentLocation).items.indexOf(item.keyword), 1);
+                                getLocationFromCurrentArea(currentLocation).items.splice(getLocationFromCurrentArea(currentLocation).items.indexOf(item.keyword), 1);
                                 inventory.splice(inventory.indexOf(item.lock), 1);
                                 playClick();
                                 addUpdateText("You unlock the " + item.shortTitle);
@@ -1434,22 +1433,22 @@ function updateMap() {
             nodeObject.element.classList = "main-square active"
 
             if (nodeObject.north != null) {                        
-              if (getLocationFromArea(getNewCoordinates(location.coordinates, "north"), "north") != null) { // Check if there is a location in this direction
+              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north"), "north") != null) { // Check if there is a location in this direction
                 nodeObject.north.classList = "horizontal-square active";
               }
             }
             if (nodeObject.west != null) {                          
-              if (getLocationFromArea(getNewCoordinates(location.coordinates, "west")) != null) { // Check if there is a location in this direction
+              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")) != null) { // Check if there is a location in this direction
                 nodeObject.west.classList = "vertical-square active";
               }
             }
             if (nodeObject.east != null) {                          
-              if (getLocationFromArea(getNewCoordinates(location.coordinates, "east")) != null) { // Check if there is a location in this direction
+              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")) != null) { // Check if there is a location in this direction
                 nodeObject.east.classList = "vertical-square active";
               }
             }
             if (nodeObject.south != null) {                          
-              if (getLocationFromArea(getNewCoordinates(location.coordinates, "south")) != null) { // Check if there is a location in this direction
+              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")) != null) { // Check if there is a location in this direction
                 nodeObject.south.classList = "horizontal-square active";
               }
             }
@@ -1563,7 +1562,7 @@ function displayNPC(index) {
         npcActive = true;
         currentNPC = index;        
 
-        mainTitleText.innerText = locationsModified[currentLocation].title;
+        mainTitleText.innerText = areasModified[currentArea].title;
         mainTitleText.classList = "secondary";        
         secondaryTitle.style.display = "flex";
         
@@ -1641,16 +1640,17 @@ function displayTitle() {
     titleOpen = true;
     updateButtons();
 
-    areasVisited += locationsModified[currentLocation].area;
-    let contextKeyword = locationsModified[currentLocation].area + "_title";        
+    ///////// TODO Change to support regions
+    // areasVisited += locationsModified[currentLocation].area;
+    // let contextKeyword = locationsModified[currentLocation].area + "_title";        
 
-    saleTitle.style.display = "none";
-    narrationText.style.display = "none";        
-    mainTitle.classList = "centered";
-    mainTitleText.classList = "";
-    mainTitleText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].title;
-    secondaryTitle.style.display = "none";        
-    mainText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].description;
+    // saleTitle.style.display = "none";
+    // narrationText.style.display = "none";        
+    // mainTitle.classList = "centered";
+    // mainTitleText.classList = "";
+    // mainTitleText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].title;
+    // secondaryTitle.style.display = "none";        
+    // mainText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].description;
 }
 
 function closeTitle() {
@@ -1855,10 +1855,11 @@ function addUpdateText(text) {
     updateText.innerText += text;
 }
 
-function removeItemFromLocation(itemKeyword, locationIndex) {
+function removeItemFromLocation(itemKeyword, locationIndex) {    
 
     console.log("remove item: " + itemKeyword);
-    locationsModified[locationIndex].items = locationsModified[locationIndex].items.filter(item => item !== itemKeyword);    
+    
+    getLocationFromCurrentArea(locationIndex).items = getLocationFromCurrentArea(locationIndex).items.filter(item => item !== itemKeyword);    
     
     save();
 
@@ -1984,7 +1985,7 @@ function playerActionComplete() {
 
     if (showDebugLog) console.log("playerActionComplete() - ");
           
-    let monsters = locationsModified[currentLocation].monsters;    
+    let monsters = getLocationFromCurrentArea(currentLocation).monsters;    
 
     let playerDead = false;
     if (monsters.length > 0 && monsters != "") {
@@ -2037,7 +2038,7 @@ function triggerEnemyAttack(monsterKeyword) {
 function recoverStamina() {
 
     let monstersPresent = false;
-    let monsters = locationsModified[currentLocation].monsters;
+    let monsters = getLocationFromCurrentArea(currentLocation).monsters;
     
     if (monsters.length > 0 && monsters != "") 
         monstersPresent = true;
@@ -2073,7 +2074,7 @@ function playerDeath() {
     }
     
     // Check if a player corpse exists already, if so destroy it
-    if (corpseLocation != -1 && locationsModified[corpseLocation].items != null && locationsModified[corpseLocation].items != "" && locationsModified[corpseLocation].items.includes("corpse")) {
+    if (corpseLocation != null && getLocationFromArea(corpseLocation.location, corpseLocation.area).items != null && getLocationFromArea(corpseLocation.location, corpseLocation.area).items != "" && getLocationFromArea(corpseLocation.location, corpseLocation.area).items.includes("corpse")) {
 
         removeItemFromLocation("corpse", corpseLocation);
     }
@@ -2086,11 +2087,12 @@ function playerDeath() {
     gold = 0;
     updateStats();
 
-    corpseLocation = currentLocation;    
-    locationsModified[corpseLocation].items.push("corpse");
-
-    console.log(locationsModified[corpseLocation].keyword);
-    console.log(locationsModified[corpseLocation].items);
+    corpseLocation = {
+        area: currentArea,
+        location: currentLocation
+    };
+        
+    getLocationFromArea(corpseLocation.location, corpseLocation.area).items.push("corpse");
 
     narrationText.style.display = "none";        
     mainTitleText.classList = "";
@@ -2219,10 +2221,9 @@ function runAway() {
 
         if (currentLocation === -99) return; // In case we died while trying to run away
 
-        const direction = activeDirections[Math.floor(Math.random() * activeDirections.length)];
-        console.log(direction);
+        const direction = activeDirections[Math.floor(Math.random() * activeDirections.length)];        
         
-        let location = "";
+        let location = [];
         let locationString = "";
 
         switch (direction) {
@@ -2230,37 +2231,26 @@ function runAway() {
             // North
             case 0:
                 locationString = "north";
-                location = locationsModified[currentLocation].north;
+                location = getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north"));                
                 break;
             // West
             case 1:
                 locationString = "west";
-                location = locationsModified[currentLocation].west;
+                location = getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west"));
                 break;
             // East
             case 2:
                 locationString = "east";
-                location = locationsModified[currentLocation].east;
+                location = getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east"));
                 break;
             // South
             case 3:
                 locationString = "south";
-                location = locationsModified[currentLocation].south;
-                break;
-            // Up
-            case 4:
-                locationString = "up";
-                location = locationsModified[currentLocation].up;
-                break;
-            // Down
-            case 5:
-                locationString = "down";
-                location = locationsModified[currentLocation].down;
-                break;
-
+                location = getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south"));
+                break;            
         }
 
-        displayLocation(location, objectType.location);                                
+        displayLocation(currentArea, location);                                
         playClick();
         recoverStamina();
 
@@ -2272,8 +2262,8 @@ function monsterDeath(monsterButton) {
     
     let monster = monstersModified[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
     
-    // Remove this monster from the current location
-    locationsModified[currentLocation].monsters.splice(locationsModified[currentLocation].monsters.indexOf(monster.keyword),1);
+    // Remove this monster from the current location    
+    getLocationFromCurrentArea(currentLocation).monsters.splice(getLocationFromCurrentArea(currentLocation).monsters.indexOf(monster.keyword),1);
 
     let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monster.insight + " insight and " +  monster.gold + " gold";
 
@@ -2365,7 +2355,7 @@ function addToInventory(keyword) {
 
     // Depending on the contextType, we will splice this item out of a different context
     if (!npcActive) {        
-        items = locationsModified[currentLocation].items;
+        items = getLocationFromCurrentArea(currentLocation).items;
     }    
     else if (npcActive) {        
         items = npcsModified[currentNPC].items;
@@ -2455,7 +2445,7 @@ function getCorpse(amount, updateString) {
         addUpdateText(updateString + " ( " + amount + " gold )");    
 
     removeItemFromLocation("corpse", currentLocation);
-    corpseLocation = -1;
+    corpseLocation = null;
 
     updateStats();
     save();
@@ -2552,8 +2542,7 @@ function save() {
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
     localStorage.setItem('corpseLocation', JSON.stringify(corpseLocation));
 
-    localStorage.setItem('areasModified', JSON.stringify(areasModified));
-    localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
+    localStorage.setItem('areasModified', JSON.stringify(areasModified));    
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
     localStorage.setItem('npcsModified', JSON.stringify(npcsModified));
     localStorage.setItem('itemsModified', JSON.stringify(itemsModified));
@@ -2585,16 +2574,14 @@ function save() {
 
     if (!resetLocations) { 
         
-        areasModified = JSON.parse(localStorage.getItem('areasModified'));       
-        locationsModified = JSON.parse(localStorage.getItem('locationsModified'));       
+        areasModified = JSON.parse(localStorage.getItem('areasModified'));                    
         monstersModified = JSON.parse(localStorage.getItem('monstersModified'));
         npcsModified = JSON.parse(localStorage.getItem('npcsModified'));
         itemsModified = JSON.parse(localStorage.getItem('itemsModified'));
         narrationsModified = JSON.parse(localStorage.getItem('narrationsModified'));
     }
     else {
-        areasModified = JSON.parse(JSON.stringify(areas));
-        locationsModified = JSON.parse(JSON.stringify(locations));
+        areasModified = JSON.parse(JSON.stringify(areas));        
         areasVisited = [];
         monstersModified = JSON.parse(JSON.stringify(monsters));                
         npcsModified = JSON.parse(JSON.stringify(npcs));
@@ -2667,8 +2654,8 @@ function save() {
     return index;
   }  
 
-  function getLocationFromArea(location) {
-
+  function getLocationFromCurrentArea(location) {
+    
     let loc = null;
     
     areasModified[currentArea].locations.forEach((element, i) => {                
@@ -2678,7 +2665,28 @@ function save() {
             loc = element;            
         }
     });
-        
+
+    return loc;
+  }
+
+  function getLocationFromArea(location, area) {
+    
+    let _area = null;
+    if (Number.isInteger(area))
+        _area = area;
+    else
+        _area = getIndexFromKeyword(area, objectType.area);
+
+    let loc = null;
+    
+    areasModified[_area].locations.forEach((element, i) => {                
+
+        if (compareArrays(element.coordinates, location)) {
+            
+            loc = element;            
+        }
+    });
+
     return loc;
   }
 
@@ -2782,8 +2790,7 @@ function getNewCoordinates(coordinates, direction) {
       
       if (showDebugLog) console.log("formatData() - ");
 
-      areasModified = JSON.parse(JSON.stringify(areas));
-      locationsModified = JSON.parse(JSON.stringify(locations));
+      areasModified = JSON.parse(JSON.stringify(areas));      
       npcsModified = JSON.parse(JSON.stringify(npcs));
       monstersModified = JSON.parse(JSON.stringify(monsters));
       narrationsModified = JSON.parse(JSON.stringify(narrations));
