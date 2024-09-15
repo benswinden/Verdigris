@@ -1338,29 +1338,7 @@ function initalizeMap() {
                         south: null,
                     }
 
-                    mainRowArray.push(nodeObject);
-
-                    ///////// TODO PLACEHOLDER ///////////////////////////
-                    // Add an event for hovering over this square
-                    // nodeObject.element.addEventListener('mouseover', function(event) {
-                        
-                    //     nodeObject.element.classList.add("active");
-                        
-                    //     if (nodeObject.north != null) nodeObject.north.classList.add("active");
-                    //     if (nodeObject.west != null) nodeObject.west.classList.add("active");
-                    //     if (nodeObject.east != null) nodeObject.east.classList.add("active");
-                    //     if (nodeObject.south != null) nodeObject.south.classList.add("active");
-                    // });
-
-                    // nodeObject.element.addEventListener('mouseout', function(event) {
-                        
-                    //     nodeObject.element.classList.remove("active");
-                    //     if (nodeObject.north != null) nodeObject.north.classList.remove("active");
-                    //     if (nodeObject.west != null) nodeObject.west.classList.remove("active");
-                    //     if (nodeObject.east != null) nodeObject.east.classList.remove("active");
-                    //     if (nodeObject.south != null) nodeObject.south.classList.remove("active");
-                    // });
-                    ///////////////////////////////////////////////////////////////
+                    mainRowArray.push(nodeObject);                    
                 }
                 // Otherwise we are on a vertical smaller square
                 else {
@@ -1421,10 +1399,14 @@ function updateMap() {
                 if (nodeObject.west != null) nodeObject.west.classList = "vertical-square"
                 if (nodeObject.east != null) nodeObject.east.classList = "vertical-square"
                 if (nodeObject.south != null) nodeObject.south.classList = "horizontal-square"
+
+                nodeObject.element.onclick = "";
             }
         }
 
         areasModified[currentArea].locations.forEach((location, index) => {
+
+            let isAdjacentToCurrent = false;
 
             // Get the corresponding nodeObject for the location listed
             const nodeObject = mapGrid[location.coordinates[0]][location.coordinates[1]];
@@ -1435,36 +1417,82 @@ function updateMap() {
             if (nodeObject.north != null) {                        
               if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north"), "north") != null) { // Check if there is a location in this direction
                 nodeObject.north.classList = "horizontal-square active";
+
+                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
+                    isAdjacentToCurrent = true;
               }
             }
             if (nodeObject.west != null) {                          
               if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")) != null) { // Check if there is a location in this direction
                 nodeObject.west.classList = "vertical-square active";
+
+                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
+                    isAdjacentToCurrent = true;
               }
             }
             if (nodeObject.east != null) {                          
               if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")) != null) { // Check if there is a location in this direction
                 nodeObject.east.classList = "vertical-square active";
+
+                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
+                    isAdjacentToCurrent = true;
               }
             }
             if (nodeObject.south != null) {                          
               if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")) != null) { // Check if there is a location in this direction
                 nodeObject.south.classList = "horizontal-square active";
+
+                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
+                    isAdjacentToCurrent = true;
               }
+            }
+            
+            // If this location is adjacent to the player's current location, it is hoverable and clickable to move here
+            if (isAdjacentToCurrent) {
+                
+                nodeObject.element.classList += " can-hover";                
+                nodeObject.element.onclick = function() { 
+                    displayLocation(currentArea, location.coordinates);                                
+                    playClick();
+                    recoverStamina() 
+                };
             }
         });
 
         // Insert player symbol in current location        
         const currentLocationNode = mapGrid[currentLocation[0]][currentLocation[1]];
-        
-        currentLocationNode.element.classList = "main-square current"
+
+        currentLocationNode.element.classList = "main-square current"        
+
+        if (getLocationFromCurrentArea(currentLocation).north != null)             
+            if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "north")) != null)
+              currentLocationNode.north.classList = "horizontal-square current";
+
+          if (getLocationFromCurrentArea(currentLocation).west != null)                        
+            if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "west")) != null)
+              currentLocationNode.west.classList = "vertical-square current";
+
+          if (getLocationFromCurrentArea(currentLocation).east != null)                        
+            if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "east")) != null)
+              currentLocationNode.east.classList = "vertical-square current";
+
+          if (getLocationFromCurrentArea(currentLocation).south != null)                        
+            if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "south")) != null)
+              currentLocationNode.south.classList = "horizontal-square current";
+
+
+
 
         // Store the directions we are able to move
         activeDirections = [];
         if (currentLocationNode.north != "") activeDirections.push(0);
         if (currentLocationNode.west != "") activeDirections.push(1);
         if (currentLocationNode.east != "") activeDirections.push(2);
-        if (currentLocationNode.south != "") activeDirections.push(3);        
+        if (currentLocationNode.south != "") activeDirections.push(3);
+
+        
+
+
     }
     else
         console.error("updateMap - Current Area: " + currentArea + " has no locations");
@@ -2753,6 +2781,49 @@ function save() {
 
       return true;
   }
+
+// Helper function to compare two objects
+function compareObjects(obj1, obj2) {
+    
+    // Check if both objects are defined
+    if (!obj1 || !obj2) {
+        return false;
+    }
+
+    // Get the keys of both objects
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    // Check if both objects have the same number of keys
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+
+    // Compare each key and value
+    for (let key of keys1) {
+        const val1 = obj1[key];
+        const val2 = obj2[key];
+
+        // If values are arrays, compare them recursively
+        if (Array.isArray(val1) && Array.isArray(val2)) {
+            if (!compareArrays(val1, val2)) {
+                return false;
+            }
+        } 
+        // If values are objects, compare them recursively
+        else if (typeof val1 === 'object' && typeof val2 === 'object') {
+            if (!compareObjects(val1, val2)) {
+                return false;
+            }
+        } 
+        // Otherwise, compare the values directly
+        else if (val1 !== val2) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
   /**
  * Get the coordinates of a new cell in a 2D array given the current coordinates and a direction.

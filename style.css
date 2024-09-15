@@ -302,12 +302,15 @@ main {
     .main-square.active {        
         border: 2px solid #363718;
     }
+    .main-square.active.can-hover:hover {        
+        border: 2px solid #6F7221;
+    }
     .main-square.inactive {        
         border: 2px solid #1D1E0E;
     }
     .main-square.current {
       background-image: url("Assets/mapPlayerIcon.svg");
-      border: 2px solid #363718;
+      border: 2px solid #6F7221;
     }
     
     .vertical-square {
@@ -323,6 +326,9 @@ main {
     .vertical-square.inactive {        
         border-bottom: 2px solid #1D1E0E;
     }
+    .vertical-square.current {        
+        border-bottom: 2px solid #6F7221;
+    }
 
     .horizontal-square {
         height: 15px;
@@ -336,6 +342,9 @@ main {
     }
     .horizontal-square.inactive {
         border-right: 2px solid #1D1E0E;
+    }
+    .horizontal-square.current {
+        border-right: 2px solid #6F7221;
     }
 
 }
