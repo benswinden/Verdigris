@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.040;
+let version = 0.041;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -23,9 +23,10 @@ let currentStamina = 0;
 let defence = 0;
 let evasion = 0;
 
-let currentLocation = 0;         
-let locationsVisited = [];      // A list of locations we have already visited
-let areasVisited = [];          // A list of areas we have already visited
+let currentArea = 0;
+let currentLocation = [0,0];
+
+let areasVisited = [];      // A list of locations we have already visited
 
 let currentActiveButton;
 
@@ -44,16 +45,24 @@ let upgradeMenuOpen = false;
 let trainMenuOpen = false;
 
 let mapInitialize = false;
+let mapGrid = [];
 
 // Default location for new games is edge_woods
-let respawnLocation = 0;
+let respawnLocation = {
+  area: "",
+  location: []
+};
 
 let corpseLocation = -1;
 
 // Debug
 let showDebugLog = true;
-let debugStartLocation = "edge_garden";
-let debugRespawn = "edge_garden";
+let debugStartArea = "bramble_path";
+let debugStartLocation = [2,5];
+let debugRespawn = {
+  area: "bramble_path",
+  location: [2,5]
+}
 let debugWindowActive = false;
 
 // Stats
@@ -72,8 +81,6 @@ const mainText =  document.querySelector('#main-text');
 const narrationText =  document.querySelector('#narration-text');
 const updateText =  document.querySelector('#update-text');
 const mapGridContainer = document.querySelector("#map-grid-container");
-
-const mapGrid =  document.querySelector('#map-grid-container');
 
 const monsterHpSection =  document.querySelector('#monster-hp-section');
 const monsterHpBar =  document.querySelector('#monster-hp-bar-current');
@@ -118,6 +125,8 @@ let createdButtons = [];
 // enum
 const objectType = {
     null: 'null',
+    region: 'region',
+    area: 'area',
     location: 'location',
     action: 'action',    
     monster: 'monster',
@@ -147,11 +156,13 @@ let narrations = [
 
 let monsters = [];
 
+let areas = [];
+
 let locations = [    
     {
-        area: "",
-        keyword: "",
-        title: "",        
+        keyword: "fl_01",
+        area: "foglands",
+        title: "fl_01",
         description: "",
         narration: "",        
         update: "",        
@@ -163,7 +174,7 @@ let locations = [
         east: "",
         south: "",
         up: "",
-        down: "",        
+        down: ""         
     }
 ]
 
@@ -225,6 +236,7 @@ const promise3 = fetch('Data/actions.csv')
 
 
 // Store these containers at runtime because they will be modified as the player plays
+let areasModified = [];
 let locationsModified = [];
 let monstersModified = []
 let npcsModified = []
@@ -262,7 +274,7 @@ function initializeGame() {
         if (currentLocation === -99)
             respawn();
         else
-            displayLocation(currentLocation);
+            displayLocation(currentArea, currentLocation);
     }
     // No save game, so start a new game
     else {
@@ -293,41 +305,44 @@ function initializeGame() {
         inventory = [];
         inventory.push("straight_sword","green_cloak","crimson_key");
         
-        locationsVisited = [];
-        areasVisited = [];
+        areasVisited = [];        
 
         titleOpen = false;
         narrationOpen = false;
         npcActive = false;
         currentNPC = -1;
-
-        let respawnIndex = getIndexFromKeyword(debugRespawn, objectType.location);
-        respawnLocation = respawnIndex;
+        
+        respawnLocation = debugRespawn;
         corpseLocation = -1;            
 
         save();
-
-        let startLocation = getIndexFromKeyword(debugStartLocation, objectType.location);
-        displayLocation(startLocation, objectType.location);
+        
+        displayLocation(debugStartArea, debugStartLocation);
     }
 }
 
 // General purpose function when we want to display a location
 // newLocation can be an integer or a keyword value
-function displayLocation(location) {    
+// Area = keyword title i.e. "bramble_path"
+// Location = coordinate pair i.e. [1,5]
+function displayLocation(area, location) {    
 
     // This should only happen once
     if (!mapInitialize)
         initalizeMap();
 
-    if (showDebugLog) console.log("displayLocation - location:" + location);
+    if (showDebugLog) console.log("displayLocation -  Area: " + area + "    Location: " + location);
 
-    // Check whether newLocation is int or string
-    if (Number.isInteger(location))
-        currentLocation = location;
+    // Check whether the provided area is a keyword or an index
+    if (Number.isInteger(area))
+        currentArea = area;
     else
-        currentLocation = getIndexFromKeyword(location, objectType.location);               
-    
+        currentArea = getIndexFromKeyword(area, objectType.area);               
+            
+    const _locationExists = getLocationFromArea(location);
+    if (_locationExists === -1) { console.error("!!!"); return; }
+    currentLocation = location;
+
     updateMap();
 
     save();
@@ -341,43 +356,42 @@ function displayLocation(location) {
     saleTitle.style.display = "none";
         
 
+    // TODO - Reactivate titles, but for regions
     // Check if we are entering a new area and should show the title card first        
-    if (locationsModified[currentLocation].area != "") {
+    // if (locationsModified[currentLocation].area != "") {
 
-        let areaVisited = areasVisited.indexOf(locationsModified[currentLocation].area) != -1;
-        if (!areaVisited) {
-            displayTitle();
-            return;
-        }
-    }
+    //     let areaVisited = areasVisited.indexOf(locationsModified[currentLocation].area) != -1;
+    //     if (!areaVisited) {
+    //         displayTitle();
+    //         return;
+    //     }
+    // }
 
     // Check if we've already visited this location
-    let locationVisited = locationsVisited.indexOf(currentLocation) != -1;
+    let areaVisited = areasVisited.indexOf(currentArea) != -1;
 
     // First time visiting this location, check whether there is a narration to play first
-    if (!locationVisited) {
+    if (!areaVisited) {
+        
         
         // Check whether this location has a narration keyword
-        if (locationsModified[currentLocation].narration != undefined && locationsModified[currentLocation].narration != "") {
+        if (areasModified[currentArea].narration != undefined && areasModified[currentArea].narration != "") {
             
             // Check if the matching narration to this keyword has already been seen                
-            if (narrationsModified[getElementFromKeyword(locationsModified[currentLocation].narration, narrations)] != undefined && !narrationsModified[getElementFromKeyword(locationsModified[currentLocation].narration, narrations)].seen) {
+            if (narrationsModified[getElementFromKeyword(areasModified[currentArea].narration, narrations)] != undefined && !narrationsModified[getElementFromKeyword(areasModified[currentArea].narration, narrations)].seen) {
 
-                displayNarration(locationsModified[currentLocation].narration);
+                displayNarration(areasModified[currentArea].narration);
                 return;
             }
         }
 
-        // If the description for this location is empty, that means it's only narration and we shouldn't add it to visited. If we did, players could get linked back to it and it would be empty as narration doesn't appear the second time visiting
-        if (locationsModified[currentLocation].description != "") {
-            locationsVisited.push(currentLocation);
-            save();
-        }
-        
+        areasVisited.push(currentArea);
+        save();
+
         // Check if there is narration text, then show it as this is the first time visiting
-        if (locationsModified[currentLocation].update != undefined && locationsModified[currentLocation].update != "") {
+        if (areasModified[currentArea].update != undefined && areasModified[currentArea].update != "") {
             narrationText.style.display = "block";
-            narrationText.innerText = locationsModified[currentLocation].update;  // Add the narration text so it appears before the main text for the locat                
+            narrationText.innerText = areasModified[currentArea].update;  // Add the narration text so it appears before the main text for the locat                
         }
     }
 
@@ -385,8 +399,8 @@ function displayLocation(location) {
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";
     
-    mainTitleText.innerText = locationsModified[currentLocation].title;        
-    mainText.innerText = locationsModified[currentLocation].description;             
+    mainTitleText.innerText = areasModified[currentArea].title;        
+    mainText.innerText = areasModified[currentArea].description;             
 
     updateButtons();
 }
@@ -474,8 +488,7 @@ function updateButtons()  {
     let contextualActions = [];         // Will be dynamically populated with actions depending on the game state
     let items = [];
     let monsters = [];
-    let npcs = [];    
-    activeDirections = [];
+    let npcs = [];
 
     let lastButtonConfigured = null;          // We will store each button we configure as this, so that when we reach the right point, we can add special formatting to it
     
@@ -549,19 +562,12 @@ function updateButtons()  {
     // If theres nothing special going on, we show the default actions for a location which are the exits
     if (!narrationOpen && !titleOpen && !trainMenuOpen && !npcActive) {
   
-        // If there is an active monster, we've already define context specific actions to display
+        // If activeMonster = true, that means we already know a monster is present because the player toggled the button
+        // If thats not true, we need to check the room whether there is on present or not
         if (!activeMonster) {
 
-            // Store the directions we are able to move
-            if (locationsModified[currentLocation].north != "") activeDirections.push(0);
-            if (locationsModified[currentLocation].west != "") activeDirections.push(1);
-            if (locationsModified[currentLocation].east != "") activeDirections.push(2);
-            if (locationsModified[currentLocation].south != "") activeDirections.push(3);
-            if (locationsModified[currentLocation].up != "") activeDirections.push(4);
-            if (locationsModified[currentLocation].down != "") activeDirections.push(5);
-
             // Check if there are monsters present in this location, if so we don't display exits, only the option to run
-            if (locationsModified[currentLocation].monsters != null && locationsModified[currentLocation].monsters != "" && locationsModified[currentLocation].monsters.length > 0) {
+            if (getLocationFromArea(currentLocation).monsters != null && getLocationFromArea(currentLocation).monsters != "" && getLocationFromArea(currentLocation).monsters.length > 0) {
                 
                 contextualActions.push({
                     keyword: "run",                                    
@@ -572,74 +578,75 @@ function updateButtons()  {
                     func: "runAway",
                 });
             }
+            ///////////////// TODO TO REMOVE
             // Otherwise, show the exits actions for this location
-            else {
+            // else {
 
-                // NORTH                                                
-                contextualActions.push({
-                    keyword: "north",                                    
-                    title: locationsModified[currentLocation].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].north, locationsModified)].title,                
-                    active: locationsModified[currentLocation].north === "" ?  false : true,
-                    staminaCost: -1,
-                    location: locationsModified[currentLocation].north,
-                    func: "",
-                });
-                // WEST                        
-                contextualActions.push({                
-                    keyword: "west",
-                    title: locationsModified[currentLocation].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].west, locationsModified)].title,
-                    active: locationsModified[currentLocation].west === "" ? false : true,
-                    staminaCost: -1,
-                    location: locationsModified[currentLocation].west,
-                    func: "",
-                });
-                // EAST                        
-                contextualActions.push({                
-                    keyword: "east",
-                    title: locationsModified[currentLocation].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].east, locationsModified)].title,
-                    active: locationsModified[currentLocation].east === "" ? false : true,
-                    staminaCost: -1,
-                    location: locationsModified[currentLocation].east,
-                    func: "",
-                });
-                // SOUTH                        
-                contextualActions.push({                
-                    keyword: "south",
-                    title: locationsModified[currentLocation].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].south, locationsModified)].title,
-                    active: locationsModified[currentLocation].south === "" ? false : true,
-                    staminaCost: -1,
-                    location: locationsModified[currentLocation].south,
-                    func: "",
-                });
-                // We only show buttons for up and down if those direction exist
-                // UP
-                if (locationsModified[currentLocation].up != "") {
-                    contextualActions.push({
-                        keyword: "up",
-                        title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].up, locationsModified)].title,
-                        active: true,
-                        staminaCost: -1,
-                        location: locationsModified[currentLocation].up,
-                        func: ""
-                    });
-                }
-                // Down
-                if (locationsModified[currentLocation].down != "") {
-                    contextualActions.push({
-                        keyword: "down",
-                        title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].down, locationsModified)].title,
-                        active: true,
-                        staminaCost: -1,
-                        location: locationsModified[currentLocation].down,
-                        func: ""
-                    });
-                }
-            }
+            //     // NORTH                                                
+            //     contextualActions.push({
+            //         keyword: "north",                                    
+            //         title: locationsModified[currentLocation].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].north, locationsModified)].title,                
+            //         active: locationsModified[currentLocation].north === "" ?  false : true,
+            //         staminaCost: -1,
+            //         location: locationsModified[currentLocation].north,
+            //         func: "",
+            //     });
+            //     // WEST                        
+            //     contextualActions.push({                
+            //         keyword: "west",
+            //         title: locationsModified[currentLocation].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].west, locationsModified)].title,
+            //         active: locationsModified[currentLocation].west === "" ? false : true,
+            //         staminaCost: -1,
+            //         location: locationsModified[currentLocation].west,
+            //         func: "",
+            //     });
+            //     // EAST                        
+            //     contextualActions.push({                
+            //         keyword: "east",
+            //         title: locationsModified[currentLocation].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].east, locationsModified)].title,
+            //         active: locationsModified[currentLocation].east === "" ? false : true,
+            //         staminaCost: -1,
+            //         location: locationsModified[currentLocation].east,
+            //         func: "",
+            //     });
+            //     // SOUTH                        
+            //     contextualActions.push({                
+            //         keyword: "south",
+            //         title: locationsModified[currentLocation].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].south, locationsModified)].title,
+            //         active: locationsModified[currentLocation].south === "" ? false : true,
+            //         staminaCost: -1,
+            //         location: locationsModified[currentLocation].south,
+            //         func: "",
+            //     });
+            //     // We only show buttons for up and down if those direction exist
+            //     // UP
+            //     if (locationsModified[currentLocation].up != "") {
+            //         contextualActions.push({
+            //             keyword: "up",
+            //             title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].up, locationsModified)].title,
+            //             active: true,
+            //             staminaCost: -1,
+            //             location: locationsModified[currentLocation].up,
+            //             func: ""
+            //         });
+            //     }
+            //     // Down
+            //     if (locationsModified[currentLocation].down != "") {
+            //         contextualActions.push({
+            //             keyword: "down",
+            //             title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].down, locationsModified)].title,
+            //             active: true,
+            //             staminaCost: -1,
+            //             location: locationsModified[currentLocation].down,
+            //             func: ""
+            //         });
+            //     }
+            // }
         }
         
-        items = locationsModified[currentLocation].items;
-        monsters = locationsModified[currentLocation].monsters;
-        npcs = locationsModified[currentLocation].npcs;                
+        items = getLocationFromArea(currentLocation).items;
+        monsters = getLocationFromArea(currentLocation).monsters;
+        npcs = getLocationFromArea(currentLocation).npcs;                
     }         
 
     // UPGRADE MENU
@@ -701,76 +708,79 @@ function updateButtons()  {
             // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
             if (item.blocking != null && item.blocking != "") {
 
-                // Depending on the blocking direction provided, we make that direction inactive, assuming it exists in this location
-                switch (item.blocking) {
+                directionBlocked(item.blocking);
 
-                    // North
-                    case "north":
-                        if (activeDirections.indexOf(0) != -1) {            // Check that the provided direction was already activated earlier
-                            contextualActions.forEach((element) => {           // Find the right context action
-                                if (element.keyword === "north") {
-                                    element.title += " [Blocked]";
-                                    element.active = false;
-                                }
-                            });
-                        }
-                        break;
-                    // West
-                    case "west":
-                        if (activeDirections.indexOf(1) != -1) {
-                            contextualActions.forEach((element) => {
-                                if (element.keyword === "west") {
-                                    element.title += " [Blocked]";
-                                    element.active = false;
-                                }
-                            });
-                        }
-                        break;
-                    // East
-                    case "east":
-                        if (activeDirections.indexOf(2) != -1) {
-                            contextualActions.forEach((element) => {
-                                if (element.keyword === "east") {
-                                    element.title += " [Blocked]";
-                                    element.active = false;
-                                }
-                            });
-                        }
-                        break;
-                    // South
-                    case "south":
-                        if (activeDirections.indexOf(3) != -1) {
-                            contextualActions.forEach((element) => {
-                                if (element.keyword === "south") {
-                                    element.title += " [Blocked]";
-                                    element.active = false;
-                                }
-                            });
-                        }
-                        break;
-                    // Up
-                    case "up":
-                        if (activeDirections.indexOf(4) != -1) {
-                            contextualActions.forEach((element) => {
-                                if (element.keyword === "up") {
-                                    element.title += " [Blocked]";
-                                    element.active = false;
-                                }
-                            });
-                        }
-                        break;
-                    // Down
-                    case "down":
-                        if (activeDirections.indexOf(5) != -1) {
-                            contextualActions.forEach((element) => {
-                                if (element.keyword === "down") {
-                                    element.title += " [Blocked]";
-                                    element.active = false;
-                                }
-                            });
-                        }
-                        break;        
-                }
+                ///////////////// TODO TO REMOVE
+                // Depending on the blocking direction provided, we make that direction inactive, assuming it exists in this location
+                // switch (item.blocking) {
+
+                //     // North
+                //     case "north":
+                //         if (activeDirections.indexOf(0) != -1) {            // Check that the provided direction was already activated earlier
+                //             contextualActions.forEach((element) => {           // Find the right context action
+                //                 if (element.keyword === "north") {
+                //                     element.title += " [Blocked]";
+                //                     element.active = false;
+                //                 }
+                //             });
+                //         }
+                //         break;
+                //     // West
+                //     case "west":
+                //         if (activeDirections.indexOf(1) != -1) {
+                //             contextualActions.forEach((element) => {
+                //                 if (element.keyword === "west") {
+                //                     element.title += " [Blocked]";
+                //                     element.active = false;
+                //                 }
+                //             });
+                //         }
+                //         break;
+                //     // East
+                //     case "east":
+                //         if (activeDirections.indexOf(2) != -1) {
+                //             contextualActions.forEach((element) => {
+                //                 if (element.keyword === "east") {
+                //                     element.title += " [Blocked]";
+                //                     element.active = false;
+                //                 }
+                //             });
+                //         }
+                //         break;
+                //     // South
+                //     case "south":
+                //         if (activeDirections.indexOf(3) != -1) {
+                //             contextualActions.forEach((element) => {
+                //                 if (element.keyword === "south") {
+                //                     element.title += " [Blocked]";
+                //                     element.active = false;
+                //                 }
+                //             });
+                //         }
+                //         break;
+                //     // Up
+                //     case "up":
+                //         if (activeDirections.indexOf(4) != -1) {
+                //             contextualActions.forEach((element) => {
+                //                 if (element.keyword === "up") {
+                //                     element.title += " [Blocked]";
+                //                     element.active = false;
+                //                 }
+                //             });
+                //         }
+                //         break;
+                //     // Down
+                //     case "down":
+                //         if (activeDirections.indexOf(5) != -1) {
+                //             contextualActions.forEach((element) => {
+                //                 if (element.keyword === "down") {
+                //                     element.title += " [Blocked]";
+                //                     element.active = false;
+                //                 }
+                //             });
+                //         }
+                //         break;        
+                // }
             }
 
             let itemCostActive = false;            
@@ -846,7 +856,7 @@ function updateButtons()  {
 
                             secondaryButtonActive = true;
                             newButton.secondaryButton.onclick = function() {  
-                                locationsModified[currentLocation].items.splice(locationsModified[currentLocation].items.indexOf(item.keyword), 1);
+                                getLocationFromArea(currentLocation).items.splice(getLocationFromArea(currentLocation).items.indexOf(item.keyword), 1);
                                 inventory.splice(inventory.indexOf(item.lock), 1);
                                 playClick();
                                 addUpdateText("You unlock the " + item.shortTitle);
@@ -1186,6 +1196,7 @@ function updateButtons()  {
                         
                         newButton.button.classList = "nav-button action-button can-hover";
 
+                        // TODO There shouldn't be location buttons once the map is complete
                         // If this is a loction action                        
                         if (action.location != null && action.location != "") {
 
@@ -1280,7 +1291,7 @@ function updateButtons()  {
             document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
             newButton.buttonText.innerText = "Exit";
-            newButton.button.onclick = function() {trainMenuOpen = false; displayLocation(currentLocation);};
+            newButton.button.onclick = function() {trainMenuOpen = false; displayLocation(currentArea, currentLocation);};
         }
 
         
@@ -1298,7 +1309,9 @@ function updateButtons()  {
 
 function initalizeMap() {
 
-    const mainGrid = [];            // Grid that will hold our node objects
+    if (showDebugLog) console.log("initializeMap() - ");
+
+    mapGrid = [];            // Grid that will hold our node objects
     const secondaryGrid = [];       // Grid to hold the refs to the smaller boxes temporarily
 
     for (let rowIndex = 0; rowIndex < mapGridContainer.children.length; rowIndex++) {
@@ -1328,26 +1341,27 @@ function initalizeMap() {
 
                     mainRowArray.push(nodeObject);
 
+                    ///////// TODO PLACEHOLDER ///////////////////////////
                     // Add an event for hovering over this square
-                    nodeObject.element.addEventListener('mouseover', function(event) {
+                    // nodeObject.element.addEventListener('mouseover', function(event) {
                         
-                        nodeObject.element.classList.add("active");
+                    //     nodeObject.element.classList.add("active");
                         
-                        if (nodeObject.north != null) nodeObject.north.classList.add("active");
-                        if (nodeObject.west != null) nodeObject.west.classList.add("active");
-                        if (nodeObject.east != null) nodeObject.east.classList.add("active");
-                        if (nodeObject.south != null) nodeObject.south.classList.add("active");
-                    });
+                    //     if (nodeObject.north != null) nodeObject.north.classList.add("active");
+                    //     if (nodeObject.west != null) nodeObject.west.classList.add("active");
+                    //     if (nodeObject.east != null) nodeObject.east.classList.add("active");
+                    //     if (nodeObject.south != null) nodeObject.south.classList.add("active");
+                    // });
 
-                    nodeObject.element.addEventListener('mouseout', function(event) {
+                    // nodeObject.element.addEventListener('mouseout', function(event) {
                         
-                        nodeObject.element.classList.remove("active");
-                        if (nodeObject.north != null) nodeObject.north.classList.remove("active");
-                        if (nodeObject.west != null) nodeObject.west.classList.remove("active");
-                        if (nodeObject.east != null) nodeObject.east.classList.remove("active");
-                        if (nodeObject.south != null) nodeObject.south.classList.remove("active");
-                    });
-
+                    //     nodeObject.element.classList.remove("active");
+                    //     if (nodeObject.north != null) nodeObject.north.classList.remove("active");
+                    //     if (nodeObject.west != null) nodeObject.west.classList.remove("active");
+                    //     if (nodeObject.east != null) nodeObject.east.classList.remove("active");
+                    //     if (nodeObject.south != null) nodeObject.south.classList.remove("active");
+                    // });
+                    ///////////////////////////////////////////////////////////////
                 }
                 // Otherwise we are on a vertical smaller square
                 else {
@@ -1356,7 +1370,7 @@ function initalizeMap() {
                 }
             }
 
-            mainGrid.push(mainRowArray);
+            mapGrid.push(mainRowArray);
             secondaryGrid.push(secondaryRowArray);
         } 
         // Otherwise we're in a row of horizontal connector squares
@@ -1376,15 +1390,15 @@ function initalizeMap() {
         }
     }
 
-    for (let y = 0; y < mainGrid.length; y++) {
-        for (let x = 0; x < mainGrid[y].length; x++) {
+    for (let y = 0; y < mapGrid.length; y++) {
+        for (let x = 0; x < mapGrid[y].length; x++) {
             
-            const nodeObj = mainGrid[y][x];
+            const nodeObj = mapGrid[y][x];
             
             if (y > 0) nodeObj.north = secondaryGrid[2*y - 1][x];
             if (x > 0) nodeObj.west = secondaryGrid[y*2][x-1];            
-            if (x < mainGrid[y].length - 1) nodeObj.east = secondaryGrid[y*2][x];            
-            if (y < mainGrid.length -1) nodeObj.south = secondaryGrid[2*y + 1][x];
+            if (x < mapGrid[y].length - 1) nodeObj.east = secondaryGrid[y*2][x];            
+            if (y < mapGrid.length -1) nodeObj.south = secondaryGrid[2*y + 1][x];
         }
     }
 
@@ -1393,7 +1407,89 @@ function initalizeMap() {
 
 function updateMap() {
 
-    
+    if (showDebugLog) console.log("updateMap() - ");
+
+    if (areasModified[currentArea].locations.length > 0) {
+
+        // Reset state of all squares in the grid
+        for (let y = 0; y < mapGrid.length; y++) {
+            for (let x = 0; x < mapGrid[y].length; x++) {
+
+                const nodeObject = mapGrid[y][x];
+                
+                nodeObject.element.classList = "main-square"
+                if (nodeObject.north != null) nodeObject.north.classList = "horizontal-square"
+                if (nodeObject.west != null) nodeObject.west.classList = "vertical-square"
+                if (nodeObject.east != null) nodeObject.east.classList = "vertical-square"
+                if (nodeObject.south != null) nodeObject.south.classList = "horizontal-square"
+            }
+        }
+
+        areasModified[currentArea].locations.forEach((location, index) => {
+
+            // Get the corresponding nodeObject for the location listed
+            const nodeObject = mapGrid[location.coordinates[0]][location.coordinates[1]];
+
+            // Set this location square to active
+            nodeObject.element.classList = "main-square active"
+
+            if (nodeObject.north != null) {                        
+              if (getLocationFromArea(getNewCoordinates(location.coordinates, "north"), "north") != null) { // Check if there is a location in this direction
+                nodeObject.north.classList = "horizontal-square active";
+              }
+            }
+            if (nodeObject.west != null) {                          
+              if (getLocationFromArea(getNewCoordinates(location.coordinates, "west")) != null) { // Check if there is a location in this direction
+                nodeObject.west.classList = "vertical-square active";
+              }
+            }
+            if (nodeObject.east != null) {                          
+              if (getLocationFromArea(getNewCoordinates(location.coordinates, "east")) != null) { // Check if there is a location in this direction
+                nodeObject.east.classList = "vertical-square active";
+              }
+            }
+            if (nodeObject.south != null) {                          
+              if (getLocationFromArea(getNewCoordinates(location.coordinates, "south")) != null) { // Check if there is a location in this direction
+                nodeObject.south.classList = "horizontal-square active";
+              }
+            }
+        });
+
+        // Insert player symbol in current location        
+        const currentLocationNode = mapGrid[currentLocation[0]][currentLocation[1]];
+        
+        currentLocationNode.element.classList = "main-square current"
+
+        // Store the directions we are able to move
+        activeDirections = [];
+        if (currentLocationNode.north != "") activeDirections.push(0);
+        if (currentLocationNode.west != "") activeDirections.push(1);
+        if (currentLocationNode.east != "") activeDirections.push(2);
+        if (currentLocationNode.south != "") activeDirections.push(3);        
+    }
+    else
+        console.error("updateMap - Current Area: " + currentArea + " has no locations");
+}
+
+// Called during updateButtons as this is when we check what items and monsters are present
+function directionBlocked(direction) {
+
+    const currentLocationNode = mapGrid[currentlocation.coordinates[0]][currentlocation.coordinates[1]];
+
+    switch(direction) {
+        case "north":
+            currentLocationNode.north.classList = "main-square inactive"
+        break;
+        case "west":
+            currentLocationNode.west.classList = "main-square inactive"
+        break;
+        case "east":
+            currentLocationNode.east.classList = "main-square inactive"
+        break;
+        case "south":
+            currentLocationNode.south.classList = "main-square inactive"
+        break;
+    }
 }
 
 // When we open a button, we need to close all other buttons
@@ -1487,7 +1583,7 @@ function closeNPC() {
 
     npcActive = false;
     currentNPC = -1;
-    displayLocation(currentLocation);
+    displayLocation(currentArea, currentLocation);
 }
 
 function displayNarration(narrationKeyword) {
@@ -1535,7 +1631,7 @@ function continueNarration() {
 function closeNarration() {
 
     narrationOpen = false;
-    displayLocation(currentLocation);
+    displayLocation(currentArea, currentLocation);
 }
 
 function displayTitle() {
@@ -1560,7 +1656,7 @@ function displayTitle() {
 function closeTitle() {
 
     titleOpen = false;
-    displayLocation(currentLocation);
+    displayLocation(currentArea, currentLocation);
 }
 
 function displayInventory() {
@@ -1594,7 +1690,7 @@ function exitInventory() {
     inventoryOpen = false;
 
     clearInventory();
-    displayLocation(currentLocation);
+    displayLocation(currentArea, currentLocation);
     if (upgradeMenuOpen)
         displayUpgrade();
     if (narrationOpen)
@@ -1628,7 +1724,7 @@ function displayUpgrade() {
 function exitUpgrade() {
 
     upgradeMenuOpen = false;
-    displayLocation(currentLocation);
+    displayLocation(currentArea, currentLocation);
 }
 
 function inventoryIndexOf(keyword) {
@@ -2017,7 +2113,7 @@ function playerDeath() {
 
 function respawn() {    
 
-    if (respawnLocation != null && respawnLocation != -1) {
+    if (respawnLocation != null) {
 
         hpCurrent = hpMax;
         currentStamina = maxStamina;
@@ -2028,7 +2124,7 @@ function respawn() {
         });
 
         updateStats();        
-        displayLocation(respawnLocation); 
+        displayLocation(respawnLocation.area, respawnLocation.location); 
         save();        
         
         // TODO Add variants on this text
@@ -2222,10 +2318,13 @@ function rest() {
 
     // Monsters all heal when you rest
     monstersModified.forEach((element) => {
-        element.hpCurrent = element.hpMax;
+      element.hpCurrent = element.hpMax;
     });
 
-    respawnLocation = currentLocation;        
+    respawnLocation = {
+      area: currentArea,
+      location: currentLocation
+    }
 
     save();
     updateStats();
@@ -2434,7 +2533,7 @@ function save() {
     localStorage.setItem('saveExists', "!");        // Used to test whether there is a save
     localStorage.setItem('version', JSON.stringify(version));
     localStorage.setItem('currentLocation', JSON.stringify(currentLocation));
-    localStorage.setItem('locationsVisited', JSON.stringify(locationsVisited));    
+    localStorage.setItem('locationsVisited', JSON.stringify(areasVisited));    
     localStorage.setItem('areasVisited', JSON.stringify(areasVisited));    
     localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
@@ -2453,6 +2552,7 @@ function save() {
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
     localStorage.setItem('corpseLocation', JSON.stringify(corpseLocation));
 
+    localStorage.setItem('areasModified', JSON.stringify(areasModified));
     localStorage.setItem('locationsModified', JSON.stringify(locationsModified));
     localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
     localStorage.setItem('npcsModified', JSON.stringify(npcsModified));
@@ -2465,7 +2565,7 @@ function save() {
     if (showDebugLog) console.log("Load");
 
     currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
-    locationsVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
+    areasVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
     areasVisited = JSON.parse(localStorage.getItem('areasVisited'));    
     insight = JSON.parse(localStorage.getItem('insight'));
     hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
@@ -2485,6 +2585,7 @@ function save() {
 
     if (!resetLocations) { 
         
+        areasModified = JSON.parse(localStorage.getItem('areasModified'));       
         locationsModified = JSON.parse(localStorage.getItem('locationsModified'));       
         monstersModified = JSON.parse(localStorage.getItem('monstersModified'));
         npcsModified = JSON.parse(localStorage.getItem('npcsModified'));
@@ -2492,8 +2593,9 @@ function save() {
         narrationsModified = JSON.parse(localStorage.getItem('narrationsModified'));
     }
     else {
-        locationsModified = JSON.parse(JSON.stringify(locations));        
-        locationsVisited = [];
+        areasModified = JSON.parse(JSON.stringify(areas));
+        locationsModified = JSON.parse(JSON.stringify(locations));
+        areasVisited = [];
         monstersModified = JSON.parse(JSON.stringify(monsters));                
         npcsModified = JSON.parse(JSON.stringify(npcs));
         itemsModified = JSON.parse(JSON.stringify(items));
@@ -2521,9 +2623,8 @@ function save() {
     
     ar = [];    
     switch (objType) {
-        case objectType.location://Location
-        
-            ar = locationsModified;            
+        case objectType.area://Location        
+            ar = areasModified;
             break;
         case objectType.monster://Monster
             ar = monstersModified;            
@@ -2564,58 +2665,145 @@ function save() {
     
     if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
     return index;
+  }  
+
+  function getLocationFromArea(location) {
+
+    let loc = null;
+    
+    areasModified[currentArea].locations.forEach((element, i) => {                
+
+        if (compareArrays(element.coordinates, location)) {
+            
+            loc = element;            
+        }
+    });
+        
+    return loc;
   }
 
   function playClick() {
-    
-    let audioClipIndex = Math.floor(Math.random() * 5);
-    let audioClip = '';
-    switch (audioClipIndex) {
-        case 0:
-            audioClip = 'Audio/clicks/Click_1.wav';
-            break;
-        case 1:
-            audioClip = 'Audio/clicks/Click_2.wav';
-            break;
-        case 2:
-            audioClip = 'Audio/clicks/Click_3.wav';
-            break;
-        case 3:
-            audioClip = 'Audio/clicks/Click_4.wav';
-            break;
-        case 4:
-            audioClip = 'Audio/clicks/Click_5.wav';
-            break;
-    }
+  
+      let audioClipIndex = Math.floor(Math.random() * 5);
+      let audioClip = '';
+      switch (audioClipIndex) {
+          case 0:
+              audioClip = 'Audio/clicks/Click_1.wav';
+              break;
+          case 1:
+              audioClip = 'Audio/clicks/Click_2.wav';
+              break;
+          case 2:
+              audioClip = 'Audio/clicks/Click_3.wav';
+              break;
+          case 3:
+              audioClip = 'Audio/clicks/Click_4.wav';
+              break;
+          case 4:
+              audioClip = 'Audio/clicks/Click_5.wav';
+              break;
+      }
 
-    var audio = new Audio(audioClip);
-    audio.play();      
+      var audio = new Audio(audioClip);
+      audio.play();      
   }
 
+  // Function to compare two arrays
+  function compareArrays(arr1, arr2) {
+      // Check if both arrays are defined
+      if (!arr1 || !arr2) {
+          return false;
+      }
+
+      // Check if both arrays have the same length
+      if (arr1.length !== arr2.length) {
+          return false;
+      }
+
+      // Compare each element
+      for (let i = 0; i < arr1.length; i++) {
+          const el1 = arr1[i];
+          const el2 = arr2[i];
+
+          // If elements are arrays, compare them recursively
+          if (Array.isArray(el1) && Array.isArray(el2)) {
+              if (!compareArrays(el1, el2)) {
+                  return false;
+              }
+          } 
+          // If elements are objects, compare them recursively
+          else if (typeof el1 === 'object' && typeof el2 === 'object') {
+              if (!compareObjects(el1, el2)) {
+                  return false;
+              }
+          } 
+          // Otherwise, compare the elements directly
+          else if (el1 !== el2) {
+              return false;
+          }
+      }
+
+      return true;
+  }
+
+  /**
+ * Get the coordinates of a new cell in a 2D array given the current coordinates and a direction.
+ * @param {number} x - The x-coordinate of the current cell.
+ * @param {number} y - The y-coordinate of the current cell.
+ * @param {string} direction - The direction to move ('up', 'down', 'left', 'right').
+ * @returns {object} The coordinates of the new cell.
+ */
+function getNewCoordinates(coordinates, direction) {
+  
+  let newY = coordinates[0];
+  let newX = coordinates[1];  
+
+  switch (direction) {
+    case 'north':
+      newY -= 1;
+      break;    
+    case 'west':
+      newX -= 1;
+      break;
+    case 'east':
+      newX += 1;
+      break;
+    case 'south':
+      newY += 1;
+      break;
+    default:
+        throw new Error('Invalid direction');
+  }
+  
+  return [newY,newX];  
+}
+
   function formatData() {    
-    
-    if (showDebugLog) console.log("formatData() - ");
+      
+      if (showDebugLog) console.log("formatData() - ");
 
-    locationsModified = JSON.parse(JSON.stringify(locations));
-    npcsModified = JSON.parse(JSON.stringify(npcs));
-    monstersModified = JSON.parse(JSON.stringify(monsters));
-    narrationsModified = JSON.parse(JSON.stringify(narrations));
+      areasModified = JSON.parse(JSON.stringify(areas));
+      locationsModified = JSON.parse(JSON.stringify(locations));
+      npcsModified = JSON.parse(JSON.stringify(npcs));
+      monstersModified = JSON.parse(JSON.stringify(monsters));
+      narrationsModified = JSON.parse(JSON.stringify(narrations));
 
-    itemsModified = JSON.parse(JSON.stringify(items));
+      itemsModified = JSON.parse(JSON.stringify(items));
 
-    itemsModified.forEach((element,index) => {
-        
-        element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
-        element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
-    });
+      itemsModified.forEach((element,index) => {
+          
+          element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
+          element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
+      });
 
-    // Places monsters in the correct locations
-    monstersModified.forEach((element,index) => {
-        
-        if (element.location != null && element.location != "") {            
-            locationsModified[getIndexFromKeyword(element.location, objectType.location)].monsters.push(element.keyword);            
-        }
-    });
+      //////////// TODO - Fix this
+      // Places monsters in the correct locations
+      // monstersModified.forEach((element,index) => {
+          
+      //     if (element.location != null && element.location != "") {            
+      //         locationsModified[getIndexFromKeyword(element.location, objectType.location)].monsters.push(element.keyword);            
+      //     }
+      // });
   }
 
   // #endregion
