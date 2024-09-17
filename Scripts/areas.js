@@ -9,6 +9,7 @@ areas = [
             {
                 coordinates: [2,5],
                 visited: false,
+                seen: false,
                 items: ["green_herb_pickup"],
                 monsters: [],
                 npcs: ["ryth"],
@@ -20,10 +21,11 @@ areas = [
             {
                 coordinates: [2,4],
                 visited: false,
+                seen: false,
                 items: [],
                 monsters: [],
                 npcs: [],
-                north: null,
+                north: [1,4],
                 west: [2,3],
                 east: [2,5],
                 south: null,                
@@ -31,6 +33,7 @@ areas = [
             {
                 coordinates: [2,3],
                 visited: false,
+                seen: false,
                 items: [],
                 monsters: [],
                 npcs: [],
@@ -42,6 +45,7 @@ areas = [
             {
                 coordinates: [1,5],
                 visited: false,
+                seen: false,
                 items: [],
                 monsters: [],
                 npcs: [],
@@ -53,6 +57,7 @@ areas = [
             {
                 coordinates: [3,5],
                 visited: false,
+                seen: false,
                 items: [],
                 monsters: [],
                 npcs: [],
@@ -64,6 +69,7 @@ areas = [
             {
                 coordinates: [3,6],
                 visited: false,
+                seen: false,
                 items: [],
                 monsters: [],
                 npcs: [],
@@ -75,6 +81,7 @@ areas = [
             {
                 coordinates: [3,7],
                 visited: false,
+                seen: false,
                 items: [],
                 monsters: [],
                 npcs: [],
@@ -82,6 +89,18 @@ areas = [
                 west: [3,6],
                 east: null,
                 south: null,                
+            },
+            {
+                coordinates: [1,4],
+                visited: false,
+                seen: false,
+                items: [],
+                monsters: [],
+                npcs: [],
+                north: null,
+                west: null,
+                east: null,
+                south: [2,4],                
             }
         ]
     }

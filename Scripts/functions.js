@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.041;
+let version = 0.042;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -340,7 +340,10 @@ function displayLocation(area, location) {
             
     const _locationExists = getLocationFromCurrentArea(location);
     if (_locationExists === -1) { console.error("!!!"); return; }
+
     currentLocation = location;
+    getLocationFromCurrentArea(location).visited = true;
+    getLocationFromCurrentArea(location).seen = true;
 
     updateMap();
 
@@ -1404,6 +1407,7 @@ function updateMap() {
             }
         }
 
+        // Cycle through all locations in this area
         areasModified[currentArea].locations.forEach((location, index) => {
 
             let isAdjacentToCurrent = false;
@@ -1411,45 +1415,72 @@ function updateMap() {
             // Get the corresponding nodeObject for the location listed
             const nodeObject = mapGrid[location.coordinates[0]][location.coordinates[1]];
 
-            // Set this location square to active
-            nodeObject.element.classList = "main-square active"
+            // Check this node has a line in this direction (If there is no line, it means we are at the edge of the grid)
+            if (nodeObject.north != null) {                
+                
+                // Check there is a location at the coordinate in this direction from our current location
+                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north"), "north") != null) {
+                
+                    // Check whether the square in this direction is the player's current location, in which case store that information
+                    if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {  // Is the location adjacent to us the player's current location?                                                
+                        isAdjacentToCurrent = true;
+                        location.seen = true;       // Since this is adjacent to the players current location, we have now seen it
+                    }
 
-            if (nodeObject.north != null) {                        
-              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north"), "north") != null) { // Check if there is a location in this direction
-                nodeObject.north.classList = "horizontal-square active";
-
-                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
-                    isAdjacentToCurrent = true;
-              }
+                    // Check whether the current location and the other square in this direction have been seen, then make sure there is a path between them
+                    if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).seen && locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north"))))
+                        // If so, show the line between these two
+                        nodeObject.north.classList = "horizontal-square inactive";                
+                }
             }
             if (nodeObject.west != null) {                          
-              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")) != null) { // Check if there is a location in this direction
-                nodeObject.west.classList = "vertical-square active";
+                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")) != null) {                
+                    
+                    if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {   // Is the location adjacent to us the player's current location?
+                        isAdjacentToCurrent = true;
+                        location.seen = true;
+                    }
 
-                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
-                    isAdjacentToCurrent = true;
-              }
+                    if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")).seen && locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west"))))
+                        nodeObject.west.classList = "vertical-square inactive";
+                }
             }
             if (nodeObject.east != null) {                          
-              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")) != null) { // Check if there is a location in this direction
-                nodeObject.east.classList = "vertical-square active";
+                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")) != null) {
+                
+                    if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {   // Is the location adjacent to us the player's current location?
+                        isAdjacentToCurrent = true;
+                        location.seen = true;
+                    }
 
-                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
-                    isAdjacentToCurrent = true;
-              }
+                    if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")).seen && locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east"))))
+                        nodeObject.east.classList = "vertical-square inactive";
+                }
             }
             if (nodeObject.south != null) {                          
-              if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")) != null) { // Check if there is a location in this direction
-                nodeObject.south.classList = "horizontal-square active";
+                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")) != null) {
+                
+                    if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {   // Is the location adjacent to us the player's current location?
+                        isAdjacentToCurrent = true;
+                        location.seen = true;
+                    }
 
-                if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates))   // Is the location adjacent to us the player's current location?
-                    isAdjacentToCurrent = true;
-              }
-            }
-            
+                    if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")).seen && locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south"))))
+                        nodeObject.south.classList = "horizontal-square inactive";
+                }
+            }            
+
+            // Set this location square to active            
+            if (location.visited === true)
+                nodeObject.element.classList = "main-square visited"
+            else if (location.seen === true)
+                nodeObject.element.classList = "main-square seen"
+            else
+                nodeObject.element.classList = "main-square"
+
             // If this location is adjacent to the player's current location, it is hoverable and clickable to move here
             if (isAdjacentToCurrent) {
-                
+
                 nodeObject.element.classList += " can-hover";                
                 nodeObject.element.onclick = function() { 
                     displayLocation(currentArea, location.coordinates);                                
@@ -1457,6 +1488,7 @@ function updateMap() {
                     recoverStamina() 
                 };
             }
+
         });
 
         // Insert player symbol in current location        
@@ -1464,21 +1496,22 @@ function updateMap() {
 
         currentLocationNode.element.classList = "main-square current"        
 
+        // Highlight all lines leading away from the current node
         if (getLocationFromCurrentArea(currentLocation).north != null)             
             if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "north")) != null)
-              currentLocationNode.north.classList = "horizontal-square current";
+              currentLocationNode.north.classList = "horizontal-square active";
 
           if (getLocationFromCurrentArea(currentLocation).west != null)                        
             if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "west")) != null)
-              currentLocationNode.west.classList = "vertical-square current";
+              currentLocationNode.west.classList = "vertical-square active";
 
           if (getLocationFromCurrentArea(currentLocation).east != null)                        
             if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "east")) != null)
-              currentLocationNode.east.classList = "vertical-square current";
+              currentLocationNode.east.classList = "vertical-square active";
 
           if (getLocationFromCurrentArea(currentLocation).south != null)                        
             if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "south")) != null)
-              currentLocationNode.south.classList = "horizontal-square current";
+              currentLocationNode.south.classList = "horizontal-square active";
 
 
 
@@ -2855,6 +2888,30 @@ function getNewCoordinates(coordinates, direction) {
   }
   
   return [newY,newX];  
+}
+
+function locationsHavePath(locationA, locationB) {
+    
+    hasPath = false;    
+
+    if (locationA.north != null) {
+        if (compareArrays(locationA.north, locationB.coordinates) && compareArrays(locationB.south, locationA.coordinates))
+            hasPath = true;
+    }
+    if (locationA.west != null) {
+        if (compareArrays(locationA.west, locationB.coordinates) && compareArrays(locationB.east, locationA.coordinates))
+            hasPath = true;
+    }
+    if (locationA.east != null) {
+        if (compareArrays(locationA.east, locationB.coordinates) && compareArrays(locationB.west, locationA.coordinates))
+            hasPath = true;
+    }
+    if (locationA.south != null) {
+        if (compareArrays(locationA.south, locationB.coordinates) && compareArrays(locationB.north, locationA.coordinates))
+            hasPath = true;
+    }
+    
+    return hasPath;
 }
 
   function formatData() {    

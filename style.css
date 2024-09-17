@@ -299,19 +299,20 @@ main {
         background-color: #06111377;
         border: 2px solid transparent;
     }
-    .main-square.active {        
+    .main-square.visited {        
         border: 2px solid #363718;
-    }
-    .main-square.active.can-hover:hover {        
-        border: 2px solid #6F7221;
-    }
-    .main-square.inactive {        
+    }    
+    .main-square.seen {        
         border: 2px solid #1D1E0E;
     }
     .main-square.current {
       background-image: url("Assets/mapPlayerIcon.svg");
       border: 2px solid #6F7221;
     }
+    .main-square.can-hover:hover {        
+        border: 2px solid #6F7221;
+    }
+
     
     .vertical-square {
         height: 20px;
@@ -319,16 +320,12 @@ main {
         background-color: transparent;
         border-bottom: 2px solid transparent;
     }
-
     .vertical-square.active {        
-        border-bottom: 2px solid #363718;
-    }
-    .vertical-square.inactive {        
-        border-bottom: 2px solid #1D1E0E;
-    }
-    .vertical-square.current {        
         border-bottom: 2px solid #6F7221;
     }
+    .vertical-square.inactive {        
+        border-bottom: 2px solid #363718;
+    }    
 
     .horizontal-square {
         height: 15px;
@@ -338,15 +335,11 @@ main {
         border-right: 2px solid transparent;
     }
     .horizontal-square.active {
-        border-right: 2px solid #363718;
-    }
-    .horizontal-square.inactive {
-        border-right: 2px solid #1D1E0E;
-    }
-    .horizontal-square.current {
         border-right: 2px solid #6F7221;
     }
-
+    .horizontal-square.inactive {
+        border-right: 2px solid #363718;
+    }
 }
 
 
