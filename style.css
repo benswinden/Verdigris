@@ -312,6 +312,10 @@ main {
     .main-square.can-hover:hover {        
         border: 2px solid #6F7221;
     }
+    .main-square.current-hostile {
+        background-image: url("Assets/mapPlayerIcon.svg");
+        border: 2px solid #8F3715;
+    }
 
     
     .vertical-square {

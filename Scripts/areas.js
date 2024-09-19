@@ -23,7 +23,7 @@ areas = [
                 visited: false,
                 seen: false,
                 items: [],
-                monsters: [],
+                monsters: ["goblin_01"],
                 npcs: [],
                 north: [1,4],
                 west: [2,3],
@@ -63,7 +63,7 @@ areas = [
                 npcs: [],
                 north: [2,5],
                 west: null,
-                east: [4,6],
+                east: [3,6],
                 south: null,                
             },
             {
