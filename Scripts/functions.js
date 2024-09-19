@@ -302,7 +302,7 @@ function initializeGame() {
         currentStamina = maxStamina;
 
         inventory = [];
-        inventory.push("straight_sword","green_cloak","crimson_key");
+        inventory.push("straight_sword","green_cloak");
         
         areasVisited = [];        
 
@@ -344,7 +344,8 @@ function displayLocation(area, location) {
     currentLocation = location;
     getLocationFromCurrentArea(location).visited = true;
     getLocationFromCurrentArea(location).seen = true;
-
+    
+    mapGridContainer.style.display = "flex";
     updateMap();
 
     save();
@@ -710,7 +711,7 @@ function updateButtons()  {
             // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
             if (item.blocking != null && item.blocking != "") {
 
-                directionBlocked(item.blocking);
+                //directionBlocked(item.blocking);
 
                 ///////////////// TODO TO REMOVE
                 // Depending on the blocking direction provided, we make that direction inactive, assuming it exists in this location
@@ -862,6 +863,7 @@ function updateButtons()  {
                                 inventory.splice(inventory.indexOf(item.lock), 1);
                                 playClick();
                                 addUpdateText("You unlock the " + item.shortTitle);
+                                updateMap();
                                 updateButtons();
                             };
                         }
@@ -1389,7 +1391,7 @@ function updateMap() {
 
     if (showDebugLog) console.log("updateMap() - ");
 
-    activeDirections = [];
+    activeDirections = [];    
     const monsterPresent = getLocationFromCurrentArea(currentLocation).monsters.length > 0;
 
     if (areasModified[currentArea].locations.length > 0) {
@@ -1426,7 +1428,7 @@ function updateMap() {
                     
                     // Check that there is a path between these two locations
                     if (locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")))) {
-
+                        
                         // Check whether the square in this direction is the player's current location, in which case store that information
                         if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {  // Is the location adjacent to us the player's current location?                                                
                             isAdjacentToCurrent = true;
@@ -1436,7 +1438,7 @@ function updateMap() {
                         }
 
                         // Check whether the current location and the other square in this direction have been seen, then make sure there is a path between them
-                        if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).seen)
+                        if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).seen)                            
                             // If so, show the line between these two
                             nodeObject.north.classList = "horizontal-square inactive";               
                     } 
@@ -1536,20 +1538,20 @@ function updateMap() {
         else {
             currentLocationNode.element.classList = "main-square current"        
 
-            // Highlight all lines leading away from the current node
-            if (getLocationFromCurrentArea(currentLocation).north != null)             
+            // Highlight all lines leading away from the current node, double check with active directions as this direction might be blocked
+            if (getLocationFromCurrentArea(currentLocation).north != null && activeDirections.includes[0])             
                 if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "north")) != null)
                 currentLocationNode.north.classList = "horizontal-square active";
 
-            if (getLocationFromCurrentArea(currentLocation).west != null)                        
+            if (getLocationFromCurrentArea(currentLocation).west != null && activeDirections.includes[1])
                 if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "west")) != null)
                 currentLocationNode.west.classList = "vertical-square active";
 
-            if (getLocationFromCurrentArea(currentLocation).east != null)                        
+            if (getLocationFromCurrentArea(currentLocation).east != null && activeDirections.includes[2])                        
                 if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "east")) != null)
                 currentLocationNode.east.classList = "vertical-square active";
 
-            if (getLocationFromCurrentArea(currentLocation).south != null)                        
+            if (getLocationFromCurrentArea(currentLocation).south != null && activeDirections.includes[3])                        
                 if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "south")) != null)
                 currentLocationNode.south.classList = "horizontal-square active";
         }
@@ -1557,27 +1559,6 @@ function updateMap() {
     }
     else
         console.error("updateMap - Current Area: " + currentArea + " has no locations");
-}
-
-// Called during updateButtons as this is when we check what items and monsters are present
-function directionBlocked(direction) {
-
-    const currentLocationNode = mapGrid[currentlocation.coordinates[0]][currentlocation.coordinates[1]];
-
-    switch(direction) {
-        case "north":
-            currentLocationNode.north.classList = "main-square inactive"
-        break;
-        case "west":
-            currentLocationNode.west.classList = "main-square inactive"
-        break;
-        case "east":
-            currentLocationNode.east.classList = "main-square inactive"
-        break;
-        case "south":
-            currentLocationNode.south.classList = "main-square inactive"
-        break;
-    }
 }
 
 // When we open a button, we need to close all other buttons
@@ -1655,6 +1636,8 @@ function displayNPC(index) {
         if (npcsModified[index].update != undefined && npcsModified[index].update != "")
             addUpdateText(npcsModified[index].update);
 
+        mapGridContainer.style.display = "none";
+
         updateButtons();
 }
 
@@ -1676,6 +1659,8 @@ function displayNarration(narrationKeyword) {
     else if (narrationKeyword === undefined && currentNarration === "") {
         console.error("displayNarrative - no narrationKeyword provided, currentNarration is undefined as well");
     }        
+
+    mapGridContainer.style.display = "none";
 
     narrationOpen = true;
     updateButtons();
@@ -1717,6 +1702,8 @@ function displayTitle() {
     
     if (showDebugLog) console.log("displayTitle() - ");
     
+    mapGridContainer.style.display = "none";
+
     titleOpen = true;
     updateButtons();
 
@@ -1747,6 +1734,8 @@ function displayInventory() {
 
     inventoryIcon.classList = "close-inventory";    
     inventoryIcon.onclick = function() { exitInventory(); playClick(); };
+
+    mapGridContainer.style.display = "none";
 
     expandStats();    
     updateButtons();
@@ -1790,6 +1779,8 @@ function clearInventory() {
 
 function displayUpgrade() {
 
+    mapGridContainer.style.display = "none";
+
     upgradeMenuOpen = true;
     updateButtons();
     expandStats();
@@ -1832,8 +1823,9 @@ function displayTrain() {
     
     expandStats();
 
-    trainMenuOpen = true;
+    mapGridContainer.style.display = "none";
 
+    trainMenuOpen = true;
     updateButtons();
 }
 
@@ -2341,7 +2333,7 @@ function monsterDeath(monsterButton) {
     // Remove this monster from the current location    
     getLocationFromCurrentArea(currentLocation).monsters.splice(getLocationFromCurrentArea(currentLocation).monsters.indexOf(monster.keyword),1);
 
-    let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monster.insight + " insight and " +  monster.gold + " gold";
+    let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monster.insight + " experience and " +  monster.gold + " gold";
 
     insight += monster.insight;
     gold += monster.gold;
@@ -2910,23 +2902,93 @@ function getNewCoordinates(coordinates, direction) {
 
 function locationsHavePath(locationA, locationB) {
     
+    let locationABlockedDirections = [];
+    let locationBBlockedDirections = [];
+
+    // Check present items for anything blocking exits    
+    let _items = locationA.items;
+    
+    if (_items != undefined && _items.length > 0 && _items != "") {
+    
+        _items.forEach((element,index) => {
+            
+            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
+            
+            // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
+            if (item.blocking != null && item.blocking != "") {
+
+                switch (item.blocking) {
+                    case "north":                        
+                        locationABlockedDirections.push(0);
+                        break;             
+                    case "west":
+                        locationABlockedDirections.push(1);
+                        break;                        
+                    case "east":
+                        locationABlockedDirections.push(2);
+                        break;                        
+                    case "south":
+                        locationABlockedDirections.push(3);
+                        break;
+                }
+            }
+        });
+    }
+    console.log(_items);
+    console.log(locationABlockedDirections);
+
+    _items = locationB.items;
+    if (_items != undefined && _items.length > 0 && _items != "") {
+    
+        _items.forEach((element,index) => {
+            
+            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
+            
+            // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
+            if (item.blocking != null && item.blocking != "") {
+
+                switch (item.blocking) {
+                    case "north":                        
+                        locationBBlockedDirections.push(0);
+                        break;             
+                    case "west":
+                        locationBBlockedDirections.push(1);
+                        break;                        
+                    case "east":
+                        locationBBlockedDirections.push(2);
+                        break;                        
+                    case "south":
+                        locationBBlockedDirections.push(3);
+                        break;
+                }
+            }
+        });
+    }
+
     hasPath = false;    
 
+    // If locationA has a coordinate listed to the north
     if (locationA.north != null) {
+        // Check if locationA's north exit coordinates match LocationB's coordinates, and check if LocationB's south coordinates match LocationA's coordinates
         if (compareArrays(locationA.north, locationB.coordinates) && compareArrays(locationB.south, locationA.coordinates))
-            hasPath = true;
+            // Check if LocationA has a blocked direction to the north, or if locationB has a block to the south
+            if (!locationABlockedDirections.includes(0) && !locationBBlockedDirections.includes(3))
+                hasPath = true;
     }
     if (locationA.west != null) {
         if (compareArrays(locationA.west, locationB.coordinates) && compareArrays(locationB.east, locationA.coordinates))
-            hasPath = true;
+            if (!locationABlockedDirections.includes(1) && !locationBBlockedDirections.includes(2))
+                hasPath = true;
     }
     if (locationA.east != null) {
         if (compareArrays(locationA.east, locationB.coordinates) && compareArrays(locationB.west, locationA.coordinates))
-            hasPath = true;
+            if (!locationABlockedDirections.includes(2) && !locationBBlockedDirections.includes(1))    
+                hasPath = true;
     }
     if (locationA.south != null) {
         if (compareArrays(locationA.south, locationB.coordinates) && compareArrays(locationB.north, locationA.coordinates))
-            hasPath = true;
+            if (!locationABlockedDirections.includes(3) && !locationBBlockedDirections.includes(0))
+                hasPath = true;
     }
     
     return hasPath;

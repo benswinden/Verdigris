@@ -18,8 +18,8 @@ green_herb,Young Green Herb,herb,,healGreenHerb,TRUE,FALSE,FALSE,FALSE,0,0,0,0,0
 green_herb_pickup,Young Green Herb,herb,,pickupGreenHerb,TRUE,FALSE,FALSE,FALSE,0,0,0,0,0,1,,,,
 thorny_bramble,Thorny Bramble,bramble,"At the end of a winding garden pathway, a long row of thorny bramble blocked any further progress. Something odd to it's symetical formation.",misc,FALSE,FALSE,FALSE,FALSE,0,0,0,0,0,0,,,,
 town_map,Old Town Map,map,A detailed diagram of the ruins of the town that sits in the castle's shadow.,map,true,false,false,false,0,0,0,0,350,0,,,,
-crimson_gate,Crimson Gate,gate,A great red copper gate tied into the Garden walls. It was closed and locked.,misc,false,false,false,false,0,0,0,0,0,0,,,east,crimson_key
-crimson_key,Crimson Key,key,A metal key forged in a dull red the color of drying blood,key,false,false,false,false,0,0,0,0,0,0,,,,
+crimson_gate,Crimson Gate,gate,A great red copper gate tied into the Garden walls. It was closed and locked.,misc,false,false,false,false,0,0,0,0,0,0,,,north,crimson_key
+crimson_key,Crimson Key,key,A metal key forged in a dull red the color of drying blood,key,true,false,false,false,0,0,0,0,0,0,,,,
 ,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,

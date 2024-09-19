@@ -7,7 +7,7 @@ goblin_01,,Goblin Darkling,goblin,"A vicious goblin on all fours, glaring. Come 
 goblin_02,,Goblin Darkling,goblin,"A vicious goblin on all fours, glaring. Come from the darkness, feeding on rot.",,1,35,35,20,30,0,12,,,
 goblin_hulk_01,,Goblin Hulk,hulk,"A massive goblin creature with thick forearms planted in front of it. It's mouth hangs open, thick saliva shot through with an oily green color cover it's sharp fangs.",,3,85,85,35,20,1,30,,,
 centipede,,Giant Centipede,centipede,Uncountable legs proprel it's articulated body. Light reflects of it's slick chitinous exoskeleton.,,2,85,85,20,20,1,0,,,
-grub_01,,Grub,grub,A crawling maggot the size of a dog wriggled it's way towards you.,,1,100,100,10,10,0,12,,,north
+grub_01,,Grub,grub,A crawling maggot the size of a dog wriggled it's way towards you.,,1,50,50,10,10,0,12,,,north
 grub_02,,Grub,grub,A crawling maggot the size of a dog wriggled it's way towards you.,,1,35,35,23,10,0,12,,,east
 grub_03,gg_12,Grub,grub,A crawling maggot the size of a dog wriggled it's way towards you.,,1,29,29,17,10,0,12,,,east
 grub_04,gg_03,Grub,grub,A crawling maggot the size of a dog wriggled it's way towards you.,,1,38,38,18,10,0,12,,,
