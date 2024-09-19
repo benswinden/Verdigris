@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.042;
+let version = 0.044;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -580,71 +580,7 @@ function updateButtons()  {
                     location: "",
                     func: "runAway",
                 });
-            }
-            ///////////////// TODO TO REMOVE
-            // Otherwise, show the exits actions for this location
-            // else {
-
-            //     // NORTH                                                
-            //     contextualActions.push({
-            //         keyword: "north",                                    
-            //         title: locationsModified[currentLocation].north === "" ? "North" : "North to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].north, locationsModified)].title,                
-            //         active: locationsModified[currentLocation].north === "" ?  false : true,
-            //         staminaCost: -1,
-            //         location: locationsModified[currentLocation].north,
-            //         func: "",
-            //     });
-            //     // WEST                        
-            //     contextualActions.push({                
-            //         keyword: "west",
-            //         title: locationsModified[currentLocation].west === "" ? "West" :"West to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].west, locationsModified)].title,
-            //         active: locationsModified[currentLocation].west === "" ? false : true,
-            //         staminaCost: -1,
-            //         location: locationsModified[currentLocation].west,
-            //         func: "",
-            //     });
-            //     // EAST                        
-            //     contextualActions.push({                
-            //         keyword: "east",
-            //         title: locationsModified[currentLocation].east === "" ? "East" : "East to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].east, locationsModified)].title,
-            //         active: locationsModified[currentLocation].east === "" ? false : true,
-            //         staminaCost: -1,
-            //         location: locationsModified[currentLocation].east,
-            //         func: "",
-            //     });
-            //     // SOUTH                        
-            //     contextualActions.push({                
-            //         keyword: "south",
-            //         title: locationsModified[currentLocation].south === "" ? "South" :"South to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].south, locationsModified)].title,
-            //         active: locationsModified[currentLocation].south === "" ? false : true,
-            //         staminaCost: -1,
-            //         location: locationsModified[currentLocation].south,
-            //         func: "",
-            //     });
-            //     // We only show buttons for up and down if those direction exist
-            //     // UP
-            //     if (locationsModified[currentLocation].up != "") {
-            //         contextualActions.push({
-            //             keyword: "up",
-            //             title: "Up to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].up, locationsModified)].title,
-            //             active: true,
-            //             staminaCost: -1,
-            //             location: locationsModified[currentLocation].up,
-            //             func: ""
-            //         });
-            //     }
-            //     // Down
-            //     if (locationsModified[currentLocation].down != "") {
-            //         contextualActions.push({
-            //             keyword: "down",
-            //             title: "Down to " + locationsModified[getElementFromKeyword(locationsModified[currentLocation].down, locationsModified)].title,
-            //             active: true,
-            //             staminaCost: -1,
-            //             location: locationsModified[currentLocation].down,
-            //             func: ""
-            //         });
-            //     }
-            // }
+            }            
         }
         
         items = getLocationFromCurrentArea(currentLocation).items;
@@ -696,9 +632,9 @@ function updateButtons()  {
         if (inventoryOpen) {
             buttonContext = 2;
         }
-        // TODO IMPLEMENT CHECK FOR IF MONSTER BUTTON IS ACTIVE
+        // Rethink have monster specific inventory actions, these should be present in the main actions menu somehow
         // if (inventoryOpen) {
-        //     buttonContext = 3;
+        // 
         // }
         if (!inventoryOpen && upgradeMenuOpen)
             buttonContext = 5;
@@ -706,85 +642,7 @@ function updateButtons()  {
         // Create a button for each item contained in our array
         items.forEach((element,index) => {
             
-            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
-            
-            // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
-            if (item.blocking != null && item.blocking != "") {
-
-                //directionBlocked(item.blocking);
-
-                ///////////////// TODO TO REMOVE
-                // Depending on the blocking direction provided, we make that direction inactive, assuming it exists in this location
-                // switch (item.blocking) {
-
-                //     // North
-                //     case "north":
-                //         if (activeDirections.indexOf(0) != -1) {            // Check that the provided direction was already activated earlier
-                //             contextualActions.forEach((element) => {           // Find the right context action
-                //                 if (element.keyword === "north") {
-                //                     element.title += " [Blocked]";
-                //                     element.active = false;
-                //                 }
-                //             });
-                //         }
-                //         break;
-                //     // West
-                //     case "west":
-                //         if (activeDirections.indexOf(1) != -1) {
-                //             contextualActions.forEach((element) => {
-                //                 if (element.keyword === "west") {
-                //                     element.title += " [Blocked]";
-                //                     element.active = false;
-                //                 }
-                //             });
-                //         }
-                //         break;
-                //     // East
-                //     case "east":
-                //         if (activeDirections.indexOf(2) != -1) {
-                //             contextualActions.forEach((element) => {
-                //                 if (element.keyword === "east") {
-                //                     element.title += " [Blocked]";
-                //                     element.active = false;
-                //                 }
-                //             });
-                //         }
-                //         break;
-                //     // South
-                //     case "south":
-                //         if (activeDirections.indexOf(3) != -1) {
-                //             contextualActions.forEach((element) => {
-                //                 if (element.keyword === "south") {
-                //                     element.title += " [Blocked]";
-                //                     element.active = false;
-                //                 }
-                //             });
-                //         }
-                //         break;
-                //     // Up
-                //     case "up":
-                //         if (activeDirections.indexOf(4) != -1) {
-                //             contextualActions.forEach((element) => {
-                //                 if (element.keyword === "up") {
-                //                     element.title += " [Blocked]";
-                //                     element.active = false;
-                //                 }
-                //             });
-                //         }
-                //         break;
-                //     // Down
-                //     case "down":
-                //         if (activeDirections.indexOf(5) != -1) {
-                //             contextualActions.forEach((element) => {
-                //                 if (element.keyword === "down") {
-                //                     element.title += " [Blocked]";
-                //                     element.active = false;
-                //                 }
-                //             });
-                //         }
-                //         break;        
-                // }
-            }
+            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];                        
 
             let itemCostActive = false;            
             let descriptionTextActive = false;
@@ -1199,9 +1057,8 @@ function updateButtons()  {
                     if (buttonActive) {
                         
                         newButton.button.classList = "nav-button action-button can-hover";
-
-                        // TODO There shouldn't be location buttons once the map is complete
-                        // If this is a loction action                        
+                        
+                        // If this is a loction action
                         if (action.location != null && action.location != "") {
 
                             newButton.button.onclick = function() { 
