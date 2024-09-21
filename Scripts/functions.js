@@ -2011,9 +2011,7 @@ function respawn() {
         currentStamina = maxStamina;
 
         // Monsters all heal when you rest
-        monsters.forEach((element) => {
-            element.hpCurrent = element.hpMax;
-        });
+        healAllMonsters();
 
         updateStats();        
         displayLocation(respawnLocation.area, respawnLocation.location); 
@@ -2205,9 +2203,7 @@ function rest() {
     addUpdateText("You kneel for a moment and say a prayer to the Quiet. You feel your soul anchored to this place.\n\nYou lay down on your bedroll and before you know it sleep takes you.");
 
     // Monsters all heal when you rest
-    monsters.forEach((element) => {
-      element.hpCurrent = element.hpMax;
-    });
+    healAllMonsters();
 
     respawnLocation = {
       area: currentArea,
@@ -2409,6 +2405,20 @@ function toggleEquipped(keyword) {
     }
     else
         console.error("toggleEquipped() - Inventory doesn't contain [" + keyword + "]");
+}
+
+function healAllMonsters() {
+
+    for (const area of areas) {
+        for (const location of area.locations) {            
+            // Check this location has monsters listed
+            if (location.monsters != null) {
+                for (const monster of location.monsters) {            
+                    monster.hpCurrent = monster.hpMax;
+                }                
+            }
+        }
+    }
 }
 
 // #endregion

@@ -12,7 +12,7 @@ areasRef = [
                 seen: false,
                 items: ["green_herb_pickup"],
                 monsters: [],
-                npcs: [],
+                npcs: ["shrine"],
                 north: [1,5],
                 west: [2,4],
                 east: null,
