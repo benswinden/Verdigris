@@ -646,8 +646,8 @@ function updateButtons(skipAnimation)  {
                         else if (item.itemType != undefined && item.itemType === "pickupCorpse")
                             // Check if _currentContext === currentContext, otherwise we can be killed in the same turn we pick up the corpse, then this function will be removing the new corpse
                             newButton.secondaryButton.onclick = function() {  getCorpse(item.quantity, "You search the remains of your lifeless body and recover what you can."); playClick(); };
-                        else if (item.itemType != undefined && item.itemType === "pickupHeal")
-                            newButton.secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromLocation(item.keyword, _currentLocation); playClick(); };
+                        // else if (item.itemType != undefined && item.itemType === "pickupHeal")
+                        //     newButton.secondaryButton.onclick = function() {  addHealth(item.quantity, "You eat the health item."); removeItemFromLocation(item.keyword, _currentLocation); playClick(); };
                         else if (item.itemType != undefined && item.itemType === "pickupGreenHerb")
                             newButton.secondaryButton.onclick = function() {  addGreenHerb(item.quantity, "You pick the young Green Herbs and put them in your pouch."); removeItemFromLocation(item.keyword, _currentLocation); playClick(); };                
                         else
@@ -1960,7 +1960,7 @@ function playerDeath() {
     }
     
     // Check if a player corpse exists already, if so destroy it
-    if (corpseLocation != null && corpseLocation.location.items != null && corpseLocation.location.items != "" && corpseLocation.location.items.includes("corpse")) {
+    if (corpseLocation != null && corpseLocation.items != null && corpseLocation.items != "" && corpseLocation.items.includes("corpse")) {
 
         removeItemFromLocation("corpse", corpseLocation);
     }
@@ -1973,12 +1973,9 @@ function playerDeath() {
     gold = 0;
     updateStats();
 
-    corpseLocation = {
-        area: currentArea,
-        location: currentLocation
-    };
+    corpseLocation = currentLocation;    
         
-    corpseLocation.location.items.push("corpse");
+    corpseLocation.items.push("corpse");
 
     mapGridContainer.style.display = "none";
     narrationText.style.display = "none";        
@@ -2227,46 +2224,49 @@ function advanceDialogue(npcName) {
 
 function addToInventory(keyword) {
     
-    if (keyword === "") {
+    // Set a very small timeout in order to make sure this function waits until whatever was happening when it was called happens first
+    setTimeout(function() {
 
-        if (showDebugLog) console.log("addToInventory() - keyword is empty");
-        return;
-    }
+        if (keyword === "") {
 
-    let item = items[getIndexFromKeyword(keyword, objectType.item)];
-    if (item === undefined) {
-        console.error("addToInventory() - keyword:" + keyword + " not found in items array");
-        return;
-    }
-
-    inventory.push(keyword);
-    
-    let actions = [];
-    let items = [];
-
-    // Depending on the contextType, we will splice this item out of a different context
-    if (!npcActive) {        
-        items = currentLocation.items;
-    }    
-    else if (npcActive) {        
-        items = npcs[currentNPC].items;
-    }
-    
-    // Find and remove the item from the item list that it was contained in
-    let itemIndex = -1;
-    items.forEach((element, index) => {
-
-        if (element === keyword) {
-            itemIndex = index;
+            if (showDebugLog) console.log("addToInventory() - keyword is empty");
+            return;
         }
-    });
-    if (itemIndex != -1) items.splice(itemIndex, 1);
 
-    updateButtons(true);
+        let item = items[getIndexFromKeyword(keyword, objectType.item)];
+        if (item === undefined) {
+            console.error("addToInventory() - keyword:" + keyword + " not found in items array");
+            return;
+        }
 
-    save();
-    addUpdateText("The " + item.shortTitle + " has been added to your inventory.");
-    spendStamina(1);
+        inventory.push(keyword);
+                
+        let _items = [];
+
+        // Depending on the contextType, we will splice this item out of a different context
+        if (!npcActive) {        
+            _items = currentLocation.items;
+        }    
+        else if (npcActive) {        
+            _items = npcs[currentNPC].items;
+        }
+        
+        // Find and remove the item from the item list that it was contained in
+        let itemIndex = -1;
+        _items.forEach((element, index) => {
+
+            if (element === keyword) {
+                itemIndex = index;
+            }
+        });
+        if (itemIndex != -1) _items.splice(itemIndex, 1);
+
+        updateButtons(true);
+
+        save();
+        addUpdateText("The " + item.shortTitle + " has been added to your inventory.");
+        spendStamina(1);
+    }, 1);
 }
 
 function buy(keyword, cost) {
@@ -2319,64 +2319,84 @@ function upgrade(keyword, cost, oreCost, leatherCost) {
 }
 
 function addGold(amount, updateString) {
-    
-    gold += amount;
-    if (updateString != "") 
-        addUpdateText(updateString + " ( " + amount + " gold )");    
 
-    updateStats();
-    save();
-    spendStamina(1);
+    // Set a very small timeout in order to make sure this function waits until whatever was happening when it was called happens first
+    setTimeout(function() {
+
+        gold += amount;
+        if (updateString != "") 
+            addUpdateText(updateString + " ( " + amount + " gold )");    
+
+        updateStats();
+        save();
+        spendStamina(1);
+    }, 1);
 }
 
 function getCorpse(amount, updateString) {
     
-    gold += amount;
-    if (updateString != "") 
-        addUpdateText(updateString + " ( " + amount + " gold )");    
+    // Set a very small timeout in order to make sure this function waits until whatever was happening when it was called happens first
+    setTimeout(function() {
 
-    removeItemFromLocation("corpse", currentLocation);
-    corpseLocation = null;
+        gold += amount;
+        if (updateString != "") 
+            addUpdateText(updateString + " ( " + amount + " gold )");    
 
-    updateStats();
-    save();
-    spendStamina(1);
+        removeItemFromLocation("corpse", currentLocation);
+        corpseLocation = null;
+
+        updateStats();
+        save();
+        spendStamina(1);
+    }, 1);
 }
 
 function addInsight(amount, updateString) {
 
-    insight += amount;
-    if (updateString != "") 
-        addUpdateText(updateString + " ( " + amount + " insight )");    
+    // Set a very small timeout in order to make sure this function waits until whatever was happening when it was called happens first
+    setTimeout(function() {
 
-    updateStats();
-    save();
-    spendStamina(1);
+        insight += amount;
+        if (updateString != "") 
+            addUpdateText(updateString + " ( " + amount + " insight )");    
+
+        updateStats();
+        save();
+        spendStamina(1);
+    }, 1);
 }
 
 function addHealth(amount, updateString) {
 
-    hpCurrent += amount;
-    if (hpCurrent > hpMax)
-        hpCurrent = hpMax;
-    if (updateString != "") 
-        addUpdateText(updateString + " ( " + amount + " health )");    
+    // Set a very small timeout in order to make sure this function waits until whatever was happening when it was called happens first
+    setTimeout(function() {
+            
+        hpCurrent += amount;
+        if (hpCurrent > hpMax)
+            hpCurrent = hpMax;
+        if (updateString != "") 
+            addUpdateText(updateString + " ( " + amount + " health )");    
 
-    updateStats();
-    save();
-    spendStamina(1);
+        updateStats();
+        save();
+        spendStamina(1);
+    }, 1);
 }
 
 function addGreenHerb(amount, updateString) {
 
-    greenHerb += amount;
+    // Set a very small timeout in order to make sure this function waits until whatever was happening when it was called happens first
+    setTimeout(function() {
+            
+        greenHerb += amount;
 
-    if (updateString != "") 
-        addUpdateText(updateString + " ( " + amount + " Green Herb )");    
+        if (updateString != "") 
+            addUpdateText(updateString + " ( " + amount + " Green Herb )");    
 
-    updateStats();
-    save();
-    spendStamina(1);
+        updateStats();
+        save();
+        spendStamina(1);
+    }, 1);
 }
 
 function toggleEquipped(keyword) {
