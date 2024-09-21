@@ -405,7 +405,7 @@ function displayLocation(area, location) {
     mainTitleText.innerText = areasModified[currentArea].title;        
     mainText.innerText = areasModified[currentArea].description;             
 
-    updateButtons();
+    updateButtons(false);
 }
 
 function clearCreatedButtons() {
@@ -466,7 +466,7 @@ function createButton(objectKeyword, objectType) {
     return newButton;
 }
 
-function updateButtons()  {        
+function updateButtons(skipAnimation)  {        
     
     if (showDebugLog) console.log("updateButtons() - ");
     
@@ -722,7 +722,7 @@ function updateButtons()  {
                                 playClick();
                                 addUpdateText("You unlock the " + item.shortTitle);
                                 updateMap();
-                                updateButtons();
+                                updateButtons(false);
                             };
                         }
                         else {
@@ -741,7 +741,7 @@ function updateButtons()  {
                     if (item.itemType != undefined && item.itemType === "healGreenHerb") {
                         secondaryButtonDisplayed = true;
                         newButton.secondaryButtonText.innerText = "Eat";
-                        newButton.secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(); playClick(); };                        
+                        newButton.secondaryButton.onclick = function() { addHealth(10, "You feel slightly healthier."); greenHerb--; updateButtons(true); playClick(); };                        
                         inventorySection.appendChild(newButton.button);
                     }
                     else {
@@ -758,7 +758,7 @@ function updateButtons()  {
                                 newButton.secondaryButtonText.innerText = "Equip";
                         
                             secondaryButtonDisplayed = true;                    
-                            newButton.secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(); playClick(); };
+                            newButton.secondaryButton.onclick = function() { toggleEquipped(item.keyword); updateButtons(true); playClick(); };
                         }
                     }
                     break;
@@ -849,7 +849,7 @@ function updateButtons()  {
             }
 
             // The function for opening and collapsing the button            
-            newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); updateButtons();};           
+            newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); updateButtons(true);};           
             
             // Listen for the event.
             newButton.button.addEventListener(
@@ -935,7 +935,7 @@ function updateButtons()  {
                 newButton.buttonLevelIcon.innerText = monster.level;
                                 
                 // The function for opening and collapsing the button                
-                newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); updateButtons(); };                                                    
+                newButton.button.onclick = function() { newButton.button.dispatchEvent(new Event("toggle")); playClick(); updateButtons(true); };                                                    
 
                 newButton.button.addEventListener(
                     "toggle",
@@ -1070,7 +1070,7 @@ function updateButtons()  {
                         // Otherwise this button is a misc function action
                         else {
 
-                            newButton.button.onclick = function() {doAction(element.func, element.staminaCost, false); playClick();};
+                            newButton.button.onclick = function() {doAction(element.func, element.staminaCost, true); playClick();};
                         }
                     }                
                 }
@@ -1159,11 +1159,14 @@ function updateButtons()  {
         // Now we animate in the created action buttons
         createdActionButtons.forEach((element, index) => {                        
 
+            let timeOut = 0;
+            if (!skipAnimation) timeOut = 300 + (100 * (index));
+
             setTimeout(function() {
 
                 element.button.style.display = "flex";
                 playClick();
-            }, 300 + (100 * (index)));
+            }, timeOut);
         });
     }    
 }
@@ -1495,7 +1498,7 @@ function displayNPC(index) {
 
         mapGridContainer.style.display = "none";
 
-        updateButtons();
+        updateButtons(false);
 }
 
 function closeNPC() {
@@ -1520,7 +1523,7 @@ function displayNarration(narrationKeyword) {
     mapGridContainer.style.display = "none";
 
     narrationOpen = true;
-    updateButtons();
+    updateButtons(false);
 
     saleTitle.style.display = "none";
     narrationText.style.display = "none";        
@@ -1562,7 +1565,7 @@ function displayTitle() {
     mapGridContainer.style.display = "none";
 
     titleOpen = true;
-    updateButtons();
+    updateButtons(false);
 
     ///////// TODO Change to support regions
     // areasVisited += locationsModified[currentLocation].area;
@@ -1595,7 +1598,7 @@ function displayInventory() {
     mapGridContainer.style.display = "none";
 
     expandStats();    
-    updateButtons();
+    updateButtons(false);
 
     narrationText.style.display = "none";        
     mainTitleText.classList = "";
@@ -1639,7 +1642,7 @@ function displayUpgrade() {
     mapGridContainer.style.display = "none";
 
     upgradeMenuOpen = true;
-    updateButtons();
+    updateButtons(false);
     expandStats();
 
     narrationText.style.display = "none";        
@@ -1683,7 +1686,7 @@ function displayTrain() {
     mapGridContainer.style.display = "none";
 
     trainMenuOpen = true;
-    updateButtons();
+    updateButtons(false);
 }
 
 function train(trainType, cost) {
@@ -1793,7 +1796,7 @@ function removeItemFromLocation(itemKeyword, locationIndex) {
     save();
 
     if (locationIndex === currentLocation)
-        updateButtons();
+        updateButtons(true);
 }
 
 // #endregion
@@ -1801,7 +1804,7 @@ function removeItemFromLocation(itemKeyword, locationIndex) {
 // #region ACTIONS
 
 // Translate a string provided in through the context data into an action
-function doAction(actionString, staminaCost, resetText) {    
+async function doAction(actionString, staminaCost, resetText) {    
 
     if (resetText)
         resetUpdateText();
@@ -1823,9 +1826,11 @@ function doAction(actionString, staminaCost, resetText) {
     
     if (showDebugLog) console.log("doAction() - functionString: " + functionString);
 
+
+
     switch (functionString) {
         case "attack":            
-                attack();            
+            let result = await attack();            
             break;
         case "upgrade":
             displayUpgrade();
@@ -1901,13 +1906,17 @@ function doAction(actionString, staminaCost, resetText) {
             console.log("!!!");
             break;
     }
-
+    
     if (staminaCost != -1) {
         if (staminaCost > currentStamina)
             console.error("doAction() - staminaCost too high");
         else        
             spendStamina(staminaCost);
-    }
+    }        
+}
+
+function doActionComplete() {
+
 }
 
 function playerActionComplete() {
@@ -1931,7 +1940,7 @@ function playerActionComplete() {
     recoverMax(false);
     updateStats();
     save();        
-    updateButtons();    
+    updateButtons(true);    
 }
 
 function triggerEnemyAttack(monsterKeyword) {
@@ -2067,38 +2076,50 @@ function respawn() {
 
 function attack() {
 
-    if (currentLocation === -99) return;
+    return new Promise((resolve, reject) => {
 
-    if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo
-    
-    if (currentActiveButton === null) console.error("Attack() - but no active monster");
-    
-    let monster = monstersModified[getIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
-    
-    // Evasion chance
-    let evasionNumber = Math.floor(Math.random() * 101);
-    if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
+        if (currentLocation === -99) return;
 
-    if (evasionNumber <= monster.evasion) {
+        if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo
+        
+        if (currentActiveButton === null) console.error("Attack() - but no active monster");
+        
+        let monster = monstersModified[getIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
+        
+        // Evasion chance
+        let evasionNumber = Math.floor(Math.random() * 101);
+        if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
 
-        let updateString = "The " + monster.shortTitle + " evades your attack."
-        addUpdateText(updateString); 
-    }
-    else {            
-
-        // PLAYER ATTACK
-        monster.hpCurrent -= power;
-        updateMonsterUI(currentActiveButton);
+        if (evasionNumber <= monster.evasion) {
             
-        let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
-        addUpdateText(updateString);  
+            setTimeout(() => {
+                let updateString = "The " + monster.shortTitle + " evades your attack."
+                addUpdateText(updateString);
 
-        // CHECK FOR MONSTER DEATH
-        if (monster.hpCurrent <= 0) {
-
-            monsterDeath(currentActiveButton);
+                resolve("Complete");
+            }, 500);
         }
-    }    
+        else {            
+
+            // PLAYER ATTACK
+            monster.hpCurrent -= power;
+            updateMonsterUI(currentActiveButton);
+                
+            let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
+            addUpdateText(updateString);  
+
+            setTimeout(() => {    
+
+                // CHECK FOR MONSTER DEATH
+                if (monster.hpCurrent <= 0) {
+
+                    monsterDeath(currentActiveButton);
+                }
+                
+                resolve("Complete");
+            }, 500);
+        }    
+    });
 }
 
 function block(staminaCost) {
@@ -2203,7 +2224,7 @@ function monsterDeath(monsterButton) {
 
     currentActiveButton = null;
     updateMap();
-    updateButtons();
+    updateButtons(true);
     addUpdateText(storedMonsterString);
 }
 
@@ -2297,7 +2318,7 @@ function addToInventory(keyword) {
     });
     if (itemIndex != -1) items.splice(itemIndex, 1);
 
-    updateButtons();
+    updateButtons(true);
 
     save();
     addUpdateText("The " + item.shortTitle + " has been added to your inventory.");
@@ -2347,7 +2368,7 @@ function upgrade(keyword, cost, oreCost, leatherCost) {
             item.defence += 5;
 
         updateStats();
-        updateButtons();
+        updateButtons(true);
     }
     else
         console.error("upgrade() - cost greater than gold");
@@ -2790,9 +2811,7 @@ function locationsHavePath(locationA, locationB) {
                 }
             }
         });
-    }
-    console.log(_items);
-    console.log(locationABlockedDirections);
+    }    
 
     _items = locationB.items;
     if (_items != undefined && _items.length > 0 && _items != "") {
