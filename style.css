@@ -324,6 +324,12 @@ main {
         background-image: url("Assets/mapPlayerIcon.svg");
         border: 2px solid #8F3715;
     }
+    .main-square.door {                
+        border-style: dashed;
+    }
+    .main-square.door:hover {                
+        border-style: dashed;
+    }
 
     
     .vertical-square {
