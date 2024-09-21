@@ -1,4 +1,4 @@
-narrations = [
+narrationsRef = [
     {
         keyword: "beginning",
         seen: false,

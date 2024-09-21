@@ -1,4 +1,4 @@
-areas = [    
+areasRef = [    
     {
         keyword: "bramble_path",
         title: "The Bramble Path",
@@ -24,7 +24,7 @@ areas = [
                 visited: false,
                 seen: false,
                 items: ["crimson_gate"],
-                monsters: [],
+                monsters: ["goblin_01"],
                 npcs: [],
                 north: [1,4],
                 west: [2,3],

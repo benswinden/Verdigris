@@ -136,72 +136,21 @@ const objectType = {
 
 // #region Containers
 
-// A template for the format of an action object
-const protoAction = {
-    keyword: "",
-    title: "",
-    active: true,
-    staminaCost: -1,
-    location: "",
-    func: ""
-}
+// These are our data arrays that contain the data for the game
+let narrationsRef = [];
+let monstersRef = [];
+let areasRef = [];
+let npcsRef = [];
+let itemsRef = [];
+let actionsRef = [];
 
-let narrations = [
-    {
-        keyword: "",
-        seen: false,
-        text:[]
-    }
-]
-
-let monsters = [];
-
+// These are containers, mostly copies of our masters which will be modified at runtime
 let areas = [];
+let monsters = []
+let npcs = []
+let items = []
+let narrations = []
 
-let locations = [    
-    {
-        keyword: "fl_01",
-        area: "foglands",
-        title: "fl_01",
-        description: "",
-        narration: "",        
-        update: "",        
-        items: [],
-        monsters: [],
-        npcs: [],
-        north: "",
-        west: "",
-        east: "",
-        south: "",
-        up: "",
-        down: ""         
-    }
-]
-
-let npcs = [
-    {
-        keyword: "",
-        title: "",
-        shortTitle: "",
-        description: "",
-        update: "",
-        dialogueAvailable: true,
-        currentDialogue: 0,
-        items: [],
-        actions: [
-            {
-                type: 0,
-                title: "",
-                keyword: "",
-                location: "",
-                func: ""
-            }            
-        ]
-    }
-];
-// ITEM TYPES - WEAPON, ARMOR, TALISMAN
-let items = [];
-let actions = [];
 
 var config = 
 {    
@@ -213,35 +162,26 @@ var config =
 const promise1 = fetch('Data/items.csv')
   .then((response) => response.text())
   .then((data) => { 
-    items = Papa.parse(data, config).data;
+    itemsRef = Papa.parse(data, config).data;
     // Filter out empty rows
-    items = items.filter(({ keyword }) => keyword != null);
+    itemsRef = itemsRef.filter(({ keyword }) => keyword != null);
 });
 
 const promise2 = fetch('Data/monsters.csv')
   .then((response) => response.text())
   .then((data) => { 
-    monsters = Papa.parse(data, config).data;
+    monstersRef = Papa.parse(data, config).data;
     // Filter out empty rows
-    monsters = monsters.filter(({ keyword }) => keyword != null);
+    monstersRef = monstersRef.filter(({ keyword }) => keyword != null);
 });
 
 const promise3 = fetch('Data/actions.csv')
   .then((response) => response.text())
   .then((data) => { 
-    actions = Papa.parse(data, config).data;
+    actionsRef = Papa.parse(data, config).data;
     // Filter out empty rows
-    actions = actions.filter(({ keyword }) => keyword != null);
+    actionsRef = actionsRef.filter(({ keyword }) => keyword != null);
 });
-
-
-// Store these containers at runtime because they will be modified as the player plays
-let areasModified = [];
-let monstersModified = []
-let npcsModified = []
-let itemsModified = []
-let narrationsModified = []
-
 
 // #endregion
 
@@ -387,12 +327,12 @@ function displayLocation(area, location) {
         
         
         // Check whether this location has a narration keyword
-        if (areasModified[currentArea].narration != undefined && areasModified[currentArea].narration != "") {
+        if (areas[currentArea].narration != undefined && areas[currentArea].narration != "") {
             
             // Check if the matching narration to this keyword has already been seen                
-            if (narrationsModified[getElementFromKeyword(areasModified[currentArea].narration, narrations)] != undefined && !narrationsModified[getElementFromKeyword(areasModified[currentArea].narration, narrations)].seen) {
+            if (narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)].seen) {
 
-                displayNarration(areasModified[currentArea].narration);
+                displayNarration(areas[currentArea].narration);
                 return;
             }
         }
@@ -401,9 +341,9 @@ function displayLocation(area, location) {
         save();
 
         // Check if there is narration text, then show it as this is the first time visiting
-        if (areasModified[currentArea].update != undefined && areasModified[currentArea].update != "") {
+        if (areas[currentArea].update != undefined && areas[currentArea].update != "") {
             narrationText.style.display = "block";
-            narrationText.innerText = areasModified[currentArea].update;  // Add the narration text so it appears before the main text for the locat                
+            narrationText.innerText = areas[currentArea].update;  // Add the narration text so it appears before the main text for the locat                
         }
     }
 
@@ -411,8 +351,8 @@ function displayLocation(area, location) {
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";
     
-    mainTitleText.innerText = areasModified[currentArea].title;        
-    mainText.innerText = areasModified[currentArea].description;             
+    mainTitleText.innerText = areas[currentArea].title;        
+    mainText.innerText = areas[currentArea].description;             
 
     updateButtons(false);
 }
@@ -497,10 +437,10 @@ function updateButtons(skipAnimation)  {
 
     clearCreatedButtons();
 
-    let contextualActions = [];         // Will be dynamically populated with actions depending on the game state
-    let items = [];
-    let monsters = [];
-    let npcs = [];
+    let _contextualActions = [];         // Will be dynamically populated with actions depending on the game state
+    let _items = [];
+    let _monsters = [];
+    let _npcs = [];
 
     let lastButtonConfigured = null;          // We will store each button we configure as this, so that when we reach the right point, we can add special formatting to it
     
@@ -509,14 +449,14 @@ function updateButtons(skipAnimation)  {
         
         inventory.forEach((element,index) => {
             
-            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
+            let item = items[getIndexFromKeyword(element, objectType.item)];
             if (item.canEquip && item.equipped) {
                 
                 if (item.actions.length > 0) {
                     
                     item.actions.forEach((element, index) => {
 
-                        contextualActions.push(actions[getElementFromKeyword(element, actions)]);
+                        _contextualActions.push(actionsRef[getElementFromKeyword(element, actionsRef)]);
                     });            
                 }
             }
@@ -524,7 +464,7 @@ function updateButtons(skipAnimation)  {
     }
     else if (narrationOpen) {
 
-        contextualActions.push({
+        _contextualActions.push({
             keyword: "next",
             title: "Next",
             active: true,
@@ -535,7 +475,7 @@ function updateButtons(skipAnimation)  {
     }
     else if (titleOpen) {
 
-        contextualActions.push({
+        _contextualActions.push({
             keyword: "continue",
             title: "Continue",
             active: true,
@@ -546,11 +486,11 @@ function updateButtons(skipAnimation)  {
     }
     else if (npcActive) {
        
-        contextualActions = JSON.parse(JSON.stringify(npcsModified[currentNPC].actions));
+        _contextualActions = JSON.parse(JSON.stringify(npcs[currentNPC].actions));
 
         // Add the default actions for all NPCs
-        if (npcsModified[currentNPC].dialogueAvailable != null) {
-            contextualActions.push({
+        if (npcs[currentNPC].dialogueAvailable != null) {
+            _contextualActions.push({
                 keyword: "talk",
                 title: "Talk",
                 active: true,
@@ -559,7 +499,7 @@ function updateButtons(skipAnimation)  {
                 func: "talk"
             });
         }
-        contextualActions.push({
+        _contextualActions.push({
             keyword: "leave",
             title: "Leave",
             active: true,
@@ -568,7 +508,7 @@ function updateButtons(skipAnimation)  {
             func: "closeNPC"
         });
 
-        items = npcsModified[currentNPC].items;
+        _items = npcs[currentNPC].items;
     }
     
     // If theres nothing special going on, we show the default actions for a location which are the exits
@@ -581,7 +521,7 @@ function updateButtons(skipAnimation)  {
             // Check if there are monsters present in this location, if so we don't display exits, only the option to run
             if (currentLocation.monsters != null && currentLocation.monsters != "" && currentLocation.monsters.length > 0) {
                 
-                contextualActions.push({
+                _contextualActions.push({
                     keyword: "run",                                    
                     title: "Run away",                
                     active: true,
@@ -592,17 +532,17 @@ function updateButtons(skipAnimation)  {
             }            
         }
         
-        items = currentLocation.items;
-        monsters = currentLocation.monsters;
-        npcs = currentLocation.npcs;                
+        _items = currentLocation.items;
+        _monsters = currentLocation.monsters;
+        _npcs = currentLocation.npcs;                
     }         
 
     // UPGRADE MENU
     // If we are currently opening the upgrade menu, we need to cycle through everything in our inventory and get only upgradable items
     if (!narrationOpen && !inventoryOpen && !trainMenuOpen && upgradeMenuOpen) {
 
-        contextualActions = [];
-        contextualActions.push({            
+        _contextualActions = [];
+        _contextualActions.push({            
             keyword: "back",
             title: "Back",
             active: true,
@@ -611,11 +551,11 @@ function updateButtons(skipAnimation)  {
             func: "exitUpgrade"
             });
 
-        items = [];
+        _items = [];
         inventory.forEach((element, index) => {
 
-            if (itemsModified[getIndexFromKeyword(element, objectType.item)].canUpgrade)
-                items.push(element);
+            if (items[getIndexFromKeyword(element, objectType.item)].canUpgrade)
+                _items.push(element);
         });
     }
 
@@ -624,12 +564,12 @@ function updateButtons(skipAnimation)  {
     if (inventoryOpen) {
         
         // We make a deep copy of our inventory to inject these resource items into only while we are viewing the inventory
-        items = JSON.parse(JSON.stringify(inventory));
-        if (ore > 0) { itemsModified[getIndexFromKeyword("ore", objectType.item)].quantity = ore; items.splice(0,0, "ore"); }
-        if (leather > 0) { itemsModified[getIndexFromKeyword("leather", objectType.item)].quantity = ore; items.splice(0,0, "leather"); }
-        if (greenHerb > 0) { itemsModified[getIndexFromKeyword("green_herb", objectType.item)].quantity = greenHerb; items.splice(0,0, "green_herb"); }            
+        _items = JSON.parse(JSON.stringify(inventory));
+        if (ore > 0) { items[getIndexFromKeyword("ore", objectType.item)].quantity = ore; _items.splice(0,0, "ore"); }
+        if (leather > 0) { items[getIndexFromKeyword("leather", objectType.item)].quantity = ore; _items.splice(0,0, "leather"); }
+        if (greenHerb > 0) { items[getIndexFromKeyword("green_herb", objectType.item)].quantity = greenHerb; _items.splice(0,0, "green_herb"); }            
     }    
-    if (items != undefined && items.length > 0 && items != "") {
+    if (_items != undefined && _items.length > 0 && _items != "") {
                 
         // Functionality is defined by the context this button is in:
         // 1: Location    2: Inventory Normal     3: Inventory + Monster      4: Vendor Buy        5: Vendor Upgrade
@@ -649,9 +589,9 @@ function updateButtons(skipAnimation)  {
             buttonContext = 5;
 
         // Create a button for each item contained in our array
-        items.forEach((element,index) => {
+        _items.forEach((element,index) => {
             
-            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];                        
+            let item = items[getIndexFromKeyword(element, objectType.item)];                        
 
             let itemCostActive = false;            
             let descriptionTextActive = false;
@@ -917,11 +857,11 @@ function updateButtons(skipAnimation)  {
         // Set up any new buttons, starting where we left off
         let nextButton = 0;
 
-        if (monsters != undefined && monsters.length > 0 && monsters != "") {
+        if (_monsters != undefined && _monsters.length > 0 && _monsters != "") {
             
-            monsters.forEach((element, index) => {
+            _monsters.forEach((element, index) => {
                 
-                const monster = monstersModified[getIndexFromKeyword(element, objectType.monster)];
+                const monster = monsters[getIndexFromKeyword(element, objectType.monster)];
                 let descriptionTextActive = false;
 
                 const newButton = createButton(monster.keyword, objectType.monster);
@@ -994,11 +934,11 @@ function updateButtons(skipAnimation)  {
 
         //  NPCS
         // Set up any new buttons, starting where we left off
-        if (npcs != undefined && npcs.length > 0 && npcs != "") {
+        if (_npcs != undefined && _npcs.length > 0 && _npcs != "") {
             
-            npcs.forEach((element, index) => {
+            _npcs.forEach((element, index) => {
 
-                const npc = npcsModified[getIndexFromKeyword(element, objectType.npc)];                
+                const npc = npcs[getIndexFromKeyword(element, objectType.npc)];                
 
                 const newButton = createButton(npc.keyword, objectType.npc);
                 createdButtons.push(newButton);
@@ -1019,12 +959,12 @@ function updateButtons(skipAnimation)  {
         // We will store action buttons as we create them so we can animate them appearing
         let createdActionButtons = [];
         
-        if (contextualActions.length > 0) {        
+        if (_contextualActions.length > 0) {        
 
             if (lastButtonConfigured != null)
                 lastButtonConfigured.classList += " spacer";         // Before we create the rest of the buttons, we add some spacing in the list to separate the two categories of buttons
 
-            contextualActions.forEach((element, index) => {
+            _contextualActions.forEach((element, index) => {
                 
                 let additionalButtonString = "";        // If any additional text needs to be appended to a button                                
                 let action = element;
@@ -1059,7 +999,7 @@ function updateButtons(skipAnimation)  {
                     // Check for talk actions as they have a specific parameter that could make it inactive
                     if (action.func === "talk") {
 
-                        if (!npcsModified[currentNPC].dialogueAvailable)
+                        if (!npcs[currentNPC].dialogueAvailable)
                             buttonActive = false;                        
                     }                    
     
@@ -1264,7 +1204,7 @@ function updateMap() {
     let monsterPresent = false;
     if (currentLocation.monsters != undefined) monsterPresent = currentLocation.monsters.length > 0;
 
-    if (areasModified[currentArea].locations.length > 0) {
+    if (areas[currentArea].locations.length > 0) {
 
         // Reset state of all squares in the grid
         for (let y = 0; y < mapGrid.length; y++) {
@@ -1283,7 +1223,7 @@ function updateMap() {
         }
 
         // Cycle through all locations in this area
-        areasModified[currentArea].locations.forEach((location, index) => {
+        areas[currentArea].locations.forEach((location, index) => {
 
             let isAdjacentToCurrent = false;
 
@@ -1497,18 +1437,18 @@ function displayNPC(index) {
         npcActive = true;
         currentNPC = index;        
 
-        mainTitleText.innerText = areasModified[currentArea].title;
+        mainTitleText.innerText = areas[currentArea].title;
         mainTitleText.classList = "secondary";        
         secondaryTitle.style.display = "flex";
         
         secondaryTitleIcon.classList = "npc";
         secondaryTitleIcon.innerText = "";
-        secondaryTitleText.innerText = npcsModified[index].title;
-        mainText.innerText = npcsModified[index].description;
+        secondaryTitleText.innerText = npcs[index].title;
+        mainText.innerText = npcs[index].description;
 
         // Some contexts have update text that should display when the player enters their context
-        if (npcsModified[index].update != undefined && npcsModified[index].update != "")
-            addUpdateText(npcsModified[index].update);
+        if (npcs[index].update != undefined && npcs[index].update != "")
+            addUpdateText(npcs[index].update);
 
         mapGridContainer.style.display = "none";
 
@@ -1545,11 +1485,11 @@ function displayNarration(narrationKeyword) {
     mainTitleText.innerText = "";
     secondaryTitle.style.display = "none";
     
-    if (narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length > currentNarrationIndex) {    
-        mainText.innerText = narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text[currentNarrationIndex];
+    if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex) {    
+        mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
     }
     else
-        console.error("displayNarrative - Narration index [" + currentNarrationIndex + "] is higher than text length [" + narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length + "]");
+        console.error("displayNarrative - Narration index [" + currentNarrationIndex + "] is higher than text length [" + narrations[getElementFromKeyword(currentNarration, narrations)].text.length + "]");
 }
 
 function continueNarration() {
@@ -1558,10 +1498,10 @@ function continueNarration() {
 
     currentNarrationIndex++;
 
-    if (narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text.length > currentNarrationIndex)
-        mainText.innerText = narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].text[currentNarrationIndex];
+    if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex)
+        mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
     else {
-        narrationsModified[getElementFromKeyword(currentNarration, narrationsModified)].seen = true;
+        narrations[getElementFromKeyword(currentNarration, narrations)].seen = true;
         closeNarration();
     }
 }
@@ -1719,7 +1659,7 @@ function train(trainType, cost) {
             insight -= cost;
 
             let curseMarkIndex = getIndexFromKeyword("curse_mark", objectType.item);
-            itemsModified[curseMarkIndex].power += 5;
+            items[curseMarkIndex].power += 5;
             break;        
     }
 
@@ -1754,10 +1694,10 @@ function calculateStats() {
         
         let index = getIndexFromKeyword(element, objectType.item);
 
-        if (itemsModified[index].equipped) {
-            power += itemsModified[index].power;
-            maxStamina += itemsModified[index].stamina;
-            defence += itemsModified[index].defence;
+        if (items[index].equipped) {
+            power += items[index].power;
+            maxStamina += items[index].stamina;
+            defence += items[index].defence;
         }
     });
 }
@@ -1778,7 +1718,7 @@ function collapseStats() {
 
 function updateMonsterUI(monsterButton) {
     
-    let monster = monstersModified[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
+    let monster = monsters[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
 
     monsterButton.monsterHpText.innerText = monster.hpCurrent + "/" + monster.hpMax;
     let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
@@ -1801,15 +1741,15 @@ function addUpdateText(text) {
     updateText.innerText += text;
 }
 
-function removeItemFromLocation(itemKeyword, locationIndex) {    
+function removeItemFromLocation(itemKeyword, location) {    
 
     console.log("remove item: " + itemKeyword);
     
-    getLocationFromCurrentArea(locationIndex).items = getLocationFromCurrentArea(locationIndex).items.filter(item => item !== itemKeyword);    
+    location.items = location.items.filter(item => item !== itemKeyword);    
     
     save();
 
-    if (locationIndex === currentLocation)
+    if (location === currentLocation)
         updateButtons(true);
 }
 
@@ -1960,7 +1900,7 @@ function playerActionComplete() {
 function triggerEnemyAttack(monsterKeyword) {
 
     let monstersActionString = "";  
-    let monster = monstersModified[getElementFromKeyword(monsterKeyword, monstersModified)];
+    let monster = monsters[getElementFromKeyword(monsterKeyword, monsters)];
 
     // Evasion chance
     let evasionNumber = Math.floor(Math.random() * 101);                
@@ -2034,7 +1974,7 @@ function playerDeath() {
 
     let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
     // Set the quantity of the corpse item to the amount of gold we are holding
-    itemsModified[getIndexFromKeyword("corpse", objectType.item)].quantity = gold;
+    items[getIndexFromKeyword("corpse", objectType.item)].quantity = gold;
     // Remove all our gold
     gold = 0;
     updateStats();
@@ -2073,7 +2013,7 @@ function respawn() {
         currentStamina = maxStamina;
 
         // Monsters all heal when you rest
-        monstersModified.forEach((element) => {
+        monsters.forEach((element) => {
             element.hpCurrent = element.hpMax;
         });
 
@@ -2098,7 +2038,7 @@ function attack() {
         
         if (currentActiveButton === null) console.error("Attack() - but no active monster");
         
-        let monster = monstersModified[getIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
+        let monster = monsters[getIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
         
         // Evasion chance
         let evasionNumber = Math.floor(Math.random() * 101);
@@ -2140,7 +2080,7 @@ function block(staminaCost) {
 
     if (showDebugLog) console.log("block() - Defence: " + defence + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
                 
-    let monster = monstersModified[currentLocation];
+    let monster = monsters[currentLocation];
     
     console.log("BLOCK NOT IMPLEMENTED");
     
@@ -2220,7 +2160,7 @@ function runAway() {
 
 function monsterDeath(monsterButton) {
     
-    let monster = monstersModified[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
+    let monster = monsters[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
     
     // Remove this monster from the current location    
     currentLocation.monsters.splice(currentLocation.monsters.indexOf(monster.keyword),1);
@@ -2251,10 +2191,10 @@ function talk() {
 
     if (npcActive) {
 
-        let dialogueString = npcsModified[currentNPC].keyword + "_" + npcsModified[currentNPC].currentDialogue;
+        let dialogueString = npcs[currentNPC].keyword + "_" + npcs[currentNPC].currentDialogue;
         
         displayNarration(dialogueString);
-        npcsModified[currentNPC].dialogueAvailable = false;
+        npcs[currentNPC].dialogueAvailable = false;
     }
     else
         console.error("talk - Somehow this was called but the current context is not an NPC")
@@ -2268,7 +2208,7 @@ function rest() {
     addUpdateText("You kneel for a moment and say a prayer to the Quiet. You feel your soul anchored to this place.\n\nYou lay down on your bedroll and before you know it sleep takes you.");
 
     // Monsters all heal when you rest
-    monstersModified.forEach((element) => {
+    monsters.forEach((element) => {
       element.hpCurrent = element.hpMax;
     });
 
@@ -2283,7 +2223,7 @@ function rest() {
 
 function advanceDialogue(npcName) {
     
-    npcsModified.forEach((element, index) => {
+    npcs.forEach((element, index) => {
 
         if (element.keyword == npcName) {
             element.currentDialogue++;
@@ -2303,7 +2243,7 @@ function addToInventory(keyword) {
         return;
     }
 
-    let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
+    let item = items[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("addToInventory() - keyword:" + keyword + " not found in items array");
         return;
@@ -2319,7 +2259,7 @@ function addToInventory(keyword) {
         items = currentLocation.items;
     }    
     else if (npcActive) {        
-        items = npcsModified[currentNPC].items;
+        items = npcs[currentNPC].items;
     }
     
     // Find and remove the item from the item list that it was contained in
@@ -2341,7 +2281,7 @@ function addToInventory(keyword) {
 
 function buy(keyword, cost) {
 
-    let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
+    let item = items[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("buy() - keyword:" + keyword + " not found in items array");
         return;
@@ -2360,7 +2300,7 @@ function buy(keyword, cost) {
 
 function upgrade(keyword, cost, oreCost, leatherCost) {
 
-    let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
+    let item = items[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("upgrade() - keyword:" + keyword + " not found in items array");
         return;
@@ -2454,7 +2394,7 @@ function toggleEquipped(keyword) {
     // Double check to make sure this is in our inventory
     if (inventoryIndexOf(keyword) != -1) {
 
-        let item = itemsModified[getIndexFromKeyword(keyword, objectType.item)];
+        let item = items[getIndexFromKeyword(keyword, objectType.item)];
         
         if (item.equipped) {
 
@@ -2504,11 +2444,11 @@ function save() {
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
     localStorage.setItem('corpseLocation', JSON.stringify(corpseLocation));
 
-    localStorage.setItem('areasModified', JSON.stringify(areasModified));    
-    localStorage.setItem('monstersModified', JSON.stringify(monstersModified));
-    localStorage.setItem('npcsModified', JSON.stringify(npcsModified));
-    localStorage.setItem('itemsModified', JSON.stringify(itemsModified));
-    localStorage.setItem('narrationsModified', JSON.stringify(narrationsModified));    
+    localStorage.setItem('areas', JSON.stringify(areas));    
+    localStorage.setItem('monsters', JSON.stringify(monsters));
+    localStorage.setItem('npcs', JSON.stringify(npcs));
+    localStorage.setItem('items', JSON.stringify(items));
+    localStorage.setItem('narrations', JSON.stringify(narrations));    
   }
   
   function load() {
@@ -2537,19 +2477,19 @@ function save() {
 
     if (!resetLocations) { 
         
-        areasModified = JSON.parse(localStorage.getItem('areasModified'));                    
-        monstersModified = JSON.parse(localStorage.getItem('monstersModified'));
-        npcsModified = JSON.parse(localStorage.getItem('npcsModified'));
-        itemsModified = JSON.parse(localStorage.getItem('itemsModified'));
-        narrationsModified = JSON.parse(localStorage.getItem('narrationsModified'));
+        areas = JSON.parse(localStorage.getItem('areas'));                    
+        monsters = JSON.parse(localStorage.getItem('monsters'));
+        npcs = JSON.parse(localStorage.getItem('npcs'));
+        items = JSON.parse(localStorage.getItem('items'));
+        narrations = JSON.parse(localStorage.getItem('narrations'));
     }
     else {
-        areasModified = JSON.parse(JSON.stringify(areas));        
+        areas = JSON.parse(JSON.stringify(areasRef));        
         areasVisited = [];
-        monstersModified = JSON.parse(JSON.stringify(monsters));                
-        npcsModified = JSON.parse(JSON.stringify(npcs));
-        itemsModified = JSON.parse(JSON.stringify(items));
-        narrationsModified = JSON.parse(JSON.stringify(narrations));
+        monsters = JSON.parse(JSON.stringify(monstersRef));                
+        npcs = JSON.parse(JSON.stringify(npcsRef));
+        items = JSON.parse(JSON.stringify(itemsRef));
+        narrations = JSON.parse(JSON.stringify(narrationsRef));
     }
   }
 
@@ -2574,16 +2514,16 @@ function save() {
     ar = [];    
     switch (objType) {
         case objectType.area://Location        
-            ar = areasModified;
+            ar = areas;
             break;
         case objectType.monster://Monster
-            ar = monstersModified;            
+            ar = monsters;            
             break;
         case objectType.item:
-            ar = itemsModified;            
+            ar = items;            
             break;
         case objectType.npc:
-            ar = npcsModified;            
+            ar = npcs;            
             break;
     }
     
@@ -2621,7 +2561,7 @@ function save() {
     
     let loc = null;
     
-    areasModified[currentArea].locations.forEach((element, i) => {                
+    areas[currentArea].locations.forEach((element, i) => {                
 
         if (compareArrays(element.coordinates, coordinates)) {
             
@@ -2642,7 +2582,7 @@ function save() {
 
     let loc = null;
     
-    areasModified[_area].locations.forEach((element, i) => {                
+    areas[_area].locations.forEach((element, i) => {                
 
         if (compareArrays(element.coordinates, coordinates)) {
             
@@ -2825,7 +2765,7 @@ function locationsHavePath(locationA, locationB) {
     
         _items.forEach((element,index) => {
             
-            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
+            let item = items[getIndexFromKeyword(element, objectType.item)];
             
             // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
             if (item.blocking != null && item.blocking != "") {
@@ -2853,7 +2793,7 @@ function locationsHavePath(locationA, locationB) {
     
         _items.forEach((element,index) => {
             
-            let item = itemsModified[getIndexFromKeyword(element, objectType.item)];
+            let item = items[getIndexFromKeyword(element, objectType.item)];
             
             // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
             if (item.blocking != null && item.blocking != "") {
@@ -2909,14 +2849,14 @@ function locationsHavePath(locationA, locationB) {
       
       if (showDebugLog) console.log("formatData() - ");
 
-      areasModified = JSON.parse(JSON.stringify(areas));      
-      npcsModified = JSON.parse(JSON.stringify(npcs));
-      monstersModified = JSON.parse(JSON.stringify(monsters));
-      narrationsModified = JSON.parse(JSON.stringify(narrations));
+      areas = JSON.parse(JSON.stringify(areasRef));      
+      npcs = JSON.parse(JSON.stringify(npcsRef));
+      monsters = JSON.parse(JSON.stringify(monstersRef));
+      narrations = JSON.parse(JSON.stringify(narrationsRef));
 
-      itemsModified = JSON.parse(JSON.stringify(items));
+      items = JSON.parse(JSON.stringify(itemsRef));
 
-      itemsModified.forEach((element,index) => {
+      items.forEach((element,index) => {
           
           element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
           element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
