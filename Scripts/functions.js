@@ -24,7 +24,7 @@ let defence = 0;
 let evasion = 0;
 
 let currentArea = 0;
-let currentLocation = [0,0];
+let currentLocation = {};
 
 let areasVisited = [];      // A list of locations we have already visited
 
@@ -50,7 +50,7 @@ let mapGrid = [];
 // Default location for new games is edge_woods
 let respawnLocation = {
   area: "",
-  location: []
+  coordinates: []
 };
 
 let corpseLocation = null;
@@ -58,7 +58,7 @@ let corpseLocation = null;
 // Debug
 let showDebugLog = true;
 let debugStartArea = "bramble_path";
-let debugStartLocation = [2,5];
+let debugStartCoordinates = [2,5];
 let debugRespawn = {
   area: "bramble_path",
   location: [2,5]
@@ -316,7 +316,9 @@ function initializeGame() {
 
         save();
         
-        displayLocation(debugStartArea, debugStartLocation);
+        const startLocation = getLocationFromArea(debugStartCoordinates, debugStartArea);
+        if (startLocation === null) console.error("InitializeGame() - Can't find start location")
+        displayLocation(debugStartArea, startLocation);
     }
 }
 
@@ -325,7 +327,7 @@ function initializeGame() {
 // Area = keyword title i.e. "bramble_path"
 // Location = coordinate pair i.e. [1,5]
 function displayLocation(area, location) {    
-
+    
     // This should only happen once
     if (!mapInitialize)
         initalizeMap();
@@ -338,12 +340,9 @@ function displayLocation(area, location) {
     else
         currentArea = getIndexFromKeyword(area, objectType.area);               
             
-    const _locationExists = getLocationFromCurrentArea(location);
-    if (_locationExists === -1) { console.error("!!!"); return; }
-
     currentLocation = location;
-    getLocationFromCurrentArea(location).visited = true;
-    getLocationFromCurrentArea(location).seen = true;
+    currentLocation.visited = true;
+    currentLocation.seen = true;
     
     mapGridContainer.style.display = "flex";
     updateMap();
@@ -570,7 +569,7 @@ function updateButtons(skipAnimation)  {
         if (!activeMonster) {
 
             // Check if there are monsters present in this location, if so we don't display exits, only the option to run
-            if (getLocationFromCurrentArea(currentLocation).monsters != null && getLocationFromCurrentArea(currentLocation).monsters != "" && getLocationFromCurrentArea(currentLocation).monsters.length > 0) {
+            if (currentLocation.monsters != null && currentLocation.monsters != "" && currentLocation.monsters.length > 0) {
                 
                 contextualActions.push({
                     keyword: "run",                                    
@@ -583,9 +582,9 @@ function updateButtons(skipAnimation)  {
             }            
         }
         
-        items = getLocationFromCurrentArea(currentLocation).items;
-        monsters = getLocationFromCurrentArea(currentLocation).monsters;
-        npcs = getLocationFromCurrentArea(currentLocation).npcs;                
+        items = currentLocation.items;
+        monsters = currentLocation.monsters;
+        npcs = currentLocation.npcs;                
     }         
 
     // UPGRADE MENU
@@ -717,7 +716,7 @@ function updateButtons(skipAnimation)  {
 
                             secondaryButtonActive = true;
                             newButton.secondaryButton.onclick = function() {  
-                                getLocationFromCurrentArea(currentLocation).items.splice(getLocationFromCurrentArea(currentLocation).items.indexOf(item.keyword), 1);
+                                currentLocation.items.splice(currentLocation.items.indexOf(item.keyword), 1);
                                 inventory.splice(inventory.indexOf(item.lock), 1);
                                 playClick();
                                 addUpdateText("You unlock the " + item.shortTitle);
@@ -1062,7 +1061,7 @@ function updateButtons(skipAnimation)  {
                         if (action.location != null && action.location != "") {
 
                             newButton.button.onclick = function() { 
-                                displayLocation(action.location, objectType.location);                                
+                                //displayLocation(action.location, objectType.location);                                
                                 playClick();
                                 recoverStamina() 
                             };
@@ -1252,7 +1251,8 @@ function updateMap() {
     if (showDebugLog) console.log("updateMap() - ");
 
     activeDirections = [];    
-    const monsterPresent = getLocationFromCurrentArea(currentLocation).monsters.length > 0;
+    let monsterPresent = false;
+    if (currentLocation.monsters != undefined) monsterPresent = currentLocation.monsters.length > 0;
 
     if (areasModified[currentArea].locations.length > 0) {
 
@@ -1284,13 +1284,13 @@ function updateMap() {
             if (nodeObject.north != null) {                
                 
                 // Check there is a location at the coordinate in this direction from our current location
-                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north"), "north") != null) {
+                if (getLocationInDirection(location.coordinates, "north") != null) {
                     
                     // Check that there is a path between these two locations
-                    if (locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")))) {
+                    if (locationsHavePath(location, getLocationInDirection(location.coordinates, "north"))) {
                         
                         // Check whether the square in this direction is the player's current location, in which case store that information
-                        if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {  // Is the location adjacent to us the player's current location?                                                
+                        if (compareArrays(getLocationInDirection(location.coordinates, "north").coordinates, currentLocation.coordinates)) {  // Is the location adjacent to us the player's current location?                                                
                             isAdjacentToCurrent = true;
                             location.seen = true;       // Since this is adjacent to the players current location, we have now seen it
 
@@ -1298,59 +1298,59 @@ function updateMap() {
                         }
 
                         // Check whether the current location and the other square in this direction have been seen, then make sure there is a path between them
-                        if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "north")).seen)                            
+                        if (location.seen && getLocationInDirection(location.coordinates, "north").seen)                            
                             // If so, show the line between these two
                             nodeObject.north.classList = "horizontal-square inactive";               
                     } 
                 }
             }
             if (nodeObject.west != null) {                          
-                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")) != null) {                
+                if (getLocationInDirection(location.coordinates, "west") != null) {                
                     
-                    if (locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")))) {
+                    if (locationsHavePath(location, getLocationInDirection(location.coordinates, "west"))) {
 
-                        if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {   // Is the location adjacent to us the player's current location?
+                        if (compareArrays(getLocationInDirection(location.coordinates, "west").coordinates, currentLocation.coordinates)) {   // Is the location adjacent to us the player's current location?
                             isAdjacentToCurrent = true;
                             location.seen = true;
 
                             activeDirections.push(2); // That means the players current location is to the west of us, so we add "east" as an active direction
                         }
 
-                        if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "west")).seen)
+                        if (location.seen && getLocationInDirection(location.coordinates, "west").seen)
                             nodeObject.west.classList = "vertical-square inactive";
                     }
                 }
             }
             if (nodeObject.east != null) {                          
-                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")) != null) {
+                if (getLocationInDirection(location.coordinates, "east") != null) {
                 
-                    if (locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")))) {
+                    if (locationsHavePath(location, getLocationInDirection(location.coordinates, "east"))) {
 
-                        if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {   // Is the location adjacent to us the player's current location?
+                        if (compareArrays(getLocationInDirection(location.coordinates, "east").coordinates, currentLocation.coordinates)) {   // Is the location adjacent to us the player's current location?
                             isAdjacentToCurrent = true;
                             location.seen = true;
 
                             activeDirections.push(1); // That means the players current location is to the east of us, so we add "west" as an active direction
                         }
 
-                        if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "east")).seen)
+                        if (location.seen && getLocationInDirection(location.coordinates, "east").seen)
                             nodeObject.east.classList = "vertical-square inactive";
                     }
                 }
             }
             if (nodeObject.south != null) {                          
-                if (getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")) != null) {
+                if (getLocationInDirection(location.coordinates, "south") != null) {
                 
-                    if (locationsHavePath(location, getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")))) {
+                    if (locationsHavePath(location, getLocationInDirection(location.coordinates, "south"))) {
 
-                        if (compareArrays(getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")).coordinates, getLocationFromCurrentArea(currentLocation).coordinates)) {   // Is the location adjacent to us the player's current location?
+                        if (compareArrays(getLocationInDirection(location.coordinates, "south").coordinates, currentLocation.coordinates)) {   // Is the location adjacent to us the player's current location?
                             isAdjacentToCurrent = true;
                             location.seen = true;
 
                             activeDirections.push(0); // That means the players current location is to the south of us, so we add "north" as an active direction
                         }
 
-                        if (location.seen && getLocationFromCurrentArea(getNewCoordinates(location.coordinates, "south")).seen)
+                        if (location.seen && getLocationInDirection(location.coordinates, "south").seen)
                             nodeObject.south.classList = "horizontal-square inactive";
                     }
                 }
@@ -1369,7 +1369,7 @@ function updateMap() {
 
                 nodeObject.element.classList += " can-hover";                
                 nodeObject.element.onclick = function() { 
-                    displayLocation(currentArea, location.coordinates);                                
+                    displayLocation(currentArea, location);                                
                     playClick();
                     recoverStamina(); 
                 };
@@ -1378,41 +1378,41 @@ function updateMap() {
         });
 
         // Insert player symbol in current location        
-        const currentLocationNode = mapGrid[currentLocation[0]][currentLocation[1]];        
+        const currentLocationNode = mapGrid[currentLocation.coordinates[0]][currentLocation.coordinates[1]];
 
         // Check if there are monsters present
-        if (getLocationFromCurrentArea(currentLocation).monsters.length > 0) {
+        if (monsterPresent) {
 
             currentLocationNode.element.classList = "main-square current-hostile"
 
             // We hide all lines coming from current square
-            if (getLocationFromCurrentArea(currentLocation).north != null)                             
+            if (currentLocation.north != null)                             
                 currentLocationNode.north.classList = "horizontal-square";
-            if (getLocationFromCurrentArea(currentLocation).west != null)                                        
+            if (currentLocation.west != null)                                        
                 currentLocationNode.west.classList = "vertical-square";
-            if (getLocationFromCurrentArea(currentLocation).east != null)                                        
+            if (currentLocation.east != null)                                        
                 currentLocationNode.east.classList = "vertical-square";
-            if (getLocationFromCurrentArea(currentLocation).south != null)                                        
+            if (currentLocation.south != null)                                        
                 currentLocationNode.south.classList = "horizontal-square";
         }
         else {
             currentLocationNode.element.classList = "main-square current"        
 
             // Highlight all lines leading away from the current node, double check with active directions as this direction might be blocked
-            if (getLocationFromCurrentArea(currentLocation).north != null && activeDirections.includes[0])             
-                if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "north")) != null)
+            if (currentLocation.north != null && activeDirections.includes[0])             
+                if (getLocationInDirection(currentLocation.coordinates, "north") != null)
                 currentLocationNode.north.classList = "horizontal-square active";
 
-            if (getLocationFromCurrentArea(currentLocation).west != null && activeDirections.includes[1])
-                if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "west")) != null)
+            if (currentLocation.west != null && activeDirections.includes[1])
+                if (getLocationInDirection(currentLocation.coordinates, "west") != null)
                 currentLocationNode.west.classList = "vertical-square active";
 
-            if (getLocationFromCurrentArea(currentLocation).east != null && activeDirections.includes[2])                        
-                if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "east")) != null)
+            if (currentLocation.east != null && activeDirections.includes[2])                        
+                if (getLocationInDirection(currentLocation.coordinates, "east") != null)
                 currentLocationNode.east.classList = "vertical-square active";
 
-            if (getLocationFromCurrentArea(currentLocation).south != null && activeDirections.includes[3])                        
-                if (getLocationFromCurrentArea(getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "south")) != null)
+            if (currentLocation.south != null && activeDirections.includes[3])                        
+                if (getLocationInDirection(currentLocation.coordinates, "south") != null)
                 currentLocationNode.south.classList = "horizontal-square active";
         }
 
@@ -1438,7 +1438,7 @@ function closeOtherButtons(newButton) {
 // 0 = North 1 = West 2 = East 3 = South 4 = Next
 function go(direction, checkForMonster) {
     
-    if (checkForMonster && getLocationFromCurrentArea(currentLocation).monsters.length > 0) {
+    if (checkForMonster && currentLocation.monsters.length > 0) {
         console.log("go - Monster is present");
         return;
     }
@@ -1452,16 +1452,16 @@ function go(direction, checkForMonster) {
         
         switch (direction) {
             case 0:
-                displayLocation(currentArea, getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "north"));                
+                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, "north"));                
                 break;
             case 1:
-                displayLocation(currentArea, getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "west"));
+                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, "west"));
                 break;
             case 2:
-                displayLocation(currentArea, getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "east"));
+                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, "east"));
                 break;
             case 3:                
-                displayLocation(currentArea, getNewCoordinates(getLocationFromCurrentArea(currentLocation).coordinates, "south"));
+                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, "south"));
                 break;
             case 4:
                 createdButtons.forEach((element) => {
@@ -1923,7 +1923,7 @@ function playerActionComplete() {
 
     if (showDebugLog) console.log("playerActionComplete() - ");
           
-    let monsters = getLocationFromCurrentArea(currentLocation).monsters;    
+    let monsters = currentLocation.monsters;    
 
     let playerDead = false;
     if (monsters.length > 0 && monsters != "") {
@@ -1976,7 +1976,7 @@ function triggerEnemyAttack(monsterKeyword) {
 function recoverStamina() {
 
     let monstersPresent = false;
-    let monsters = getLocationFromCurrentArea(currentLocation).monsters;
+    let monsters = currentLocation.monsters;
     
     if (monsters.length > 0 && monsters != "") 
         monstersPresent = true;
@@ -2209,7 +2209,7 @@ function monsterDeath(monsterButton) {
     let monster = monstersModified[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
     
     // Remove this monster from the current location    
-    getLocationFromCurrentArea(currentLocation).monsters.splice(getLocationFromCurrentArea(currentLocation).monsters.indexOf(monster.keyword),1);
+    currentLocation.monsters.splice(currentLocation.monsters.indexOf(monster.keyword),1);
 
     let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monster.insight + " experience and " +  monster.gold + " gold";
 
@@ -2302,7 +2302,7 @@ function addToInventory(keyword) {
 
     // Depending on the contextType, we will splice this item out of a different context
     if (!npcActive) {        
-        items = getLocationFromCurrentArea(currentLocation).items;
+        items = currentLocation.items;
     }    
     else if (npcActive) {        
         items = npcsModified[currentNPC].items;
@@ -2603,13 +2603,13 @@ function save() {
     return index;
   }  
 
-  function getLocationFromCurrentArea(location) {
+  function getLocationFromCurrentArea(coordinates) {
     
     let loc = null;
     
     areasModified[currentArea].locations.forEach((element, i) => {                
 
-        if (compareArrays(element.coordinates, location)) {
+        if (compareArrays(element.coordinates, coordinates)) {
             
             loc = element;            
         }
@@ -2618,7 +2618,7 @@ function save() {
     return loc;
   }
 
-  function getLocationFromArea(location, area) {
+  function getLocationFromArea(coordinates, area) {
     
     let _area = null;
     if (Number.isInteger(area))
@@ -2630,7 +2630,7 @@ function save() {
     
     areasModified[_area].locations.forEach((element, i) => {                
 
-        if (compareArrays(element.coordinates, location)) {
+        if (compareArrays(element.coordinates, coordinates)) {
             
             loc = element;            
         }
@@ -2753,7 +2753,7 @@ function compareObjects(obj1, obj2) {
  * @param {string} direction - The direction to move ('up', 'down', 'left', 'right').
  * @returns {object} The coordinates of the new cell.
  */
-function getNewCoordinates(coordinates, direction) {
+function getLocationInDirection(coordinates, direction) {
   
   let newY = coordinates[0];
   let newX = coordinates[1];  
@@ -2775,7 +2775,8 @@ function getNewCoordinates(coordinates, direction) {
         throw new Error('Invalid direction');
   }
   
-  return [newY,newX];  
+  const newLocation = getLocationFromCurrentArea([newY,newX]);  
+  return newLocation;
 }
 
 function locationsHavePath(locationA, locationB) {
