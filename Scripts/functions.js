@@ -49,8 +49,8 @@ let mapGrid = [];
 
 // Default location for new games is edge_woods
 let respawnLocation = {
-  area: "",
-  coordinates: []
+  area: null,
+  location: null
 };
 
 let corpseLocation = null;
@@ -59,10 +59,6 @@ let corpseLocation = null;
 let showDebugLog = true;
 let debugStartArea = "bramble_path";
 let debugStartCoordinates = [2,5];
-let debugRespawn = {
-  area: "bramble_path",
-  location: [2,5]
-}
 let debugWindowActive = false;
 
 // Stats
@@ -250,14 +246,14 @@ function initializeGame() {
         narrationOpen = false;
         npcActive = false;
         currentNPC = -1;
-        
-        respawnLocation = debugRespawn;
+            
         corpseLocation = null;
 
         save();
         
         const startLocation = getLocationFromArea(debugStartCoordinates, debugStartArea);
         if (startLocation === null) console.error("InitializeGame() - Can't find start location")
+        respawnLocation = { area: debugStartArea, location: startLocation };
         displayLocation(debugStartArea, startLocation);
     }
 }
@@ -1964,7 +1960,7 @@ function playerDeath() {
     }
     
     // Check if a player corpse exists already, if so destroy it
-    if (corpseLocation != null && getLocationFromArea(corpseLocation.location, corpseLocation.area).items != null && getLocationFromArea(corpseLocation.location, corpseLocation.area).items != "" && getLocationFromArea(corpseLocation.location, corpseLocation.area).items.includes("corpse")) {
+    if (corpseLocation != null && corpseLocation.location.items != null && corpseLocation.location.items != "" && corpseLocation.location.items.includes("corpse")) {
 
         removeItemFromLocation("corpse", corpseLocation);
     }
@@ -1982,8 +1978,9 @@ function playerDeath() {
         location: currentLocation
     };
         
-    getLocationFromArea(corpseLocation.location, corpseLocation.area).items.push("corpse");
+    corpseLocation.location.items.push("corpse");
 
+    mapGridContainer.style.display = "none";
     narrationText.style.display = "none";        
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";    
@@ -2013,7 +2010,7 @@ function respawn() {
         // Monsters all heal when you rest
         healAllMonsters();
 
-        updateStats();        
+        updateStats();
         displayLocation(respawnLocation.area, respawnLocation.location); 
         save();        
         
