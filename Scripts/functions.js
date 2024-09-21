@@ -138,7 +138,7 @@ const objectType = {
 
 // These are our data arrays that contain the data for the game
 let narrationsRef = [];
-let monstersRef = [];
+let monstersRef = [];       // Reference for unique monsters, these will be duplicated for each location at runtime. References to the actual monster data will be within each location
 let areasRef = [];
 let npcsRef = [];
 let itemsRef = [];
@@ -146,10 +146,10 @@ let actionsRef = [];
 
 // These are containers, mostly copies of our masters which will be modified at runtime
 let areas = [];
-let monsters = []
-let npcs = []
-let items = []
-let narrations = []
+let monsters = [];          // These are duplicates of the monsters defined in data
+let npcs = [];
+let items = [];
+let narrations = [];
 
 
 var config = 
@@ -859,9 +859,8 @@ function updateButtons(skipAnimation)  {
 
         if (_monsters != undefined && _monsters.length > 0 && _monsters != "") {
             
-            _monsters.forEach((element, index) => {
-                
-                const monster = monsters[getIndexFromKeyword(element, objectType.monster)];
+            _monsters.forEach((monster, index) => {
+                                
                 let descriptionTextActive = false;
 
                 const newButton = createButton(monster.keyword, objectType.monster);
@@ -1718,7 +1717,7 @@ function collapseStats() {
 
 function updateMonsterUI(monsterButton) {
     
-    let monster = monsters[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
+    let monster = currentLocation.monsters[getElementFromKeyword(monsterButton.keyword, currentLocation.monsters)];
 
     monsterButton.monsterHpText.innerText = monster.hpCurrent + "/" + monster.hpMax;
     let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
@@ -1882,10 +1881,10 @@ function playerActionComplete() {
     let playerDead = false;
     if (monsters.length > 0 && monsters != "") {
 
-        monsters.forEach((element, index) => {
+        monsters.forEach((monster, index) => {
 
             if (currentLocation != -99)      // Check in case a previous monster already killed us
-                playerDead = triggerEnemyAttack(element);
+                playerDead = triggerEnemyAttack(monster);
         });            
     }    
 
@@ -1897,10 +1896,9 @@ function playerActionComplete() {
     updateButtons(true);    
 }
 
-function triggerEnemyAttack(monsterKeyword) {
+function triggerEnemyAttack(monster) {
 
-    let monstersActionString = "";  
-    let monster = monsters[getElementFromKeyword(monsterKeyword, monsters)];
+    let monstersActionString = "";      
 
     // Evasion chance
     let evasionNumber = Math.floor(Math.random() * 101);                
@@ -2038,7 +2036,7 @@ function attack() {
         
         if (currentActiveButton === null) console.error("Attack() - but no active monster");
         
-        let monster = monsters[getIndexFromKeyword(currentActiveButton.keyword, objectType.monster)];
+        let monster = currentLocation.monsters[getElementFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
         
         // Evasion chance
         let evasionNumber = Math.floor(Math.random() * 101);
@@ -2079,8 +2077,7 @@ function attack() {
 function block(staminaCost) {
 
     if (showDebugLog) console.log("block() - Defence: " + defence + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
-                
-    let monster = monsters[currentLocation];
+                    
     
     console.log("BLOCK NOT IMPLEMENTED");
     
@@ -2160,7 +2157,7 @@ function runAway() {
 
 function monsterDeath(monsterButton) {
     
-    let monster = monsters[getIndexFromKeyword(monsterButton.keyword, objectType.monster)];
+    let monster = currentLocation.monsters[getElementFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
     
     // Remove this monster from the current location    
     currentLocation.monsters.splice(currentLocation.monsters.indexOf(monster.keyword),1);
@@ -2444,8 +2441,7 @@ function save() {
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
     localStorage.setItem('corpseLocation', JSON.stringify(corpseLocation));
 
-    localStorage.setItem('areas', JSON.stringify(areas));    
-    localStorage.setItem('monsters', JSON.stringify(monsters));
+    localStorage.setItem('areas', JSON.stringify(areas));        
     localStorage.setItem('npcs', JSON.stringify(npcs));
     localStorage.setItem('items', JSON.stringify(items));
     localStorage.setItem('narrations', JSON.stringify(narrations));    
@@ -2477,16 +2473,14 @@ function save() {
 
     if (!resetLocations) { 
         
-        areas = JSON.parse(localStorage.getItem('areas'));                    
-        monsters = JSON.parse(localStorage.getItem('monsters'));
+        areas = JSON.parse(localStorage.getItem('areas'));                            
         npcs = JSON.parse(localStorage.getItem('npcs'));
         items = JSON.parse(localStorage.getItem('items'));
         narrations = JSON.parse(localStorage.getItem('narrations'));
     }
     else {
         areas = JSON.parse(JSON.stringify(areasRef));        
-        areasVisited = [];
-        monsters = JSON.parse(JSON.stringify(monstersRef));                
+        areasVisited = [];        
         npcs = JSON.parse(JSON.stringify(npcsRef));
         items = JSON.parse(JSON.stringify(itemsRef));
         narrations = JSON.parse(JSON.stringify(narrationsRef));
@@ -2515,9 +2509,6 @@ function save() {
     switch (objType) {
         case objectType.area://Location        
             ar = areas;
-            break;
-        case objectType.monster://Monster
-            ar = monsters;            
             break;
         case objectType.item:
             ar = items;            
@@ -2850,8 +2841,7 @@ function locationsHavePath(locationA, locationB) {
       if (showDebugLog) console.log("formatData() - ");
 
       areas = JSON.parse(JSON.stringify(areasRef));      
-      npcs = JSON.parse(JSON.stringify(npcsRef));
-      monsters = JSON.parse(JSON.stringify(monstersRef));
+      npcs = JSON.parse(JSON.stringify(npcsRef));      
       narrations = JSON.parse(JSON.stringify(narrationsRef));
 
       items = JSON.parse(JSON.stringify(itemsRef));
@@ -2862,14 +2852,23 @@ function locationsHavePath(locationA, locationB) {
           element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
       });
 
-      //////////// TODO - Fix this
-      // Places monsters in the correct locations
-      // monstersModified.forEach((element,index) => {
-          
-      //     if (element.location != null && element.location != "") {            
-      //         locationsModified[getIndexFromKeyword(element.location, objectType.location)].monsters.push(element.keyword);            
-      //     }
-      // });
+      // Take the references in each locations monster array, and spawn unique versions of those from MonsterRef            
+      for (const area of areas) {
+        for (const location of area.locations) {
+            const newMonsterArray = [];     // We will store references to all newly created monsters and overwrite the key word array that is created before runtime
+            // Check this location has monsters listed
+            if (location.monsters != null) {
+                for (const monster of location.monsters) {
+
+                    // Create a duplicated of the original referenced monster in our monsters array which will serve as our runtime data for this monster
+                    let newMonster = JSON.parse(JSON.stringify( monstersRef[getElementFromKeyword(monster, monstersRef)]))
+                    newMonsterArray.push(newMonster);
+                }
+            }
+
+            location.monsters = newMonsterArray;            
+        }
+      }
   }
 
   // #endregion
