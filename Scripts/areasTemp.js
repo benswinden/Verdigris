@@ -1,4 +1,4 @@
-areasRef = [    
+areasTemp = [    
     {
         keyword: "bramble_path",
         title: "The Bramble Path",

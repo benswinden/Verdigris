@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor</title>
+    <link rel="shortcut icon" href="#" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="editor.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400..800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="wrapper">
+        <div id="content">
+
+            <header>            
+                <div class="nav-entry disabled">Area</div>
+                <div class="nav-separator"></div>
+                <div class="nav-entry selected">Map</div>
+            </header>
+            <main>
+                
+                <div id="area-picker-container">
+                    <div class="form-label">Area</div>
+                    <div class="dropdown">
+                        <button class="dropbtn">Select</button>
+                        <div class="dropdown-content">                            
+                        </div>
+                    </div>
+                </div>                
+
+                <div id="map-grid-container">
+        
+                    <div class="row">
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div>            
+                    </div>
+                    <div class="row">
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                    </div>
+                    <div class="row">
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div>            
+                    </div>
+                    <div class="row">
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                    </div>
+                    <div class="row">
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div>            
+                    </div>
+                    <div class="row">
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                    </div>    
+                    <div class="row">
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div>            
+                    </div>
+                    <div class="row">
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                        <div class="horizontal-square"></div>
+                    </div>
+                    <div class="row">
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div><div class="vertical-square"></div>
+                        <div class="main-square"></div>            
+                    </div>        
+                </div>
+            </main>
+            
+            <nav>
+
+                <div id="button-master" class="nav-button can-hover item-button active">
+                    <div class="button-level-icon">1</div>
+                    <div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">9</div></div>
+                    <div class="item-cost-section"><img src="Assets/GoldSmallIcon.svg" class="item-cost-icon"><div class="item-cost-text">999</div></div>
+                    <div class="button-text"></div>
+                    <div class="button-chevron"><img src="Assets/Item-ChevronClosed.svg" class="chevron-closed"></div>
+                    <div class="break"></div>
+                    <div class="monster-hp-section">
+                        <div class="monster-hp-bar-background">
+                            <div class="monster-hp-text">
+                                12 / 100
+                            </div>                
+                        </div>
+                        <div class="monster-hp-bar-current"></div>
+                    </div>
+                    <div class="break"></div>
+                    <div class="description-section button-text">                        
+                    </div>
+                    <div class="break"></div>
+                    <div class="left-spacer"></div>
+                    <div class="upgrade-material-cost"></div>                    
+                    <div class="button-stat-section">
+                        <ul>
+                            <li><img src="Assets/PowerIconSmall.svg" class="button-equip-stat"><div class="button-power-text">2</div> </li>                                                    
+                            <li><img src="Assets/StaminaIconSmall.svg" class="button-equip-stat"><div class="button-stamina-text">2</div> </li>
+                            <li><img src="Assets/DefenceIconSmall.svg" class="button-equip-stat"><div class="button-defence-text">2</div> </li>
+                        </ul>
+                    </div>                
+                    <div class="secondary-action-button can-hover item-button"><div class="secondary-button-text"></div></div>
+                </div>
+
+                
+                <div id="buttons-container">
+                    <button id="load-button">Load</button> <button id="save-button">Save</button>
+                </div>
+
+
+        </div>
+        <div class="bg">
+            <img src="Assets/Background.png" alt="">
+          </div>
+    </div>
+
+    <script  src="Scripts/papaparse.min.js"></script>
+    <script  src="Scripts/editor.js"></script>    
+    <script  src="Scripts/areasTemp.js"></script>    
+</body>
+</html>
