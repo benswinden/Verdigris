@@ -34,6 +34,11 @@ const buttonMaster = document.querySelector('#button');
 const newObjectContainer = document.querySelector("#new-object-container");
 const newObjectTypePicker = document.querySelector("#new-object-type-picker");
 const newObjectPicker = document.querySelector("#new-object-picker");
+const createDoorButton = document.querySelector("#door-button");
+const removeDoorButton = document.querySelector("#remove-door-button");
+const doorAttributeContainer = document.querySelector("#door-attribute-container");
+
+
 
 var config = 
 {    
@@ -170,10 +175,17 @@ function initializeAreaPicker() {
         let entry = document.createElement('a');
         entry.textContent = area.title;
         entry.addEventListener('click', function(event) {
-            newObjectTypeSelected = objectType.area;
+            
+            currentLocation = null;
+
             event.preventDefault();
             dropbtn.textContent = area.title;
             currentArea = getElementFromKeyword(area.keyword, areasData);
+
+            removeDoorButton.style.display = "none";
+            createDoorButton.style.display = "none";
+            doorAttributeContainer.style.display = "none";
+
             loadArea();
         });
         dropdownContent.appendChild(entry);
@@ -202,14 +214,12 @@ function updateMap() {
                 nodeObject.element.onclick = function() {
                     
                     const newLocation = createLocation([y,x]);
-                    playClick();
-                                                         
-                    if (currentLocation != null && checkIsAdjacent(currentLocation.coordinates, [y,x])) {                        
-                        createPath(currentLocation, newLocation);
-                        currentLocation = null;
-                    }
-                    else if (currentLocation === null || (currentLocation != null && !checkIsAdjacent(currentLocation.coordinates, [y,x])))
-                        currentLocation = newLocation;
+                    playClick();                     
+                    currentLocation = newLocation;
+
+                    createDoorButton.style.display = "block";
+                    removeDoorButton.style.display = "none";
+                    doorAttributeContainer.style.display = "none";
 
                     updateMap();
                 }                                
@@ -287,7 +297,11 @@ function updateMap() {
                     toggleNode(location);                
                 }
                 else {
-                    const _currentLocation = currentLocation;   // Store this so we can set the actual value to null but still use the current store location                    
+                    const _currentLocation = currentLocation;   // Store this so we can set the actual value to null but still use the current store location
+                    
+                    createDoorButton.style.display = "none";
+                    removeDoorButton.style.display = "none";
+                    doorAttributeContainer.style.display = "none";
                     currentLocation = null;
 
                     // If there is already a path, remove it
@@ -313,7 +327,13 @@ function updateMap() {
         if (currentLocation != null) {
 
             currentLocationNode = mapGrid[currentLocation.coordinates[0]][currentLocation.coordinates[1]];
-            currentLocationNode.element.classList = "main-square current  can-hover"
+            currentLocationNode.element.classList = "main-square current can-hover"
+
+            if (currentLocation.door != null) {
+
+                currentLocationNode.element.classList += " door";                
+            
+            }  
         }
 
     }
@@ -398,10 +418,26 @@ function removeCreatedButtons() {
 
 function toggleNode(location) {
 
-    if (currentLocation != null && compareArrays(location.coordinates, currentLocation.coordinates))
+    if (currentLocation != null && compareArrays(location.coordinates, currentLocation.coordinates)) {
         currentLocation = null;
-    else
+        createDoorButton.style.display = "none";
+        removeDoorButton.style.display = "none";
+        doorAttributeContainer.style.display = "none";
+    }
+    else {
         currentLocation = location;
+        createDoorButton.style.display = "block";
+        removeDoorButton.style.display = "none";
+
+        // If this location is already a door we want to initialize the proper values into the picker
+        if (currentLocation.door != null) {
+
+            createDoorButton.style.display = "none";
+        removeDoorButton.style.display = "block";
+            doorAttributeContainer.style.display = "flex";
+            initializeDoorAttributePicker();
+        }
+    }
 
     updateMap();
 }
@@ -497,6 +533,33 @@ function createNewObject() {
     ar.push(newObjectSelected.keyword);
     closeNewObjectPicker();
     updateButtons();
+}
+
+function createDoor() {
+
+    if (currentLocation === null) { console.error("createDoor but currentLocation is null"); return; }
+
+    createDoorButton.style.display = "none";
+    removeDoorButton.style.display = "none";
+    doorAttributeContainer.style.display = "flex";
+    initializeDoorAttributePicker();
+}
+
+function removeDoor() {
+
+    if (currentLocation === null) { console.error("removeDoor but currentLocation is null"); return; }
+
+    console.log(currentLocation.door.coordinates + "    " + currentLocation.door.area);
+    const otherLocation = getLocationFromArea(currentLocation.door.coordinates, currentLocation.door.area);
+    otherLocation.door = null;
+
+    currentLocation.door = null;
+
+    createDoorButton.style.display = "block";
+    removeDoorButton.style.display = "none";
+    doorAttributeContainer.style.display = "none";
+
+    updateMap();
 }
 
 let newObjectTypeSelected = null;
@@ -628,9 +691,94 @@ function closeNewObjectPicker() {
     newObjectContainer.style.display = "none";
 }
 
+function initializeDoorAttributePicker() {
 
+    const areaDropdownContent = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropdown-content');
+    const areaDropdownButton = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropbtn');
+    const coordinatesDropdownContent = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropdown-content');
+    const coordinatesDropdownButton = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropbtn');
 
+    while (areaDropdownContent.firstChild) {
+        areaDropdownContent.removeChild(areaDropdownContent.firstChild);
+    }
+    while (coordinatesDropdownContent.firstChild) {
+        coordinatesDropdownContent.removeChild(coordinatesDropdownContent.firstChild);
+    }
 
+    areaDropdownButton.textContent = "Select";
+    coordinatesDropdownButton.textContent = "";
+
+    for (const area of areasData) {
+                
+        let entry = document.createElement('a');
+        entry.textContent = area.title;
+        entry.addEventListener('click', function(event) {
+            
+            event.preventDefault();
+            areaDropdownButton.textContent = area.title;
+            initializeCoordinates(area);
+            
+        });
+        areaDropdownContent.appendChild(entry);
+    }
+
+    if (currentLocation != null && currentLocation.door != null) {
+
+        const _area = areasData[getElementFromKeyword(currentLocation.door.area, areasData)];
+        areaDropdownButton.textContent = _area.title;
+        initializeCoordinates(_area);
+    }
+
+}
+
+function initializeCoordinates(area) {
+    
+    const coordinatesDropdownContent = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropdown-content');
+    const coordinatesDropdownButton = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropbtn');
+
+    while (coordinatesDropdownContent.firstChild) {
+        coordinatesDropdownContent.removeChild(coordinatesDropdownContent.firstChild);
+    }
+
+    coordinatesDropdownButton.textContent = "";
+
+    for (const location of area.locations) {
+        
+        // Skip over coordinates that are already doors
+        if (location.door === null) {
+
+            let entry = document.createElement('a');
+            entry.textContent = location.coordinates;
+            entry.addEventListener('click', function(event) {
+                
+                event.preventDefault();
+                coordinatesDropdownButton.textContent = "[ " + location.coordinates[0] + " , " + location.coordinates[1] + " ]";
+                
+                // If we've picked coordinates, we can set the door attribute
+                currentLocation.door = { 
+                    area: area.keyword,
+                    coordinates: location.coordinates
+                }
+
+                // find door on the other side and add it                
+                const otherLocation = getLocationFromArea(location.coordinates, area.keyword);
+                otherLocation.door = { 
+                    area: areasData[currentArea].keyword,
+                    coordinates: currentLocation.coordinates
+                };
+                
+                updateMap();        
+            });
+
+            coordinatesDropdownContent.appendChild(entry);
+        }    
+    }
+
+    if (currentLocation != null && currentLocation.door != null) {
+
+        coordinatesDropdownButton.textContent = "[ " + currentLocation.door.coordinates[0] + " , " + currentLocation.door.coordinates[1] + " ]";        
+    }
+}
 
 
 
@@ -1081,6 +1229,16 @@ document.getElementById('cancel-button').addEventListener('click', async functio
 document.getElementById('create-button').addEventListener('click', async function() {
     
     createNewObject();
+});
+
+document.getElementById('door-button').addEventListener('click', async function() {
+    
+    createDoor();
+});
+
+document.getElementById('remove-door-button').addEventListener('click', async function() {
+    
+    removeDoor();
 });
 
 

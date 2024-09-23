@@ -48,7 +48,7 @@ header {
 .form-label {
     color: #C0C0BC;
     font-family: Eczar;
-    font-size: 18px;
+    font-size: 14px;
     margin: 15px 0 8px 0;    
 }
 
@@ -72,7 +72,7 @@ header {
     border: 3px solid #363718;
     width: 100%;
     padding: 5px 10px 5px 30px;
-    min-height: 43px;
+    min-height: 49px;
 }
 
 .dropbtn:hover {        
@@ -148,7 +148,7 @@ header {
 
 #map-grid-container {
     display: flex;
-
+    margin-bottom: 30px;
 
     .main-square {
         height: 40px;
@@ -203,6 +203,31 @@ header {
     }
 }
 
+#door-button-container {
+    margin-bottom: 50px;
+    width: 100%;
+}
+
+#door-attribute-container {
+    display: none;
+    gap: 5px;
+    margin-left: 20px;
+}
+
+#door-area-picker {
+    .dropdown {
+        width: 500px;
+    }
+}
+
+#door-coordinate-picker {
+
+    .dropdown {
+        width: 150px;
+    }
+}
+
+
 #buttons-container {
     margin-bottom: 50px;
 }
@@ -248,6 +273,11 @@ header {
 
 
 
+#save-button-container {
+    display: flex;
+    gap: 15px;
+}
+
 #new-object-container {
     display: none;
     margin-bottom: 50px;
@@ -258,10 +288,10 @@ header {
     gap: 15px;
 }
 
-#cancel-button, #create-button, #new-button, #load-button, #save-button{
+#remove-door-button, #door-button, #cancel-button, #create-button, #new-button, #load-button, #save-button{
     font-family: Eczar;
     color: #989A87;
-    font-size: 18px;    
+    font-size: 16px;    
     background-color: #01090A;        
     cursor: pointer;    
     text-decoration: none;
@@ -269,11 +299,16 @@ header {
     transition-duration: 0.4s;
     border: 3px solid #363718;
     width: 120px;
-    padding: 2px 0;    
+    padding: 2px 0;
+    margin-left: 20px;
 }
 
-#cancel-button:hover, #create-button:hover, #new-button:hover, #load-button:hover, #save-button:hover {        
+#remove-door-button:hover, #door-button:hover, #cancel-button:hover, #create-button:hover, #new-button:hover, #load-button:hover, #save-button:hover {        
     border: 3px solid #6F7221;
+}
+
+#remove-door-button {
+    display: none;
 }
 
 #create-button {

@@ -32,7 +32,10 @@
           2,
           6
         ],
-        "south": null,
+        "south": [
+          3,
+          5
+        ],
         "door": null
       },
       {
@@ -162,49 +165,8 @@
       },
       {
         "coordinates": [
-          2,
-          6
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": null,
-        "west": [
-          2,
-          5
-        ],
-        "east": null,
-        "south": [
-          3,
-          6
-        ],
-        "door": null
-      },
-      {
-        "coordinates": [
           3,
           5
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": null,
-        "west": null,
-        "east": [
-          3,
-          6
-        ],
-        "south": null,
-        "door": null
-      },
-      {
-        "coordinates": [
-          3,
-          6
         ],
         "visited": false,
         "seen": false,
@@ -213,60 +175,13 @@
         "npcs": [],
         "north": [
           2,
-          6
-        ],
-        "west": [
-          3,
           5
-        ],
-        "east": [
-          3,
-          7
-        ],
-        "south": [
-          4,
-          6
-        ],
-        "door": null
-      },
-      {
-        "coordinates": [
-          4,
-          6
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": [
-          3,
-          6
         ],
         "west": null,
         "east": [
-          4,
-          7
-        ],
-        "south": null,
-        "door": null
-      },
-      {
-        "coordinates": [
-          4,
-          7
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": null,
-        "west": [
-          4,
+          3,
           6
         ],
-        "east": null,
         "south": null,
         "door": null
       },
@@ -277,14 +192,49 @@
         ],
         "visited": false,
         "seen": false,
+        "items": [
+          "iron_longsword"
+        ],
+        "monsters": [
+          "centipede"
+        ],
+        "npcs": [],
+        "north": [
+          1,
+          7
+        ],
+        "west": [
+          2,
+          6
+        ],
+        "east": [
+          2,
+          8
+        ],
+        "south": [
+          3,
+          7
+        ],
+        "door": null
+      },
+      {
+        "coordinates": [
+          1,
+          7
+        ],
+        "visited": false,
+        "seen": false,
         "items": [],
         "monsters": [],
         "npcs": [],
         "north": null,
-        "west": null,
+        "west": [
+          1,
+          6
+        ],
         "east": null,
         "south": [
-          3,
+          2,
           7
         ],
         "door": null
@@ -306,6 +256,66 @@
         "west": [
           3,
           6
+        ],
+        "east": null,
+        "south": null,
+        "door": null
+      },
+      {
+        "coordinates": [
+          1,
+          6
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": null,
+        "west": null,
+        "east": [
+          1,
+          7
+        ],
+        "south": null,
+        "door": null
+      },
+      {
+        "coordinates": [
+          3,
+          6
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": null,
+        "west": [
+          3,
+          5
+        ],
+        "east": [
+          3,
+          7
+        ],
+        "south": null,
+        "door": null
+      },
+      {
+        "coordinates": [
+          2,
+          8
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": null,
+        "west": [
+          2,
+          7
         ],
         "east": null,
         "south": null,
@@ -421,25 +431,6 @@
       },
       {
         "coordinates": [
-          2,
-          2
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": null,
-        "west": null,
-        "east": [
-          2,
-          3
-        ],
-        "south": null,
-        "door": null
-      },
-      {
-        "coordinates": [
           1,
           5
         ],
@@ -510,117 +501,7 @@
       {
         "coordinates": [
           0,
-          4
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": null,
-        "west": null,
-        "east": null,
-        "south": [
-          1,
-          4
-        ],
-        "door": null
-      },
-      {
-        "coordinates": [
-          3,
-          5
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": [
-          2,
-          5
-        ],
-        "west": [
-          3,
-          4
-        ],
-        "east": null,
-        "south": null,
-        "door": null
-      },
-      {
-        "coordinates": [
-          3,
-          4
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": null,
-        "west": [
-          3,
-          3
-        ],
-        "east": [
-          3,
-          5
-        ],
-        "south": null,
-        "door": null
-      },
-      {
-        "coordinates": [
-          3,
-          3
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": [
-          2,
-          3
-        ],
-        "west": null,
-        "east": [
-          3,
-          4
-        ],
-        "south": [
-          4,
-          3
-        ],
-        "door": null
-      },
-      {
-        "coordinates": [
-          4,
-          3
-        ],
-        "visited": false,
-        "seen": false,
-        "items": [],
-        "monsters": [],
-        "npcs": [],
-        "north": [
-          3,
-          3
-        ],
-        "west": [
-          4,
-          2
-        ],
-        "east": null,
-        "south": null,
-        "door": null
-      },
-      {
-        "coordinates": [
-          4,
-          2
+          0
         ],
         "visited": false,
         "seen": false,
@@ -630,9 +511,28 @@
         "north": null,
         "west": null,
         "east": [
-          4,
-          3
+          0,
+          1
         ],
+        "south": null,
+        "door": null
+      },
+      {
+        "coordinates": [
+          0,
+          1
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": null,
+        "west": [
+          0,
+          0
+        ],
+        "east": null,
         "south": null,
         "door": null
       }
