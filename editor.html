@@ -155,40 +155,38 @@
             
             <nav>
 
-                <div id="button-master" class="nav-button can-hover item-button active">
-                    <div class="button-level-icon">1</div>
-                    <div class="stamina-cost-section"><img src="Assets/StaminaCostIcon.svg" class="stamina-cost-icon"><div class="stamina-cost-text">9</div></div>
-                    <div class="item-cost-section"><img src="Assets/GoldSmallIcon.svg" class="item-cost-icon"><div class="item-cost-text">999</div></div>
-                    <div class="button-text"></div>
-                    <div class="button-chevron"><img src="Assets/Item-ChevronClosed.svg" class="chevron-closed"></div>
-                    <div class="break"></div>
-                    <div class="monster-hp-section">
-                        <div class="monster-hp-bar-background">
-                            <div class="monster-hp-text">
-                                12 / 100
-                            </div>                
+                <div id="buttons-container">
+                    <div id="button">
+                        <div id="button-master" class="nav-button can-hover active">                        
+                            <div class="button-text"></div>
                         </div>
-                        <div class="monster-hp-bar-current"></div>
+                        <div class="button-delete"><img class="delete-icon"></div>
                     </div>
-                    <div class="break"></div>
-                    <div class="description-section button-text">                        
-                    </div>
-                    <div class="break"></div>
-                    <div class="left-spacer"></div>
-                    <div class="upgrade-material-cost"></div>                    
-                    <div class="button-stat-section">
-                        <ul>
-                            <li><img src="Assets/PowerIconSmall.svg" class="button-equip-stat"><div class="button-power-text">2</div> </li>                                                    
-                            <li><img src="Assets/StaminaIconSmall.svg" class="button-equip-stat"><div class="button-stamina-text">2</div> </li>
-                            <li><img src="Assets/DefenceIconSmall.svg" class="button-equip-stat"><div class="button-defence-text">2</div> </li>
-                        </ul>
-                    </div>                
-                    <div class="secondary-action-button can-hover item-button"><div class="secondary-button-text"></div></div>
                 </div>
 
+                <div id="new-object-container">
+                    <div id="new-object-type-picker">
+                        <div class="form-label">Object Type</div>
+                        <div class="dropdown">
+                            <button class="dropbtn">Select</button>
+                            <div class="dropdown-content">                            
+                            </div>
+                        </div>
+                    </div>
+                    <div id="new-object-picker">
+                        <div class="form-label">Object</div>
+                        <div class="dropdown">
+                            <button class="dropbtn">Select</button>
+                            <div class="dropdown-content">                            
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="create-button">Create</button><button id="cancel-button">Cancel</button>
+                </div>
                 
-                <div id="buttons-container">
-                    <button id="load-button">Load</button> <button id="save-button">Save</button>
+                <div id="save-button-container">
+                    <button id="new-button">New Object</button> <button id="load-button">Load</button> <button id="save-button">Save</button>
                 </div>
 
 
@@ -200,6 +198,7 @@
 
     <script  src="Scripts/papaparse.min.js"></script>
     <script  src="Scripts/editor.js"></script>    
-    <script  src="Scripts/areasTemp.js"></script>    
+    <script  src="Scripts/areasTemp.js"></script>
+    <script  src="Scripts/npcs.js"></script>    
 </body>
 </html>

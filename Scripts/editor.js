@@ -5,11 +5,14 @@ let currentLocation = null;
 let mapInitialize = false;
 let mapGrid = [];
 
+let createdButtons = [];
+
 let showDebugLog = true;
 
 let areasData = [];
-let items = [];
+let itemsRef = [];
 let monstersRef = [];
+let npcsRef = [];
 
 let areasTemp = [];
 
@@ -26,6 +29,11 @@ const objectType = {
 }
 
 const mapGridContainer = document.querySelector("#map-grid-container");
+const buttonsContainer = document.querySelector("#buttons-container");
+const buttonMaster = document.querySelector('#button');
+const newObjectContainer = document.querySelector("#new-object-container");
+const newObjectTypePicker = document.querySelector("#new-object-type-picker");
+const newObjectPicker = document.querySelector("#new-object-picker");
 
 var config = 
 {    
@@ -37,9 +45,9 @@ var config =
 const promise1 = fetch('Data/items.csv')
   .then((response) => response.text())
   .then((data) => { 
-    items = Papa.parse(data, config).data;
+    itemsRef = Papa.parse(data, config).data;
     // Filter out empty rows
-    items = items.filter(({ keyword }) => keyword != null);
+    itemsRef = itemsRef.filter(({ keyword }) => keyword != null);
 });
 
 const promise2 = fetch('Data/monsters.csv')
@@ -50,15 +58,17 @@ const promise2 = fetch('Data/monsters.csv')
     monstersRef = monstersRef.filter(({ keyword }) => keyword != null);
 });
 
+document.addEventListener('DOMContentLoaded', function() {
 
-// We wait till all async processes have completed before starting the game
-Promise.all([promise1, promise2]).then((values) => {
-    
-    loadData();
-    initalizeMap();
-    initializeAreaPicker();
-    
-  });
+    // We wait till all async processes have completed before starting the game
+    Promise.all([promise1, promise2]).then((values) => {
+        
+        loadData();
+        initalizeMap();
+        initializeAreaPicker();
+        
+    });
+});
 
 
 function loadArea() {
@@ -307,6 +317,81 @@ function updateMap() {
     }
     else
         console.error("updateMap - Current Area: " + currentArea + " has no locations");
+
+    updateButtons();
+}
+
+function updateButtons() {
+    
+    removeCreatedButtons();
+
+    if (currentLocation === null) return;
+    
+    if (currentLocation.items != null && currentLocation.items != "") {
+        
+        for (const itemKeyword of currentLocation.items) {
+
+            let item = itemsRef[getIndexFromKeyword(itemKeyword, objectType.item)];
+            const newButton = createButton(itemKeyword, objectType.item);
+            createdButtons.push(newButton);
+            newButton.button.classList = "nav-button item-button can-hover";
+            newButton.buttonText.innerText = item.title;
+        }
+    }
+    if (currentLocation.monsters != null && currentLocation.monsters != "") {
+
+        for (const monsterKeyword of currentLocation.monsters) {
+
+            let monster = monstersRef[getIndexFromKeyword(monsterKeyword, objectType.monster)];
+            const newButton = createButton(monsterKeyword, objectType.monster);
+            createdButtons.push(newButton);
+            newButton.button.classList = "nav-button monster-button can-hover";
+            newButton.buttonText.innerText = monster.title;
+        }
+    }
+    if (currentLocation.npcs != null && currentLocation.npcs != "") {
+
+        for (const npcKeyword of currentLocation.npcs) {
+
+            let npc = npcsRef[getIndexFromKeyword(npcKeyword, objectType.npc)];
+            const newButton = createButton(npcKeyword, objectType.npc);
+            createdButtons.push(newButton);
+            newButton.button.classList = "nav-button npc-button can-hover";
+            newButton.buttonText.innerText = npc.title;
+        }
+    }
+}
+
+function createButton(objectKeyword, objType) {
+
+    const clone = buttonMaster.cloneNode(true);
+
+    let newButton = {
+        container: clone,
+        button: clone.querySelector('#button-master'),
+        keyword: objectKeyword,
+        type: objType,        
+        buttonText: clone.querySelector('#button-master').querySelector('.button-text'),        
+    }
+
+    clone.querySelector('.button-delete').onclick = function() {
+        deleteObject(objectKeyword, objType);
+    }        
+
+    newButton.container.style.display = "flex";
+    newButton.button.classList.remove('active');
+    buttonsContainer.insertBefore(newButton.container, buttonMaster);
+
+    return newButton;
+}
+
+function removeCreatedButtons() {
+
+    createdButtons.forEach((element) => {        
+        element.container.remove();
+    });
+    
+    createdButtons = [];
 }
 
 function toggleNode(location) {
@@ -370,6 +455,185 @@ console.log([coordinatesA[0],coordinatesA[1]+1], coordinatesB);
     return isAdjacent;
 }
 
+function deleteObject(objectKeyword, objType) {
+
+    if (currentLocation === null) { console.error("deleteObject but currentLocation is null"); return; }
+
+    console.log("deleteObject() - keyword: " + objectKeyword + "  type: " + objType);
+
+    switch (objType) {        
+        case objectType.item:
+            ar = currentLocation.items;
+            break;
+        case objectType.monster:
+            ar = currentLocation.monsters;
+            break;
+        case objectType.npc:
+            ar = ar = currentLocation.npcs;
+            break;
+    }
+
+    ar.splice(ar.indexOf(objectKeyword), 1);
+    updateButtons();
+}
+
+function createNewObject() {
+
+    if (currentLocation === null) { console.error("createObject but currentLocation is null"); return; }
+    if (newObjectSelected === null) { console.error("createObject but no selected object "); return; }
+
+    switch (newObjectSelected.type) {        
+        case objectType.item:
+            ar = currentLocation.items;
+            break;
+        case objectType.monster:
+            ar = currentLocation.monsters;
+            break;
+        case objectType.npc:
+            ar = ar = currentLocation.npcs;
+            break;            
+    }
+
+    ar.push(newObjectSelected.keyword);
+    closeNewObjectPicker();
+    updateButtons();
+}
+
+let newObjectTypeSelected = null;
+let newObjectSelected = null;
+
+function initializeNewObjectPicker() {
+    
+    newObjectTypeSelected = null;
+    newObjectSelected = null;
+
+    const typeDropdownContent = newObjectContainer.querySelector('#new-object-type-picker').querySelector('.dropdown-content');
+    const typeDropdownButton = newObjectContainer.querySelector('#new-object-type-picker').querySelector('.dropbtn');
+    const objectDropdownContent = newObjectContainer.querySelector('#new-object-picker').querySelector('.dropdown-content');
+    const objectDropdownButton = newObjectContainer.querySelector('#new-object-picker').querySelector('.dropbtn');
+
+    typeDropdownButton.textContent = "Select";
+    objectDropdownButton.textContent = '';
+
+    
+    while (typeDropdownContent.firstChild) {
+        typeDropdownContent.removeChild(typeDropdownContent.firstChild);
+    }
+    while (objectDropdownContent.firstChild) {
+        objectDropdownContent.removeChild(objectDropdownContent.firstChild);
+    }
+
+    let entry = null;
+    entry = document.createElement('a');
+    entry.textContent = "Item";
+    entry.addEventListener('click', function(event) {
+        newObjectTypeSelected = objectType.item;
+        event.preventDefault();
+        typeDropdownButton.textContent = "Item";
+        updateNewObjectPicker();
+    });
+    typeDropdownContent.appendChild(entry);
+
+    entry = document.createElement('a');
+    entry.textContent = "Monster";
+    entry.addEventListener('click', function(event) {
+        newObjectTypeSelected = objectType.monster;
+        event.preventDefault();
+        typeDropdownButton.textContent = "Monster";
+        updateNewObjectPicker();
+    });
+    typeDropdownContent.appendChild(entry);
+
+    entry = document.createElement('a');
+    entry.textContent = "NPC";
+    entry.addEventListener('click', function(event) {
+        newObjectTypeSelected = objectType.npc;
+        event.preventDefault();
+        typeDropdownButton.textContent = "NPC";
+        updateNewObjectPicker();
+    });
+    typeDropdownContent.appendChild(entry);
+
+
+    updateNewObjectPicker();
+    newObjectContainer.style.display = "block";
+}
+
+function updateNewObjectPicker() {
+
+    if (newObjectTypeSelected === null) return;
+    
+    const objectDropdownContent = newObjectContainer.querySelector('#new-object-picker').querySelector('.dropdown-content');
+    const objectDropdownButton = newObjectContainer.querySelector('#new-object-picker').querySelector('.dropbtn');
+
+    newObjectSelected = null;
+    objectDropdownButton.textContent = "Select";
+    
+    while (objectDropdownContent.firstChild) {
+        objectDropdownContent.removeChild(objectDropdownContent.firstChild);
+    }
+    
+    
+    switch (newObjectTypeSelected) {
+        case (objectType.item):
+            
+            for (const item of itemsRef) {
+                
+                let entry = document.createElement('a');
+                entry.textContent = item.title;
+                entry.addEventListener('click', function(event) {
+                    newObjectTypeSelected = objectType.item;
+                    event.preventDefault();
+                    objectDropdownButton.textContent = item.title;
+                    newObjectSelected = { keyword: item.keyword, type: objectType.item };
+                });
+                objectDropdownContent.appendChild(entry);
+            }
+            break;
+        case (objectType.monster):
+
+            for (const monster of monstersRef) {
+                
+                let entry = document.createElement('a');
+                entry.textContent = monster.title;
+                entry.addEventListener('click', function(event) {
+                    newObjectTypeSelected = objectType.monster;
+                    event.preventDefault();
+                    objectDropdownButton.textContent = monster.title;
+                    newObjectSelected = { keyword: monster.keyword, type: objectType.monster };
+                });
+                objectDropdownContent.appendChild(entry);
+            }
+            break;
+        case (objectType.npc):
+
+            for (const npc of npcsRef) {
+                    
+                let entry = document.createElement('a');
+                entry.textContent = npc.title;
+                entry.addEventListener('click', function(event) {
+                    newObjectTypeSelected = objectType.npc;
+                    event.preventDefault();
+                    objectDropdownButton.textContent = npc.title;
+                    newObjectSelected = { keyword: npc.keyword, type: objectType.npc };
+                });
+                objectDropdownContent.appendChild(entry);
+            }
+            break;
+    }
+}
+
+function closeNewObjectPicker() {
+
+    newObjectContainer.style.display = "none";
+}
+
+
+
+
+
+
+
 /////////
 // UTILITIES - Copy Pasted from Functions on Sept. 22
 ////////
@@ -404,10 +668,13 @@ function getLocationFromArea(coordinates, area) {
             ar = areasData;
             break;
         case objectType.item:
-            ar = items;            
+            ar = itemsRef;            
+            break;
+        case objectType.monster:
+            ar = monstersRef;            
             break;
         case objectType.npc:
-            ar = npcs;            
+            ar = npcsRef;            
             break;
     }
     
@@ -624,7 +891,7 @@ function locationsHavePath(locationA, locationB) {
   
       _items.forEach((element,index) => {
           
-          let item = items[getIndexFromKeyword(element, objectType.item)];
+          let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
           
           // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
           if (item.blocking != null && item.blocking != "") {
@@ -652,7 +919,7 @@ function locationsHavePath(locationA, locationB) {
   
       _items.forEach((element,index) => {
           
-          let item = items[getIndexFromKeyword(element, objectType.item)];
+          let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
           
           // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
           if (item.blocking != null && item.blocking != "") {
@@ -783,5 +1050,22 @@ document.getElementById('save-button').addEventListener('click', async function(
         console.error('Error writing file:', error);        
     }
 });
+
+document.getElementById('new-button').addEventListener('click', async function() {
+
+    if (currentLocation === null) return;
+    initializeNewObjectPicker();
+});
+
+document.getElementById('cancel-button').addEventListener('click', async function() {
+
+    closeNewObjectPicker();
+});
+
+document.getElementById('create-button').addEventListener('click', async function() {
+    
+    createNewObject();
+});
+
 
 document.addEventListener('keydown', function(event) { if (event.key === 'Backspace') { removeLocation(currentLocation); playClick(); } });
