@@ -63,13 +63,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // We wait till all async processes have completed before starting the game
     Promise.all([promise1, promise2]).then((values) => {
         
-        loadData();
-        initalizeMap();
-        initializeAreaPicker();
-        
+        initialize();        
     });
 });
 
+async function initialize() {
+
+    await loadData();
+
+    initalizeMap();
+    initializeAreaPicker();
+}
 
 function loadArea() {
 
@@ -157,15 +161,21 @@ function initializeAreaPicker() {
     const dropdownContent = document.querySelector('.dropdown-content');
     const dropbtn = document.querySelector('.dropbtn');
 
-    for (let i = 1; i <= 10; i++) {
-        const entry = document.createElement('a');
-        entry.href = '#';
-        entry.textContent = `Entry ${i}`;
-        entry.addEventListener('click', function(event) {
-            event.preventDefault();
-            dropbtn.textContent = `Selected: Entry ${i}`;
-        });
+    while (dropdownContent.firstChild) {
+        dropdownContent.removeChild(dropdownContent.firstChild);
+    }
 
+    for (const area of areasData) {
+                
+        let entry = document.createElement('a');
+        entry.textContent = area.title;
+        entry.addEventListener('click', function(event) {
+            newObjectTypeSelected = objectType.area;
+            event.preventDefault();
+            dropbtn.textContent = area.title;
+            currentArea = getElementFromKeyword(area.keyword, areasData);
+            loadArea();
+        });
         dropdownContent.appendChild(entry);
     }
 }
@@ -267,11 +277,16 @@ function updateMap() {
             // Set this location square to active                        
             nodeObject.element.classList = "main-square active can-hover"
 
-            // If this location is adjacent to the player's current location, it is hoverable and clickable to move here
-            if (currentLocation != null && isAdjacentToCurrent) {
-                
-                nodeObject.element.onclick = function() { 
-                    playClick();
+
+            // Set this node's on click function            
+            nodeObject.element.onclick = function() { 
+
+                playClick();
+
+                if (!isLeftCtrlHeld || (isLeftCtrlHeld && currentLocation === null)) {
+                    toggleNode(location);                
+                }
+                else {
                     const _currentLocation = currentLocation;   // Store this so we can set the actual value to null but still use the current store location                    
                     currentLocation = null;
 
@@ -285,20 +300,12 @@ function updateMap() {
                     }
 
                     updateMap();
-                };
-            }
-            else if (currentLocation === null) {
-                
-                nodeObject.element.onclick = function() { 
-                    toggleNode(location);
-                    playClick();
-                };
-            }
-
+                }                    
+            };
+            
             if (location.door != null) {
                 nodeObject.element.classList += " door";
             }
-
         });
 
         // Insert player symbol in current location        
@@ -307,11 +314,6 @@ function updateMap() {
 
             currentLocationNode = mapGrid[currentLocation.coordinates[0]][currentLocation.coordinates[1]];
             currentLocationNode.element.classList = "main-square current  can-hover"
-
-            currentLocationNode.element.onclick = function() { 
-                toggleNode(currentLocation);
-                playClick();
-            };
         }
 
     }
@@ -396,7 +398,7 @@ function removeCreatedButtons() {
 
 function toggleNode(location) {
 
-    if (currentLocation != null && compareArrays(location.coordinates, currentLocation.coordinates))        
+    if (currentLocation != null && compareArrays(location.coordinates, currentLocation.coordinates))
         currentLocation = null;
     else
         currentLocation = location;
@@ -438,11 +440,9 @@ function removeLocation(location) {
 }
 
 function checkIsAdjacent(coordinatesA, coordinatesB) {
-
     
     let isAdjacent = false;
-    console.log(coordinatesA);
-console.log([coordinatesA[0],coordinatesA[1]+1], coordinatesB);
+
     if (compareArrays([coordinatesA[0]-1,coordinatesA[1]], coordinatesB))
         isAdjacent = true; 
     if (compareArrays([coordinatesA[0],coordinatesA[1]-1], coordinatesB)) 
@@ -638,6 +638,22 @@ function closeNewObjectPicker() {
 // UTILITIES - Copy Pasted from Functions on Sept. 22
 ////////
 
+function getElementFromKeyword(keyword, array) {
+    
+    if (array === undefined || array === null) console.error("getElementFromKeyword() - keyword [" + keyword + "] No array provided");
+
+    let index = -1;
+    
+    array.forEach((element, i) => {        
+        if (element.keyword === keyword) {
+            
+            index = i;            
+        }
+    });
+    
+    if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
+    return index;
+  }  
 
 function getLocationFromArea(coordinates, area) {
     
@@ -1014,7 +1030,7 @@ async function loadData() {
         }
         const contents = await response.text();
         areasData = JSON.parse(contents);
-        loadArea();
+        
         console.log('File has been loaded successfully.');
 
     } catch (error) {
@@ -1069,3 +1085,18 @@ document.getElementById('create-button').addEventListener('click', async functio
 
 
 document.addEventListener('keydown', function(event) { if (event.key === 'Backspace') { removeLocation(currentLocation); playClick(); } });
+
+let isLeftCtrlHeld = false;
+
+// Add event listeners for keydown and keyup
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Control') {        
+        isLeftCtrlHeld = true;
+    }
+});
+
+document.addEventListener('keyup', function(event) {
+    if (event.key === 'Control') {        
+        isLeftCtrlHeld = false;
+    }
+});
