@@ -246,7 +246,10 @@ function updateMap() {
                 }
 
                     if (locationsHavePath(location, getLocationInDirection(location.coordinates, currentArea, "north")))
-                        nodeObject.north.classList = "horizontal-square inactive";
+                        if (pathIsBlocked(location, getLocationInDirection(location.coordinates, currentArea, "north")))
+                            nodeObject.north.classList = "horizontal-square blocked";
+                        else
+                            nodeObject.north.classList = "horizontal-square inactive";
                 }
             }
             if (nodeObject.west != null) {                          
@@ -257,7 +260,10 @@ function updateMap() {
                     }
                     
                     if (locationsHavePath(location, getLocationInDirection(location.coordinates, currentArea, "west")))
-                        nodeObject.west.classList = "vertical-square inactive";                   
+                        if (pathIsBlocked(location, getLocationInDirection(location.coordinates, currentArea, "west")))
+                            nodeObject.west.classList = "vertical-square blocked";                   
+                        else
+                            nodeObject.west.classList = "vertical-square inactive";                   
                 }
             }
             if (nodeObject.east != null) {                          
@@ -268,7 +274,10 @@ function updateMap() {
                     }
                     
                     if (locationsHavePath(location, getLocationInDirection(location.coordinates, currentArea, "east")))
-                        nodeObject.east.classList = "vertical-square inactive";               
+                        if (pathIsBlocked(location, getLocationInDirection(location.coordinates, currentArea, "east")))
+                            nodeObject.east.classList = "vertical-square blocked";               
+                        else
+                            nodeObject.east.classList = "vertical-square inactive";               
                 }
             }
             if (nodeObject.south != null) {                          
@@ -279,7 +288,10 @@ function updateMap() {
                     }
                     
                     if (locationsHavePath(location, getLocationInDirection(location.coordinates, currentArea, "south")))
-                        nodeObject.south.classList = "horizontal-square inactive";
+                        if (pathIsBlocked(location, getLocationInDirection(location.coordinates, currentArea, "south")))
+                            nodeObject.south.classList = "horizontal-square blocked";
+                        else
+                            nodeObject.south.classList = "horizontal-square inactive";
                  
                 }
             }            
@@ -510,7 +522,7 @@ function deleteObject(objectKeyword, objType) {
     }
 
     ar.splice(ar.indexOf(objectKeyword), 1);
-    updateButtons();
+    updateMap();    
 }
 
 function createNewObject() {
@@ -1044,97 +1056,123 @@ function removePath(locationA, locationB) {
 }
 
 function locationsHavePath(locationA, locationB) {
-  
-  let locationABlockedDirections = [];
-  let locationBBlockedDirections = [];
-
-  // Check present items for anything blocking exits    
-  let _items = locationA.items;
-  
-  if (_items != undefined && _items.length > 0 && _items != "") {
-  
-      _items.forEach((element,index) => {
-          
-          let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
-          
-          // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
-          if (item.blocking != null && item.blocking != "") {
-
-              switch (item.blocking) {
-                  case "north":                        
-                      locationABlockedDirections.push(0);
-                      break;             
-                  case "west":
-                      locationABlockedDirections.push(1);
-                      break;                        
-                  case "east":
-                      locationABlockedDirections.push(2);
-                      break;                        
-                  case "south":
-                      locationABlockedDirections.push(3);
-                      break;
-              }
-          }
-      });
-  }    
-
-  _items = locationB.items;
-  if (_items != undefined && _items.length > 0 && _items != "") {
-  
-      _items.forEach((element,index) => {
-          
-          let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
-          
-          // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
-          if (item.blocking != null && item.blocking != "") {
-
-              switch (item.blocking) {
-                  case "north":                        
-                      locationBBlockedDirections.push(0);
-                      break;             
-                  case "west":
-                      locationBBlockedDirections.push(1);
-                      break;                        
-                  case "east":
-                      locationBBlockedDirections.push(2);
-                      break;                        
-                  case "south":
-                      locationBBlockedDirections.push(3);
-                      break;
-              }
-          }
-      });
-  }
+    
 
   hasPath = false;    
 
   // If locationA has a coordinate listed to the north
   if (locationA.north != null) {
       // Check if locationA's north exit coordinates match LocationB's coordinates, and check if LocationB's south coordinates match LocationA's coordinates
-      if (compareArrays(locationA.north, locationB.coordinates) && compareArrays(locationB.south, locationA.coordinates))
-          // Check if LocationA has a blocked direction to the north, or if locationB has a block to the south
-          if (!locationABlockedDirections.includes(0) && !locationBBlockedDirections.includes(3))
+      if (compareArrays(locationA.north, locationB.coordinates) && compareArrays(locationB.south, locationA.coordinates))          
               hasPath = true;
   }
   if (locationA.west != null) {
-      if (compareArrays(locationA.west, locationB.coordinates) && compareArrays(locationB.east, locationA.coordinates))
-          if (!locationABlockedDirections.includes(1) && !locationBBlockedDirections.includes(2))
+      if (compareArrays(locationA.west, locationB.coordinates) && compareArrays(locationB.east, locationA.coordinates))          
               hasPath = true;
   }
   if (locationA.east != null) {
-      if (compareArrays(locationA.east, locationB.coordinates) && compareArrays(locationB.west, locationA.coordinates))
-          if (!locationABlockedDirections.includes(2) && !locationBBlockedDirections.includes(1))    
+      if (compareArrays(locationA.east, locationB.coordinates) && compareArrays(locationB.west, locationA.coordinates))          
               hasPath = true;
   }
   if (locationA.south != null) {
-      if (compareArrays(locationA.south, locationB.coordinates) && compareArrays(locationB.north, locationA.coordinates))
-          if (!locationABlockedDirections.includes(3) && !locationBBlockedDirections.includes(0))
+      if (compareArrays(locationA.south, locationB.coordinates) && compareArrays(locationB.north, locationA.coordinates))          
               hasPath = true;
   }
   
   return hasPath;
 }
 
+function pathIsBlocked(locationA, locationB) {
+  
+    let locationABlockedDirections = [];
+    let locationBBlockedDirections = [];
+  
+    // Check present items for anything blocking exits    
+    let _items = locationA.items;
+    
+    if (_items != undefined && _items.length > 0 && _items != "") {
+    
+        _items.forEach((element,index) => {
+            
+            let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
+            
+            // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
+            if (item.blocking != null && item.blocking != "") {
+  
+                switch (item.blocking) {
+                    case "north":                        
+                        locationABlockedDirections.push(0);
+                        break;             
+                    case "west":
+                        locationABlockedDirections.push(1);
+                        break;                        
+                    case "east":
+                        locationABlockedDirections.push(2);
+                        break;                        
+                    case "south":
+                        locationABlockedDirections.push(3);
+                        break;
+                }
+            }
+        });
+    }    
+  
+    _items = locationB.items;
+    if (_items != undefined && _items.length > 0 && _items != "") {
+    
+        _items.forEach((element,index) => {
+            
+            let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
+            
+            // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
+            if (item.blocking != null && item.blocking != "") {
+  
+                switch (item.blocking) {
+                    case "north":                        
+                        locationBBlockedDirections.push(0);
+                        break;             
+                    case "west":
+                        locationBBlockedDirections.push(1);
+                        break;                        
+                    case "east":
+                        locationBBlockedDirections.push(2);
+                        break;                        
+                    case "south":
+                        locationBBlockedDirections.push(3);
+                        break;
+                }
+            }
+        });
+    }
+  
+    let isBlocked = false;    
+  
+    // If locationA has a coordinate listed to the north
+    if (locationA.north != null) {
+        // Check if locationA's north exit coordinates match LocationB's coordinates, and check if LocationB's south coordinates match LocationA's coordinates
+        if (compareArrays(locationA.north, locationB.coordinates) && compareArrays(locationB.south, locationA.coordinates))
+            // Check if LocationA has a blocked direction to the north, or if locationB has a block to the south
+            if (locationABlockedDirections.includes(0) || locationBBlockedDirections.includes(3))
+                isBlocked = true;
+    }
+    if (locationA.west != null) {
+        if (compareArrays(locationA.west, locationB.coordinates) && compareArrays(locationB.east, locationA.coordinates))
+            if (locationABlockedDirections.includes(1) || locationBBlockedDirections.includes(2))
+                isBlocked = true;
+    }
+    if (locationA.east != null) {
+        if (compareArrays(locationA.east, locationB.coordinates) && compareArrays(locationB.west, locationA.coordinates))
+            if (locationABlockedDirections.includes(2) || locationBBlockedDirections.includes(1))    
+                isBlocked = true;
+    }
+    if (locationA.south != null) {
+        if (compareArrays(locationA.south, locationB.coordinates) && compareArrays(locationB.north, locationA.coordinates))
+            if (locationABlockedDirections.includes(3) || locationBBlockedDirections.includes(0))
+                isBlocked = true;
+    }
+    
+    return isBlocked;
+  }
 
 function playClick() {
   

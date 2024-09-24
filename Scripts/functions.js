@@ -2878,7 +2878,7 @@ function locationsHavePath(locationA, locationB) {
           element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
           element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
       });
-      console.log(items);
+      
       // Take the references in each locations monster array, and spawn unique versions of those from MonsterRef            
       for (const area of areas) {
         for (const location of area.locations) {
