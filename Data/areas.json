@@ -49,9 +49,7 @@
           "crimson_gate",
           "crimson_key"
         ],
-        "monsters": [
-          "goblin_01"
-        ],
+        "monsters": [],
         "npcs": [],
         "north": [
           1,
@@ -76,9 +74,7 @@
         "visited": false,
         "seen": false,
         "items": [],
-        "monsters": [
-          "goblin_01"
-        ],
+        "monsters": [],
         "npcs": [],
         "north": null,
         "west": [
@@ -376,7 +372,10 @@
           2,
           7
         ],
-        "south": null,
+        "south": [
+          3,
+          6
+        ],
         "door": null
       },
       {
@@ -486,7 +485,10 @@
         "items": [],
         "monsters": [],
         "npcs": [],
-        "north": null,
+        "north": [
+          0,
+          3
+        ],
         "west": null,
         "east": [
           1,
@@ -515,7 +517,13 @@
           1
         ],
         "south": null,
-        "door": null
+        "door": {
+          "area": "thorn_hollow",
+          "coordinates": [
+            3,
+            6
+          ]
+        }
       },
       {
         "coordinates": [
@@ -532,8 +540,80 @@
           0,
           0
         ],
+        "east": [
+          0,
+          2
+        ],
+        "south": null,
+        "door": null
+      },
+      {
+        "coordinates": [
+          3,
+          6
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": [
+          2,
+          6
+        ],
+        "west": null,
         "east": null,
         "south": null,
+        "door": {
+          "area": "thorn_hollow",
+          "coordinates": [
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "coordinates": [
+          0,
+          2
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": null,
+        "west": [
+          0,
+          1
+        ],
+        "east": [
+          0,
+          3
+        ],
+        "south": null,
+        "door": null
+      },
+      {
+        "coordinates": [
+          0,
+          3
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": null,
+        "west": [
+          0,
+          2
+        ],
+        "east": null,
+        "south": [
+          1,
+          3
+        ],
         "door": null
       }
     ]

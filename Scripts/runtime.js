@@ -77,8 +77,19 @@ resetLocationsCheckbox.onclick = function() {
     localStorage.setItem('resetLocations', JSON.stringify(resetLocations));
 };
 
-// We wait till all async processes have completed before starting the game
-Promise.all([promise1, promise2, promise3]).then((values) => {
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // We wait till all async processes have completed before starting the game
+    Promise.all([promise1, promise2, promise3]).then((values) => {
+        
+        loading();
+    });
+});
+
+async function loading() {
+    
+    await loadData();
     
     initializeGame();
-  });
+}

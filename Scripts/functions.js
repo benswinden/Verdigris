@@ -445,7 +445,7 @@ function updateButtons(skipAnimation)  {
         
         inventory.forEach((element,index) => {
             
-            let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
+            let item = items[getIndexFromKeyword(element, objectType.item)];
             if (item.canEquip && item.equipped) {
                 
                 if (item.actions.length > 0) {
@@ -550,7 +550,7 @@ function updateButtons(skipAnimation)  {
         _items = [];
         inventory.forEach((element, index) => {
 
-            if (itemsRef[getIndexFromKeyword(element, objectType.item)].canUpgrade)
+            if (items[getIndexFromKeyword(element, objectType.item)].canUpgrade)
                 _items.push(element);
         });
     }
@@ -561,9 +561,9 @@ function updateButtons(skipAnimation)  {
         
         // We make a deep copy of our inventory to inject these resource items into only while we are viewing the inventory
         _items = JSON.parse(JSON.stringify(inventory));
-        if (ore > 0) { itemsRef[getIndexFromKeyword("ore", objectType.item)].quantity = ore; _items.splice(0,0, "ore"); }
-        if (leather > 0) { itemsRef[getIndexFromKeyword("leather", objectType.item)].quantity = ore; _items.splice(0,0, "leather"); }
-        if (greenHerb > 0) { itemsRef[getIndexFromKeyword("green_herb", objectType.item)].quantity = greenHerb; _items.splice(0,0, "green_herb"); }            
+        if (ore > 0) { items[getIndexFromKeyword("ore", objectType.item)].quantity = ore; _items.splice(0,0, "ore"); }
+        if (leather > 0) { items[getIndexFromKeyword("leather", objectType.item)].quantity = ore; _items.splice(0,0, "leather"); }
+        if (greenHerb > 0) { items[getIndexFromKeyword("green_herb", objectType.item)].quantity = greenHerb; _items.splice(0,0, "green_herb"); }            
     }    
     if (_items != undefined && _items.length > 0 && _items != "") {
                 
@@ -587,7 +587,7 @@ function updateButtons(skipAnimation)  {
         // Create a button for each item contained in our array
         _items.forEach((element,index) => {
             
-            let item = itemsRef[getIndexFromKeyword(element, objectType.item)];                        
+            let item = items[getIndexFromKeyword(element, objectType.item)];                        
 
             let itemCostActive = false;            
             let descriptionTextActive = false;
@@ -1198,7 +1198,7 @@ function updateMap() {
     activeDirections = [];    
     let monsterPresent = false;
     if (currentLocation.monsters != undefined) monsterPresent = currentLocation.monsters.length > 0;
-
+    
     if (areas[currentArea].locations.length > 0) {
 
         // Reset state of all squares in the grid
@@ -1654,7 +1654,7 @@ function train(trainType, cost) {
             insight -= cost;
 
             let curseMarkIndex = getIndexFromKeyword("curse_mark", objectType.item);
-            itemsRef[curseMarkIndex].power += 5;
+            items[curseMarkIndex].power += 5;
             break;        
     }
 
@@ -1689,10 +1689,10 @@ function calculateStats() {
         
         let index = getIndexFromKeyword(element, objectType.item);
 
-        if (itemsRef[index].equipped) {
-            power += itemsRef[index].power;
-            maxStamina += itemsRef[index].stamina;
-            defence += itemsRef[index].defence;
+        if (items[index].equipped) {
+            power += items[index].power;
+            maxStamina += items[index].stamina;
+            defence += items[index].defence;
         }
     });
 }
@@ -1968,7 +1968,7 @@ function playerDeath() {
 
     let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
     // Set the quantity of the corpse item to the amount of gold we are holding
-    itemsRef[getIndexFromKeyword("corpse", objectType.item)].quantity = gold;
+    items[getIndexFromKeyword("corpse", objectType.item)].quantity = gold;
     // Remove all our gold
     gold = 0;
     updateStats();
@@ -2233,7 +2233,7 @@ function addToInventory(keyword) {
             return;
         }
 
-        let item = itemsRef[getIndexFromKeyword(keyword, objectType.item)];
+        let item = items[getIndexFromKeyword(keyword, objectType.item)];
         if (item === undefined) {
             console.error("addToInventory() - keyword:" + keyword + " not found in items array");
             return;
@@ -2271,7 +2271,7 @@ function addToInventory(keyword) {
 
 function buy(keyword, cost) {
 
-    let item = itemsRef[getIndexFromKeyword(keyword, objectType.item)];
+    let item = items[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("buy() - keyword:" + keyword + " not found in items array");
         return;
@@ -2290,7 +2290,7 @@ function buy(keyword, cost) {
 
 function upgrade(keyword, cost, oreCost, leatherCost) {
 
-    let item = itemsRef[getIndexFromKeyword(keyword, objectType.item)];
+    let item = items[getIndexFromKeyword(keyword, objectType.item)];
     if (item === undefined) {
         console.error("upgrade() - keyword:" + keyword + " not found in items array");
         return;
@@ -2404,7 +2404,7 @@ function toggleEquipped(keyword) {
     // Double check to make sure this is in our inventory
     if (inventoryIndexOf(keyword) != -1) {
 
-        let item = itemsRef[getIndexFromKeyword(keyword, objectType.item)];
+        let item = items[getIndexFromKeyword(keyword, objectType.item)];
         
         if (item.equipped) {
 
@@ -2470,7 +2470,7 @@ function save() {
 
     localStorage.setItem('areas', JSON.stringify(areas));        
     localStorage.setItem('npcs', JSON.stringify(npcs));
-    localStorage.setItem('items', JSON.stringify(itemsRef));
+    localStorage.setItem('items', JSON.stringify(items));
     localStorage.setItem('narrations', JSON.stringify(narrations));    
   }
   
@@ -2502,14 +2502,14 @@ function save() {
         
         areas = JSON.parse(localStorage.getItem('areas'));                            
         npcs = JSON.parse(localStorage.getItem('npcs'));
-        itemsRef = JSON.parse(localStorage.getItem('items'));
+        items = JSON.parse(localStorage.getItem('items'));
         narrations = JSON.parse(localStorage.getItem('narrations'));
     }
     else {
         areas = JSON.parse(JSON.stringify(areasRef));        
         areasVisited = [];        
         npcs = JSON.parse(JSON.stringify(npcsRef));
-        itemsRef = JSON.parse(JSON.stringify(itemsRef));
+        items = JSON.parse(JSON.stringify(itemsRef));
         narrations = JSON.parse(JSON.stringify(narrationsRef));
     }
   }
@@ -2538,7 +2538,7 @@ function save() {
             ar = areas;
             break;
         case objectType.item:
-            ar = itemsRef;            
+            ar = items;            
             break;
         case objectType.npc:
             ar = npcs;            
@@ -2783,7 +2783,7 @@ function locationsHavePath(locationA, locationB) {
     
         _items.forEach((element,index) => {
             
-            let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
+            let item = items[getIndexFromKeyword(element, objectType.item)];
             
             // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
             if (item.blocking != null && item.blocking != "") {
@@ -2811,7 +2811,7 @@ function locationsHavePath(locationA, locationB) {
     
         _items.forEach((element,index) => {
             
-            let item = itemsRef[getIndexFromKeyword(element, objectType.item)];
+            let item = items[getIndexFromKeyword(element, objectType.item)];
             
             // Check if this item blocks any directions (locked doors block a direction and need a key to be unlocked)
             if (item.blocking != null && item.blocking != "") {
@@ -2866,19 +2866,19 @@ function locationsHavePath(locationA, locationB) {
   function formatData() {    
       
       if (showDebugLog) console.log("formatData() - ");
-
+    
       areas = JSON.parse(JSON.stringify(areasRef));      
       npcs = JSON.parse(JSON.stringify(npcsRef));      
       narrations = JSON.parse(JSON.stringify(narrationsRef));
 
-      itemsRef = JSON.parse(JSON.stringify(itemsRef));
+      items = JSON.parse(JSON.stringify(itemsRef));
 
-      itemsRef.forEach((element,index) => {
+      items.forEach((element,index) => {
           
           element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
           element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
       });
-
+      console.log(items);
       // Take the references in each locations monster array, and spawn unique versions of those from MonsterRef            
       for (const area of areas) {
         for (const location of area.locations) {
@@ -2897,5 +2897,23 @@ function locationsHavePath(locationA, locationB) {
         }
       }
   }
+
+  async function loadData() {
+
+    try {
+
+        const response = await fetch('Data/areas.json');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const contents = await response.text();
+        areasRef = JSON.parse(contents);
+        
+        console.log('File has been loaded successfully.');
+
+    } catch (error) {
+        console.error('Error loading file:', error);
+    }
+}
 
   // #endregion
