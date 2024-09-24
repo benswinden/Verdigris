@@ -1,7 +1,7 @@
 [
   {
     "keyword": "bramble_path",
-    "title": "The Bramble Path",
+    "title": "The Bramble Paths",
     "description": "The ancient pathways were overgrown and hard to discern which way was which.",
     "narration": "",
     "update": "",
@@ -178,7 +178,10 @@
           3,
           6
         ],
-        "south": null,
+        "south": [
+          4,
+          5
+        ],
         "door": null
       },
       {
@@ -316,6 +319,31 @@
         "east": null,
         "south": null,
         "door": null
+      },
+      {
+        "coordinates": [
+          4,
+          5
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": [
+          3,
+          5
+        ],
+        "west": null,
+        "east": null,
+        "south": null,
+        "door": {
+          "area": "rose_wall",
+          "coordinates": [
+            0,
+            5
+          ]
+        }
       }
     ]
   },
@@ -615,6 +643,81 @@
           3
         ],
         "door": null
+      }
+    ]
+  },
+  {
+    "keyword": "rose_wall",
+    "title": "The Rose Wall",
+    "description": "A barrier of twisted briar and thorn, blooming in red and pink roses climbed high as a city wall.\\n\\nA hole led into the tangle where some large animal had broken it's way through.",
+    "narration": "",
+    "update": "",
+    "locations": [
+      {
+        "coordinates": [
+          2,
+          5
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": [
+          1,
+          5
+        ],
+        "west": null,
+        "east": null,
+        "south": null,
+        "door": null
+      },
+      {
+        "coordinates": [
+          1,
+          5
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": [
+          0,
+          5
+        ],
+        "west": null,
+        "east": null,
+        "south": [
+          2,
+          5
+        ],
+        "door": null
+      },
+      {
+        "coordinates": [
+          0,
+          5
+        ],
+        "visited": false,
+        "seen": false,
+        "items": [],
+        "monsters": [],
+        "npcs": [],
+        "north": null,
+        "west": null,
+        "east": null,
+        "south": [
+          1,
+          5
+        ],
+        "door": {
+          "area": "bramble_path",
+          "coordinates": [
+            4,
+            5
+          ]
+        }
       }
     ]
   }

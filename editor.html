@@ -16,12 +16,12 @@
         <div id="content">
 
             <header>            
-                <div class="nav-entry disabled">Area</div>
+                <div class="nav-entry nav-area selected">Area</div>
                 <div class="nav-separator"></div>
-                <div class="nav-entry selected">Map</div>
+                <div class="nav-entry nav-map disabled">Map</div>
             </header>
-            <main>
-                
+
+            <main>                
                 <div id="area-picker-container">
                     <div class="form-label">Area</div>
                     <div class="dropdown">
@@ -31,199 +31,239 @@
                     </div>
                 </div>                
 
-                <div id="map-grid-container">
-        
-                    <div class="row">
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div>            
+                <div id="area-section-container">
+                    <div class="form-label">Keyword</div>
+                    <input type="text" id="keyword-input">
+                    <div class="form-label">Title</div>
+                    <input type="text" id="title-input">
+                    <div class="form-label">Description</div>
+                    <textarea id="description-input"></textarea>
+
+                    <div id="new-area-container">
+                        <button id="new-area-button">New Area</button>
                     </div>
-                    <div class="row">
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
+                </div>
+
+                <div id="map-section-container">
+
+                    <div id="map-grid-container">
+            
+                        <div class="row">
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div>            
+                        </div>
+                        <div class="row">
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                        </div>
+                        <div class="row">
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div>            
+                        </div>
+                        <div class="row">
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                        </div>
+                        <div class="row">
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div>            
+                        </div>
+                        <div class="row">
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                        </div>    
+                        <div class="row">
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div>            
+                        </div>
+                        <div class="row">
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                        </div>
+                        <div class="row">
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div>            
+                        </div>
+                        <div class="row">
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                            <div class="horizontal-square"></div>
+                        </div>
+                        <div class="row">
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div><div class="vertical-square"></div>
+                            <div class="main-square"></div>            
+                        </div>        
                     </div>
-                    <div class="row">
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div>            
+                
+                    <div id="map-buttons-container">
+                        
+                        <div id="door-button-container">
+                            <button id="new-object-button">New Object</button> <button id="door-button">Create Door</button> <button id="remove-door-button">Remove Door</button>
+                        </div>
+
+                        <div id="door-attribute-container">
+                            <div id="door-area-picker">
+                                <div class="form-label">Area</div>
+                                <div class="dropdown">
+                                    <button class="dropbtn">Select</button>
+                                    <div class="dropdown-content">                            
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="door-coordinate-picker">
+                                <div class="form-label">Coordinates</div>
+                                <div class="dropdown">
+                                    <button class="dropbtn">Select</button>
+                                    <div class="dropdown-content">                            
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div id="buttons-container">
+                            <div id="button">
+                                <div id="button-master" class="nav-button can-hover active">                        
+                                    <div class="button-text"></div>
+                                </div>
+                                <div class="button-delete"><img class="delete-icon"></div>
+                            </div>
+                        </div>
+
+
+                        <div id="new-object-container">
+                            <div id="new-object-type-picker">
+                                <div class="form-label">Object Type</div>
+                                <div class="dropdown">
+                                    <button class="dropbtn">Select</button>
+                                    <div class="dropdown-content">                            
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="new-object-picker">
+                                <div class="form-label">Object</div>
+                                <div class="dropdown">
+                                    <button class="dropbtn">Select</button>
+                                    <div class="dropdown-content">                            
+                                    </div>
+                                </div>
+                            </div>                            
+
+                            <button id="create-object-button">Create</button><button id="cancel-button">Cancel</button>
+                        </div>                                                
                     </div>
-                    <div class="row">
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                    </div>
-                    <div class="row">
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div>            
-                    </div>
-                    <div class="row">
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                    </div>    
-                    <div class="row">
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div>            
-                    </div>
-                    <div class="row">
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                        <div class="horizontal-square"></div>
-                    </div>
-                    <div class="row">
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div><div class="vertical-square"></div>
-                        <div class="main-square"></div>            
-                    </div>        
+                </div>
+
+                <div id="save-button-container">
+                   <button id="save-button">Save</button> <button id="load-button">Load</button>
                 </div>
             </main>
-            
-            <nav>
-                
-                <div id="door-button-container">
-                    <button id="door-button">Create Door</button><button id="remove-door-button">Remove Door</button>
-
-                    <div id="door-attribute-container">
-                        <div id="door-area-picker">
-                            <div class="form-label">Area</div>
-                            <div class="dropdown">
-                                <button class="dropbtn">Select</button>
-                                <div class="dropdown-content">                            
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="door-coordinate-picker">
-                            <div class="form-label">Coordinates</div>
-                            <div class="dropdown">
-                                <button class="dropbtn">Select</button>
-                                <div class="dropdown-content">                            
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="buttons-container">
-                    <div id="button">
-                        <div id="button-master" class="nav-button can-hover active">                        
-                            <div class="button-text"></div>
-                        </div>
-                        <div class="button-delete"><img class="delete-icon"></div>
-                    </div>
-                </div>
-
-
-                <div id="new-object-container">
-                    <div id="new-object-type-picker">
-                        <div class="form-label">Object Type</div>
-                        <div class="dropdown">
-                            <button class="dropbtn">Select</button>
-                            <div class="dropdown-content">                            
-                            </div>
-                        </div>
-                    </div>
-                    <div id="new-object-picker">
-                        <div class="form-label">Object</div>
-                        <div class="dropdown">
-                            <button class="dropbtn">Select</button>
-                            <div class="dropdown-content">                            
-                            </div>
-                        </div>
-                    </div>                            
-
-                    <button id="create-button">Create</button><button id="cancel-button">Cancel</button>
-                </div>
-                
-                <div id="save-button-container">
-                    <button id="new-button">New Object</button> <button id="load-button">Load</button> <button id="save-button">Save</button>
-                </div>
-
-
         </div>
-        <div class="bg">
-            <img src="Assets/Background.png" alt="">
-          </div>
     </div>
 
     <script  src="Scripts/papaparse.min.js"></script>
-    <script  src="Scripts/editor.js"></script>    
-    <script  src="Scripts/areasTemp.js"></script>
-    <script  src="Scripts/npcs.js"></script>    
+    <script  src="Scripts/editor.js"></script>        
+    <script  src="Scripts/npcs.js"></script>
+
+    <div class="bg"> <img src="Assets/Background.png" alt=""> </div>
 </body>
 </html>

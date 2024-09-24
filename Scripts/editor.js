@@ -1,5 +1,5 @@
 
-let currentArea = 0;
+let currentArea = null;
 let currentLocation = null;
 
 let mapInitialize = false;
@@ -15,6 +15,8 @@ let monstersRef = [];
 let npcsRef = [];
 
 let areasTemp = [];
+
+let isLeftCtrlHeld = false;
 
 // enum
 const objectType = {
@@ -37,7 +39,14 @@ const newObjectPicker = document.querySelector("#new-object-picker");
 const createDoorButton = document.querySelector("#door-button");
 const removeDoorButton = document.querySelector("#remove-door-button");
 const doorAttributeContainer = document.querySelector("#door-attribute-container");
-
+const navArea = document.querySelector(".nav-area");
+const navMap = document.querySelector(".nav-map");
+const areaSection = document.querySelector("#area-section-container");
+const mapSection = document.querySelector("#map-section-container");
+const keywordInput = document.querySelector("#keyword-input");
+const titleInput = document.querySelector("#title-input");
+const descriptionInput = document.querySelector("#description-input");
+const newAreaButton = document.querySelector("#new-area-button");
 
 
 var config = 
@@ -65,6 +74,8 @@ const promise2 = fetch('Data/monsters.csv')
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    eventListeners();
+
     // We wait till all async processes have completed before starting the game
     Promise.all([promise1, promise2]).then((values) => {
         
@@ -80,11 +91,6 @@ async function initialize() {
     initializeAreaPicker();
 }
 
-function loadArea() {
-
-    updateMap();
-}
-
 function initalizeMap() {
 
     if (showDebugLog) console.log("initializeMap() - ");
@@ -92,6 +98,7 @@ function initalizeMap() {
     mapGrid = [];            // Grid that will hold our node objects
     const secondaryGrid = [];       // Grid to hold the refs to the smaller boxes temporarily
 
+    let rowCount = 0;
     for (let rowIndex = 0; rowIndex < mapGridContainer.children.length; rowIndex++) {
         
         const row = mapGridContainer.children[rowIndex];
@@ -102,8 +109,9 @@ function initalizeMap() {
             const mainRowArray = [];
             const secondaryRowArray = [];
 
+            let columnCount = 0;
             for (let elementIndex = 0; elementIndex < row.children.length; elementIndex++) {
-
+                
                 const element = row.children[elementIndex];     // This can be either a main square or a secondary one
 
                 // The even elements are going to be our node squares
@@ -117,6 +125,12 @@ function initalizeMap() {
                         south: null,
                     }
 
+                    const newDiv = document.createElement('div');
+                    element.appendChild(newDiv);
+                    newDiv.classList = "coordinate";
+                    newDiv.textContent = "[" + rowCount + "," + columnCount + "]";
+                    columnCount++;
+
                     mainRowArray.push(nodeObject);                    
                 }
                 // Otherwise we are on a vertical smaller square
@@ -128,6 +142,8 @@ function initalizeMap() {
 
             mapGrid.push(mainRowArray);
             secondaryGrid.push(secondaryRowArray);
+
+            rowCount++;
         } 
         // Otherwise we're in a row of horizontal connector squares
         else {
@@ -143,7 +159,7 @@ function initalizeMap() {
             }
 
             secondaryGrid.push(secondaryRowArray);
-        }
+        }        
     }
 
     for (let y = 0; y < mapGrid.length; y++) {
@@ -190,6 +206,20 @@ function initializeAreaPicker() {
         });
         dropdownContent.appendChild(entry);
     }
+    console.log(currentArea);
+    if (currentArea != null) {
+
+        dropbtn.textContent = areasData[currentArea].title;
+    }
+}
+
+function loadArea() {
+
+    keywordInput.value = areasData[currentArea].keyword;
+    titleInput.value = areasData[currentArea].title;
+    descriptionInput.value = areasData[currentArea].description;
+
+    updateMap();
 }
 
 function updateMap() {
@@ -214,7 +244,7 @@ function updateMap() {
                 nodeObject.element.onclick = function() {
                     
                     const newLocation = createLocation([y,x]);
-                    playClick();                     
+                    playClick();
                     currentLocation = newLocation;
 
                     createDoorButton.style.display = "block";
@@ -304,11 +334,11 @@ function updateMap() {
             nodeObject.element.onclick = function() { 
 
                 playClick();
-
+                
                 if (!isLeftCtrlHeld || (isLeftCtrlHeld && currentLocation === null)) {
                     toggleNode(location);                
                 }
-                else {
+                else  {
                     const _currentLocation = currentLocation;   // Store this so we can set the actual value to null but still use the current store location
                     
                     createDoorButton.style.display = "none";
@@ -501,6 +531,37 @@ function checkIsAdjacent(coordinatesA, coordinatesB) {
         isAdjacent = true;
 
     return isAdjacent;
+}
+
+function createNewArea() {
+
+    const newArea = {
+        keyword: "new_area",
+        title: "New area title",
+        description: "New area description.",
+        narration: "",
+        update: "",
+        locations: [
+            {
+                coordinates: [0,0],
+                visited: false,
+                seen: false,
+                items: [],
+                monsters: [],
+                npcs: [],
+                north: null,
+                west: null,
+                east: null,
+                south: null,
+                door: null
+            }
+        ]
+    };
+    
+    areasData.push(newArea);
+    currentArea = areasData.length-1;
+    initializeAreaPicker();
+    loadArea();
 }
 
 function deleteObject(objectKeyword, objType) {
@@ -1224,75 +1285,123 @@ async function loadData() {
     }
 }
 
-// SAVE BUTTON
-document.getElementById('save-button').addEventListener('click', async function() {
+function eventListeners() {
 
-    const fileHandle = await window.showSaveFilePicker({
-        types: [{
-            description: 'JSON Files',
-            accept: { 'application/json': ['.json'] }
-        }]
+    document.getElementById('save-button').addEventListener('click', async function() {
+
+        const fileHandle = await window.showSaveFilePicker({
+            suggestedName: 'areas.json',
+            types: [{
+                description: 'JSON Files',
+                accept: { 'application/json': ['.json'] }
+            }]
+        });
+
+        const writableStream = await fileHandle.createWritable();
+
+        try {
+
+            // Convert JSON object to string
+            const jsonString = JSON.stringify(areasData, null, 2);
+
+            // Write the JSON string to the file
+            await writableStream.write(jsonString);
+
+            // Close the file and save the changes
+            await writableStream.close();
+
+            console.log('File has been updated successfully.');
+        } catch (error) {
+            console.error('Error writing file:', error);        
+        }
     });
 
-    const writableStream = await fileHandle.createWritable();
+    document.getElementById('new-object-button').addEventListener('click', async function() {
 
-    try {
+        if (currentLocation === null) return;
+        initializeNewObjectPicker();
+    });
 
-        // Convert JSON object to string
-        const jsonString = JSON.stringify(areasData, null, 2);
+    document.getElementById('cancel-button').addEventListener('click', async function() {
 
-        // Write the JSON string to the file
-        await writableStream.write(jsonString);
+        closeNewObjectPicker();
+    });
 
-        // Close the file and save the changes
-        await writableStream.close();
+    document.getElementById('create-object-button').addEventListener('click', async function() {
+        
+        createNewObject();
+    });
 
-        console.log('File has been updated successfully.');
-    } catch (error) {
-        console.error('Error writing file:', error);        
-    }
-});
+    createDoorButton.addEventListener('click', async function() {
+        
+        createDoor();
+    });
 
-document.getElementById('new-button').addEventListener('click', async function() {
+    removeDoorButton.addEventListener('click', async function() {
+        
+        removeDoor();
+    });
 
-    if (currentLocation === null) return;
-    initializeNewObjectPicker();
-});
+    navArea.addEventListener('click', async function() {
+        
+        areaSection.style.display = "block";
+        mapSection.style.display = "none";
+        navArea.classList.remove("disabled");
+        navArea.classList.add("selected");
+        navMap.classList.remove("selected");
+        navMap.classList.add("disabled");
+    });
 
-document.getElementById('cancel-button').addEventListener('click', async function() {
+    navMap.addEventListener('click', async function() {
+        
+        areaSection.style.display = "none";
+        mapSection.style.display = "block";
+        navArea.classList.remove("selected");
+        navArea.classList.add("disabled");
+        navMap.classList.remove("disabled");
+        navMap.classList.add("selected");
+    });
 
-    closeNewObjectPicker();
-});
+    newAreaButton.addEventListener('click', async function() {
+        
+        createNewArea();
+    });
 
-document.getElementById('create-button').addEventListener('click', async function() {
-    
-    createNewObject();
-});
+    document.addEventListener('keydown', function(event) { if (event.key === 'Backspace') { removeLocation(currentLocation); playClick(); } });
 
-document.getElementById('door-button').addEventListener('click', async function() {
-    
-    createDoor();
-});
+    // Add event listeners for keydown and keyup
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Control') {        
+            isLeftCtrlHeld = true;
+        }
+    });
 
-document.getElementById('remove-door-button').addEventListener('click', async function() {
-    
-    removeDoor();
-});
+    document.addEventListener('keyup', function(event) {
+        if (event.key === 'Control') {        
+            isLeftCtrlHeld = false;
+        }
+    });
 
+    keywordInput.addEventListener('input', function(event) {
+        
+        if (currentArea === null) { console.error("Changed keyword but no current area"); return;}
 
-document.addEventListener('keydown', function(event) { if (event.key === 'Backspace') { removeLocation(currentLocation); playClick(); } });
+        areasData[currentArea].keyword = event.target.value;
+    });
 
-let isLeftCtrlHeld = false;
+    titleInput.addEventListener('input', function(event) {
+        
+        if (currentArea === null) { console.error("Changed title but no current area"); return;}
 
-// Add event listeners for keydown and keyup
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Control') {        
-        isLeftCtrlHeld = true;
-    }
-});
+        document.querySelector('#area-picker-container').querySelector('.dropbtn').textContent = event.target.value;
+        areasData[currentArea].title = event.target.value;
+    });
 
-document.addEventListener('keyup', function(event) {
-    if (event.key === 'Control') {        
-        isLeftCtrlHeld = false;
-    }
-});
+    descriptionInput.addEventListener('input', function(event) {
+        
+        if (currentArea === null) { console.error("Changed description but no current area"); return;}
+
+        areasData[currentArea].description = event.target.value;
+    });
+
+}

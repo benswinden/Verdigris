@@ -142,19 +142,73 @@ header {
 
 
 
+
 /*
-        MAP GRID
+        AREA SECTION
 */
+
+#area-section-container {
+    display: block;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    padding-left: 30px;
+    box-sizing: border-box;
+
+    font-family: Eczar;
+    color: #989A87;
+    font-size: 16px;    
+    background-color: #01090A;            
+    text-decoration: none;    
+    transition-duration: 0.4s;
+    border: 3px solid #363718;            
+}
+
+textarea {
+    height: 100px; /* Adjust the height as needed */
+}
+
+/* Style inputs and textarea when focused */
+input:focus, textarea:focus {
+    border-color: #8F871E; /* Change border color when focused */
+    outline: none; /* Remove default outline */
+    
+}
+
+#new-area-container {
+    margin-top: 20px;
+}
+
+
+/*
+        MAP SECTION
+*/
+
+#map-section-container {
+    display: none;
+}
 
 #map-grid-container {
     display: flex;
     margin-bottom: 30px;
 
     .main-square {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         height: 40px;
         width: 40px;                
         background-color: #06111377;
-        border: 2px solid transparent;
+        border: 2px solid transparent;    
+
+        .coordinate {
+            font-size: 12px;
+            color: #393D1E;
+        }
     }
     .main-square.active {
         border: 2px solid #363718;
@@ -210,6 +264,7 @@ header {
 }
 
 #door-button-container {
+    display: flex;
     margin-bottom: 50px;
     width: 100%;
 }
@@ -282,6 +337,7 @@ header {
 #save-button-container {
     display: flex;
     gap: 15px;
+    margin-top: 60px;
 }
 
 #new-object-container {
@@ -294,7 +350,7 @@ header {
     gap: 15px;
 }
 
-#remove-door-button, #door-button, #cancel-button, #create-button, #new-button, #load-button, #save-button{
+#new-area-button, #remove-door-button, #door-button, #cancel-button, #create-object-button, #new-object-button, #load-button, #save-button{
     font-family: Eczar;
     color: #989A87;
     font-size: 16px;    
@@ -309,7 +365,7 @@ header {
     margin-left: 20px;
 }
 
-#remove-door-button:hover, #door-button:hover, #cancel-button:hover, #create-button:hover, #new-button:hover, #load-button:hover, #save-button:hover {        
+#new-area-button:hover, #remove-door-button:hover, #door-button:hover, #cancel-button:hover, #create-object-button:hover, #new-object-button:hover, #load-button:hover, #save-button:hover {        
     border: 3px solid #6F7221;
 }
 
@@ -317,7 +373,7 @@ header {
     display: none;
 }
 
-#create-button {
+#create-object-button {
     margin-top: 30px;
 }
 
