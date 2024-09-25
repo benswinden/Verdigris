@@ -7,6 +7,8 @@ let hpCurrent = 10;
 let hpMax = 10;
 let gold = 0;
 
+let experience = 0;
+
 let ore = 0;
 let leather = 0;
 let greenHerb = 0;
@@ -61,11 +63,13 @@ let debugStartArea = "bramble_path";
 let debugStartCoordinates = [2,5];
 let debugWindowActive = false;
 
-// Stats
-const insightText = document.querySelector('#insight-text');
-const hpText = document.querySelector('#hp-text');
-const goldText = document.querySelector('#gold-text');
+// Header
+const header = document.querySelector('header');
+const playerXPBar = document.querySelector('#player-xp-bar-current');
 const inventoryIcon = document.querySelector('#inventory-icon');
+const playerHPBar = document.querySelector('#player-hp-bar-current');
+const playerHPText = document.querySelector('#player-hp-text');
+
 // Main Content
 const mainTitle =  document.querySelector('#main-title');
 const mainTitleText =  document.querySelector('#main-title-text');
@@ -90,15 +94,6 @@ const inventorySection =  document.querySelector('#inventory-section');
 const saleTitle =  document.querySelector('#sale-title');
 const saleSection =  document.querySelector('#sale-section');
 
-const hpStat = document.querySelector('#hp-stat');            // Text and icon combined
-const insightStat = document.querySelector('#insight-stat');        // Text and icon combined
-const goldStat = document.querySelector('#gold-stat');        // Text and icon combined
-const powerStat = document.querySelector('#power-stat');            // Text and icon combined
-const staminaStat = document.querySelector('#stamina-stat');        // Text and icon combined
-const defenceStat = document.querySelector('#defence-stat');        // Text and icon combined
-const powerText = document.querySelector('#power-text');
-const staminaText = document.querySelector('#stamina-text');
-const defenceText = document.querySelector('#defence-text');
 
 const buttonMaster = document.querySelector('#button-master');
 
@@ -219,6 +214,7 @@ function initializeGame() {
         // Using JSON to create deep newButtons of our starting data arrays
         formatData();
 
+        experience = 0;
         insight = 0;
         hpCurrent = 140;
         hpMax = 140;
@@ -294,8 +290,7 @@ function displayLocation(area, location) {
     updateMap();
 
     save();
-    resetUpdateText();
-    collapseStats();
+    resetUpdateText();    
     currentActiveButton = null;
     narrationText.style.display = "none";
     updateText.style.display = "none";    
@@ -630,7 +625,7 @@ function updateButtons(skipAnimation)  {
 
                 // 1: Location = Take 
                 case 1:                    
-                    document.querySelector("nav").insertBefore(newButton.button, buttonMaster);
+                    document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);
 
                     if (item.canTake) {
                         secondaryButtonDisplayed = true;
@@ -785,7 +780,7 @@ function updateButtons(skipAnimation)  {
                         }
                     }
 
-                    document.querySelector("nav").insertBefore(newButton.button, buttonMaster);
+                    document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);
                     statSectionActive = false;                
                     secondaryButtonDisplayed = true;
                     newButton.secondaryButtonText.innerText = "Upgrade";
@@ -873,7 +868,7 @@ function updateButtons(skipAnimation)  {
                     descriptionTextActive = true;
                 }
 
-                document.querySelector("nav").insertBefore(newButton.button, buttonMaster);
+                document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);
 
                 newButton.buttonLevelIcon.style.display = "block";
                 newButton.buttonLevelIcon.innerText = monster.level;
@@ -943,7 +938,7 @@ function updateButtons(skipAnimation)  {
                 // ITEM NAME
                 newButton.buttonText.innerText = npc.title;                
                 
-                document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
+                document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);                                                                
                 newButton.button.onclick = function() { displayNPC(getIndexFromKeyword(element, objectType.npc)); playClick(); };                                                                                
             });
         }
@@ -970,7 +965,7 @@ function updateButtons(skipAnimation)  {
                 createdActionButtons.push(newButton);
 
                 // ITEM NAME                            
-                document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
+                document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);                                                                
                 
                 let buttonActive = true;
 
@@ -1040,7 +1035,7 @@ function updateButtons(skipAnimation)  {
             newButton.button.style.display = "none";
             createdButtons.push(newButton);
             createdActionButtons.push(newButton);
-            document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
+            document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Body (" + increaseHpCost + " insight)";
             if (insight >= increaseHpCost) {        
                 
@@ -1058,7 +1053,7 @@ function updateButtons(skipAnimation)  {
             newButton.button.style.display = "none";
             createdButtons.push(newButton);
             createdActionButtons.push(newButton);
-            document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
+            document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Breathe (" + increaseStaminaCost + " insight)";
             if (insight >= increaseStaminaCost) {        
                 
@@ -1076,7 +1071,7 @@ function updateButtons(skipAnimation)  {
             newButton.button.style.display = "none";            
             createdButtons.push(newButton);
             createdActionButtons.push(newButton);
-            document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
+            document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);        
             newButton.buttonText.innerText = "Feed the Curse Mark (" + increasePowerCost + " insight)";
             if (insight >= increasePowerCost) {        
                 
@@ -1093,7 +1088,7 @@ function updateButtons(skipAnimation)  {
             newButton.button.style.display = "none";       
             createdButtons.push(newButton);
             createdActionButtons.push(newButton);
-            document.querySelector("nav").insertBefore(newButton.button, buttonMaster);        
+            document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
             newButton.buttonText.innerText = "Exit";
             newButton.button.onclick = function() {trainMenuOpen = false; displayLocation(currentArea, currentLocation);};
@@ -1546,7 +1541,6 @@ function displayInventory() {
 
     mapGridContainer.style.display = "none";
 
-    expandStats();    
     updateButtons(false);
 
     narrationText.style.display = "none";        
@@ -1580,8 +1574,6 @@ function clearInventory() {
     inventoryIcon.classList = "open-inventory";
     inventoryIcon.onclick = function() { displayInventory(); playClick(); };        
 
-    expandStats();
-
     inventoryTitle.style.display = "none";
     equipmentTitle.style.display = "none";
 }
@@ -1591,8 +1583,7 @@ function displayUpgrade() {
     mapGridContainer.style.display = "none";
 
     upgradeMenuOpen = true;
-    updateButtons(false);
-    expandStats();
+    updateButtons(false);    
 
     narrationText.style.display = "none";        
          
@@ -1628,9 +1619,7 @@ function displayTrain() {
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";    
     mainTitleText.innerText = "Seek Guidance";
-    mainText.innerText = "You close your eyes and kneel. You feel the earth below and breathe deep the air.";
-    
-    expandStats();
+    mainText.innerText = "You close your eyes and kneel. You feel the earth below and breathe deep the air.";    
 
     mapGridContainer.style.display = "none";
 
@@ -1668,13 +1657,13 @@ function updateStats() {
     
     calculateStats();
 
-    insightText.innerText = insight;
-    hpText.innerText = hpCurrent + " / " + hpMax;
-    goldText.innerText = gold;
+    playerHPText.innerText = hpCurrent + "/" + hpMax;
+    let HPCurrentPercent = hpCurrent / hpMax;        
+    playerHPBar.style.width = (HPCurrentPercent * 250 + 2)  + 'px';
+        
+    let XPCurrentPercent = experience / 1000;        
+    playerXPBar.style.width = (XPCurrentPercent * 625 + 2)  + 'px';
 
-    powerText.innerText = power;
-    staminaText.innerText = currentStamina + " / " + maxStamina;
-    defenceText.innerText = defence;
 }
 
 // Calculates stats that are based on multiple factors
@@ -1695,20 +1684,6 @@ function calculateStats() {
             defence += items[index].defence;
         }
     });
-}
-
-function expandStats() {
-
-    powerStat.style.display = "flex";
-    goldStat.style.display = "flex";
-    defenceStat.style.display = "flex";
-}
-
-function collapseStats() {
-
-    powerStat.style.display = "none";
-    goldStat.style.display = "none";
-    defenceStat.style.display = "none";
 }
 
 function updateMonsterUI(monsterButton) {
@@ -1991,7 +1966,7 @@ function playerDeath() {
     createdButtons.push(newButton);    
     newButton.button.classList = "nav-button action-button can-hover";                
     newButton.buttonText.innerText = "Awaken";                    
-    document.querySelector("nav").insertBefore(newButton.button, buttonMaster);                                                                
+    document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);                                                                
     newButton.button.onclick = function() { respawn();};        
     currentLocation = -99;   // Save 'dead' state
     save();
@@ -2154,8 +2129,11 @@ function monsterDeath(monsterButton) {
     // Remove this monster from the current location    
     currentLocation.monsters.splice(currentLocation.monsters.indexOf(monster.keyword),1);
 
-    let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monster.insight + " experience and " +  monster.gold + " gold";
+    const monsterExperience = getRandomInt(monster.experienceMin, monster.experienceMax);
 
+    let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monsterExperience + " experience and " +  monster.gold + " gold";
+
+    experience += monsterExperience;
     insight += monster.insight;
     gold += monster.gold;
     updateStats();     
@@ -2451,6 +2429,7 @@ function save() {
     localStorage.setItem('currentArea', JSON.stringify(currentArea));
     localStorage.setItem('locationsVisited', JSON.stringify(areasVisited));    
     localStorage.setItem('areasVisited', JSON.stringify(areasVisited));    
+    localStorage.setItem('experience', JSON.stringify(experience));
     localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
     localStorage.setItem('hpMax', JSON.stringify(hpMax));
@@ -2474,123 +2453,124 @@ function save() {
     localStorage.setItem('narrations', JSON.stringify(narrations));    
   }
   
-  function load() {
+function load() {
 
-    if (showDebugLog) console.log("Load");
+if (showDebugLog) console.log("Load");
 
-    currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
-    currentArea = JSON.parse(localStorage.getItem('currentArea'));           
-    areasVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
-    areasVisited = JSON.parse(localStorage.getItem('areasVisited'));    
-    insight = JSON.parse(localStorage.getItem('insight'));
-    hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
-    maxStamina = JSON.parse(localStorage.getItem('maxStamina'));
-    currentStamina = JSON.parse(localStorage.getItem('currentStamina'));
-    hpMax = JSON.parse(localStorage.getItem('hpMax'));
-    gold = JSON.parse(localStorage.getItem('gold'));
-    ore = JSON.parse(localStorage.getItem('ore'));
-    greenHerb = JSON.parse(localStorage.getItem('greenHerb'));
-    leather = JSON.parse(localStorage.getItem('leather'));
-    basePower = JSON.parse(localStorage.getItem('basePower'));
-    baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
-    baseDefence = JSON.parse(localStorage.getItem('baseDefence'));
-    inventory = JSON.parse(localStorage.getItem('inventory'));
-    respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'))
-    corpseLocation = JSON.parse(localStorage.getItem('corpseLocation'))
+currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
+currentArea = JSON.parse(localStorage.getItem('currentArea'));           
+areasVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
+areasVisited = JSON.parse(localStorage.getItem('areasVisited'));    
+experience = JSON.parse(localStorage.getItem('experience'));
+insight = JSON.parse(localStorage.getItem('insight'));
+hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
+maxStamina = JSON.parse(localStorage.getItem('maxStamina'));
+currentStamina = JSON.parse(localStorage.getItem('currentStamina'));
+hpMax = JSON.parse(localStorage.getItem('hpMax'));
+gold = JSON.parse(localStorage.getItem('gold'));
+ore = JSON.parse(localStorage.getItem('ore'));
+greenHerb = JSON.parse(localStorage.getItem('greenHerb'));
+leather = JSON.parse(localStorage.getItem('leather'));
+basePower = JSON.parse(localStorage.getItem('basePower'));
+baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
+baseDefence = JSON.parse(localStorage.getItem('baseDefence'));
+inventory = JSON.parse(localStorage.getItem('inventory'));
+respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'))
+corpseLocation = JSON.parse(localStorage.getItem('corpseLocation'))
 
-    if (!resetLocations) { 
+if (!resetLocations) { 
+    
+    areas = JSON.parse(localStorage.getItem('areas'));                            
+    npcs = JSON.parse(localStorage.getItem('npcs'));
+    items = JSON.parse(localStorage.getItem('items'));
+    narrations = JSON.parse(localStorage.getItem('narrations'));
+}
+else {
+    areas = JSON.parse(JSON.stringify(areasRef));        
+    areasVisited = [];        
+    npcs = JSON.parse(JSON.stringify(npcsRef));
+    items = JSON.parse(JSON.stringify(itemsRef));
+    narrations = JSON.parse(JSON.stringify(narrationsRef));
+}
+}
+
+function versionCheck() {
+
+let saveVersion = JSON.parse(localStorage.getItem('version'));
+if (showDebugLog) console.log("Current version: " + version + "    Save Version: " + saveVersion);
+return version === saveVersion;
+}
+
+function resetGame() {
+
+localStorage.clear();
+clearInventory();
+initializeGame();
+}
+
+// Get an index from an array of the given type.
+// i.e. I want to find a location named "keyword"
+function getIndexFromKeyword(keyword, objType) {
+
+ar = [];    
+switch (objType) {
+    case objectType.area://Location        
+        ar = areas;
+        break;
+    case objectType.item:
+        ar = items;            
+        break;
+    case objectType.npc:
+        ar = npcs;            
+        break;
+}
+
+let index = -1;
+
+ar.forEach((element, i) => {        
+    if (element.keyword === keyword) {
         
-        areas = JSON.parse(localStorage.getItem('areas'));                            
-        npcs = JSON.parse(localStorage.getItem('npcs'));
-        items = JSON.parse(localStorage.getItem('items'));
-        narrations = JSON.parse(localStorage.getItem('narrations'));
+        index = i;            
     }
-    else {
-        areas = JSON.parse(JSON.stringify(areasRef));        
-        areasVisited = [];        
-        npcs = JSON.parse(JSON.stringify(npcsRef));
-        items = JSON.parse(JSON.stringify(itemsRef));
-        narrations = JSON.parse(JSON.stringify(narrationsRef));
+});
+
+if (index === -1) console.error("getIndexFromkeyword() - Failed to find keyword [" + keyword + "] of object type [" + objType + "]");
+return index;
+}
+
+function getElementFromKeyword(keyword, array) {
+
+if (array === undefined || array === null) console.error("getElementFromKeyword() - keyword [" + keyword + "] No array provided");
+
+let index = -1;
+
+array.forEach((element, i) => {        
+    if (element.keyword === keyword) {
+        
+        index = i;            
     }
-  }
+});
 
-  function versionCheck() {
-    
-    let saveVersion = JSON.parse(localStorage.getItem('version'));
-    if (showDebugLog) console.log("Current version: " + version + "    Save Version: " + saveVersion);
-    return version === saveVersion;
-  }
+if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
+return index;
+}  
 
-  function resetGame() {
+function getLocationFromCurrentArea(coordinates) {
 
-    localStorage.clear();
-    clearInventory();
-    initializeGame();
-  }
+let loc = null;
 
-  // Get an index from an array of the given type.
-  // i.e. I want to find a location named "keyword"
-  function getIndexFromKeyword(keyword, objType) {
-    
-    ar = [];    
-    switch (objType) {
-        case objectType.area://Location        
-            ar = areas;
-            break;
-        case objectType.item:
-            ar = items;            
-            break;
-        case objectType.npc:
-            ar = npcs;            
-            break;
+areas[currentArea].locations.forEach((element, i) => {                
+
+    if (compareArrays(element.coordinates, coordinates)) {
+        
+        loc = element;            
     }
-    
-    let index = -1;
-    
-    ar.forEach((element, i) => {        
-        if (element.keyword === keyword) {
-            
-            index = i;            
-        }
-    });
-    
-    if (index === -1) console.error("getIndexFromkeyword() - Failed to find keyword [" + keyword + "] of object type [" + objType + "]");
-    return index;
-  }
+});
 
-  function getElementFromKeyword(keyword, array) {
-    
-    if (array === undefined || array === null) console.error("getElementFromKeyword() - keyword [" + keyword + "] No array provided");
+return loc;
+}
 
-    let index = -1;
-    
-    array.forEach((element, i) => {        
-        if (element.keyword === keyword) {
-            
-            index = i;            
-        }
-    });
-    
-    if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
-    return index;
-  }  
-
-  function getLocationFromCurrentArea(coordinates) {
-    
-    let loc = null;
-    
-    areas[currentArea].locations.forEach((element, i) => {                
-
-        if (compareArrays(element.coordinates, coordinates)) {
-            
-            loc = element;            
-        }
-    });
-
-    return loc;
-  }
-
-  function getLocationFromArea(coordinates, area) {
+function getLocationFromArea(coordinates, area) {
     
     let _area = null;
     if (Number.isInteger(area))
@@ -2599,7 +2579,7 @@ function save() {
         _area = getIndexFromKeyword(area, objectType.area);
 
     let loc = null;
-    
+
     areas[_area].locations.forEach((element, i) => {                
 
         if (compareArrays(element.coordinates, coordinates)) {
@@ -2609,71 +2589,77 @@ function save() {
     });
 
     return loc;
-  }
+}
 
-  function playClick() {
-  
-      let audioClipIndex = Math.floor(Math.random() * 5);
-      let audioClip = '';
-      switch (audioClipIndex) {
-          case 0:
-              audioClip = 'Audio/clicks/Click_1.wav';
-              break;
-          case 1:
-              audioClip = 'Audio/clicks/Click_2.wav';
-              break;
-          case 2:
-              audioClip = 'Audio/clicks/Click_3.wav';
-              break;
-          case 3:
-              audioClip = 'Audio/clicks/Click_4.wav';
-              break;
-          case 4:
-              audioClip = 'Audio/clicks/Click_5.wav';
-              break;
-      }
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+}
 
-      var audio = new Audio(audioClip);
-      audio.play();      
-  }
+function playClick() {
 
-  // Function to compare two arrays
-  function compareArrays(arr1, arr2) {
-      // Check if both arrays are defined
-      if (!arr1 || !arr2) {
-          return false;
-      }
+    let audioClipIndex = Math.floor(Math.random() * 5);
+    let audioClip = '';
+    switch (audioClipIndex) {
+        case 0:
+            audioClip = 'Audio/clicks/Click_1.wav';
+            break;
+        case 1:
+            audioClip = 'Audio/clicks/Click_2.wav';
+            break;
+        case 2:
+            audioClip = 'Audio/clicks/Click_3.wav';
+            break;
+        case 3:
+            audioClip = 'Audio/clicks/Click_4.wav';
+            break;
+        case 4:
+            audioClip = 'Audio/clicks/Click_5.wav';
+            break;
+    }
 
-      // Check if both arrays have the same length
-      if (arr1.length !== arr2.length) {
-          return false;
-      }
+    var audio = new Audio(audioClip);
+    audio.play();      
+}
 
-      // Compare each element
-      for (let i = 0; i < arr1.length; i++) {
-          const el1 = arr1[i];
-          const el2 = arr2[i];
+// Function to compare two arrays
+function compareArrays(arr1, arr2) {
+    // Check if both arrays are defined
+    if (!arr1 || !arr2) {
+        return false;
+    }
 
-          // If elements are arrays, compare them recursively
-          if (Array.isArray(el1) && Array.isArray(el2)) {
-              if (!compareArrays(el1, el2)) {
-                  return false;
-              }
-          } 
-          // If elements are objects, compare them recursively
-          else if (typeof el1 === 'object' && typeof el2 === 'object') {
-              if (!compareObjects(el1, el2)) {
-                  return false;
-              }
-          } 
-          // Otherwise, compare the elements directly
-          else if (el1 !== el2) {
-              return false;
-          }
-      }
+    // Check if both arrays have the same length
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
 
-      return true;
-  }
+    // Compare each element
+    for (let i = 0; i < arr1.length; i++) {
+        const el1 = arr1[i];
+        const el2 = arr2[i];
+
+        // If elements are arrays, compare them recursively
+        if (Array.isArray(el1) && Array.isArray(el2)) {
+            if (!compareArrays(el1, el2)) {
+                return false;
+            }
+        } 
+        // If elements are objects, compare them recursively
+        else if (typeof el1 === 'object' && typeof el2 === 'object') {
+            if (!compareObjects(el1, el2)) {
+                return false;
+            }
+        } 
+        // Otherwise, compare the elements directly
+        else if (el1 !== el2) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 // Helper function to compare two objects
 function compareObjects(obj1, obj2) {

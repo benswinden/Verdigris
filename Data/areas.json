@@ -104,7 +104,10 @@
         ],
         "north": null,
         "west": null,
-        "east": null,
+        "east": [
+          1,
+          6
+        ],
         "south": [
           2,
           5
@@ -167,7 +170,9 @@
         "visited": false,
         "seen": false,
         "items": [],
-        "monsters": [],
+        "monsters": [
+          "grub_01"
+        ],
         "npcs": [],
         "north": [
           2,
@@ -246,7 +251,9 @@
         "visited": false,
         "seen": false,
         "items": [],
-        "monsters": [],
+        "monsters": [
+          "goblin_02"
+        ],
         "npcs": [],
         "north": [
           2,
@@ -271,7 +278,10 @@
         "monsters": [],
         "npcs": [],
         "north": null,
-        "west": null,
+        "west": [
+          1,
+          5
+        ],
         "east": [
           1,
           7
@@ -287,7 +297,9 @@
         "visited": false,
         "seen": false,
         "items": [],
-        "monsters": [],
+        "monsters": [
+          "grub_02"
+        ],
         "npcs": [],
         "north": null,
         "west": [

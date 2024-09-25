@@ -80,6 +80,15 @@ resetLocationsCheckbox.onclick = function() {
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    window.addEventListener('scroll', function() {
+        
+        if (window.scrollY > 0) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+
     // We wait till all async processes have completed before starting the game
     Promise.all([promise1, promise2, promise3]).then((values) => {
         

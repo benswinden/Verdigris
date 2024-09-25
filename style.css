@@ -53,7 +53,7 @@ h1, h2, p {
 #debug {
     display: none;
     position: absolute;
-    top: 0;
+    top: 100px;
     left: 0;
     color: #9b9b9b;
     font-size: 16px;
@@ -88,50 +88,115 @@ h1, h2, p {
         HEADER
 */
 
-
 header {
-    display: flex;
-    justify-content: space-between;    
-    font-size: 28px;
-    border-radius: 6px;       
-    margin: 95px 0 0 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    transition-duration: 0.4s;
+    background-color: transparent;
 }
 
-#stats {    
-    background: #01090A;
-    border: 1px solid #363718;
-    width: 100%;
+header.scrolled {
+    background-color: #030807e6;
+}
 
-    div {
-        text-align: center;
-        min-width: 70px;
+#header-container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;    
+    max-width: 700px;
+    margin: auto;
+    margin-top: 22px;
+}
+
+#player-level-icon {
+    position:absolute;
+    top: -18px;
+    display: block;
+    text-align: center;        
+    color: #D0BC02;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 53px;
+    width: 50px;
+    height: 50px;
+    margin: 5px 0px 0 -20px;        
+    background-image: url("Assets/PlayerXPDiamond.svg");
+    background-repeat: no-repeat;
+    z-index: 10; 
+}
+
+#player-xp-section {
+    
+    line-height: 0;    
+
+    #player-xp-bar-background {        
+        border-radius: 2px;
+        background-color: transparent;
+        border: 2px solid #363718;
+        width: 625px;
+        height: 8px;
+        margin: 5px 0 0 0;
+        display : flex;
+        align-items : center;
+        justify-content: center;
+        z-index: 1;        
+    }
+
+    #player-xp-bar-current {
+        position: relative;
+        border-radius: 0px;
+        background-color: #575943;    
+        border-radius: 2px;
+        width: 300px;
+        height: 8px;        
+        top: -10px;
+        z-index: 2;
     }
 }
 
-ul {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    height: auto;
-    width: auto;        
-    list-style: none;    
-    margin: 0;
-    padding: 0;
-    font-size: 20px;        
-    font-weight: 700;        
+
+#player-hp-section {
+    margin-left: 55px;
+    line-height: 0;    
+
+    #player-hp-bar-background {        
+        border-radius: 2px;
+        background-color: #01090A;
+        border: 2px solid #512018;
+        width: 250px;
+        height: 16px;
+        margin: 5px 0 0 0;
+        display : flex;
+        align-items : center;
+        justify-content: center;
+        z-index: 1;        
+    }
+
+    #player-hp-bar-current {
+        position: relative;
+        background-color: #512018;    
+        border-radius: 2px;
+        width: 200px;
+        height: 16px;        
+        top: -18px;
+        z-index: 2;
+    }
+
+    #player-hp-text {
+        margin: 0;
+        padding: 0;
+        line-height: 0;
+        color: #E86E40;
+        font-size: 13px;
+        font-weight: 500;    
+        z-index: 3;
+    }
 }
 
-li {
-    color: #CDCEC6;
-    font-size: 21px;
-    font-weight: 400;
-    display: flex;    
-    justify-content: center;
-    align-items: center;    
-}
 
-li.hidden {
-    display:none;
-}
 
 #inventory-button-section {
     cursor:pointer;
@@ -140,9 +205,10 @@ li.hidden {
     align-items: center;
     background: #01090A;
     border: 1px solid #363718;
-    width: 70px;
-    height: 65px;
-    margin-left: 10px;
+    width: 40px;
+    height: 35px;
+    margin-left: 15px;
+    margin-top: -7px;
 
     .open-inventory {
         width: 75%;
@@ -170,13 +236,22 @@ li.hidden {
     }
 }
 
+
+
+
+/*
+        MAIN
+*/
+
+
 main {
-    margin: 25px;
+    margin-top: 140px;
+    margin-bottom: 100px;
 }
 
 .title-section {
     color: black;
-    margin: 80px 0 0 0;
+    margin: 0 0 0 0;
 
     #main-title {
         display: flex;
@@ -367,7 +442,7 @@ main {
         BUTTONS
 */
 
-nav {
+#main-button-container {
      padding-bottom: 100px;
 }
 
@@ -652,6 +727,34 @@ nav {
     color: #C0C8CF;
     border: 3px solid #7C8D97;
 }
+
+/* Lists are used for stat section in the expanded item button
+*/
+ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    height: auto;
+    width: auto;        
+    list-style: none;    
+    margin: 0;
+    padding: 0;
+    font-size: 20px;        
+    font-weight: 700;        
+}
+
+li {
+    color: #CDCEC6;
+    font-size: 21px;
+    font-weight: 400;
+    display: flex;    
+    justify-content: center;
+    align-items: center;    
+}
+
+li.hidden {
+    display:none;
+}
+
 
 .npc-button {
     color: #6C7D5B;
