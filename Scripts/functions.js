@@ -235,10 +235,10 @@ function initializeGame() {
         baseStamina = 3;        
         baseDefence = 0;
         baseEvasion = 20;
-                        
-        updateStats();
-        
+                      
         currentStamina = maxStamina;
+
+        updateStats();            
 
         inventory = [];
         inventory.push("straight_sword","green_cloak","worn_shield");
