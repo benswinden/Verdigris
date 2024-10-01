@@ -273,10 +273,17 @@ input:focus, textarea:focus {
     width: 100%;
 }
 
+
 #door-attribute-container {
     display: none;
+    flex-wrap: wrap;
     gap: 5px;
     margin-left: 20px;
+    margin-bottom: 50px;
+}
+
+#door-region-picker {
+    width: 74%;
 }
 
 #door-area-picker {

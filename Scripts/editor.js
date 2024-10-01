@@ -348,7 +348,7 @@ function updateMap() {
                     const newLocation = createLocation([y,x]);
                     playClick();
                     currentLocation = newLocation;
-
+                    
                     createDoorButton.style.display = "block";
                     removeDoorButton.style.display = "none";
                     doorAttributeContainer.style.display = "none";
@@ -444,8 +444,7 @@ function updateMap() {
                     const _currentLocation = currentLocation;   // Store this so we can set the actual value to null but still use the current store location
                     
                     createDoorButton.style.display = "none";
-                    removeDoorButton.style.display = "none";
-                    doorAttributeContainer.style.display = "none";
+                    removeDoorButton.style.display = "none";                
                     currentLocation = null;
 
                     // If there is already a path, remove it
@@ -466,7 +465,7 @@ function updateMap() {
             }
         });
 
-        // Insert player symbol in current location        
+        // Current selected node styling
         let currentLocationNode = null;
         if (currentLocation != null) {
 
@@ -572,12 +571,13 @@ function toggleNode(location) {
         currentLocation = location;
         createDoorButton.style.display = "block";
         removeDoorButton.style.display = "none";
+        doorAttributeContainer.style.display = "none";
 
         // If this location is already a door we want to initialize the proper values into the picker
         if (currentLocation.door != null) {
 
             createDoorButton.style.display = "none";
-        removeDoorButton.style.display = "block";
+            removeDoorButton.style.display = "block";
             doorAttributeContainer.style.display = "flex";
             initializeDoorAttributePicker();
         }
@@ -642,6 +642,7 @@ function createNewRegion() {
             keyword: "new_region",
             title: "New region title",
             description: "New region description.",
+            visited: false,
             areas: [
                 {
                     keyword: "new_area",
@@ -649,6 +650,7 @@ function createNewRegion() {
                     description: "New area description.",
                     narration: "",
                     update: "",
+                    visited: false,
                     locations: [
                         {
                             coordinates: [0,0],
@@ -685,6 +687,7 @@ function createNewArea() {
         description: "New area description.",
         narration: "",
         update: "",
+        visited: false,
         locations: [
             {
                 coordinates: [0,0],
@@ -765,9 +768,9 @@ function createDoor() {
 function removeDoor() {
 
     if (currentLocation === null) { console.error("removeDoor but currentLocation is null"); return; }
-
-    console.log(currentLocation.door.coordinates + "    " + currentLocation.door.area);
-    const otherLocation = getLocationFromArea(currentLocation.door.coordinates, currentLocation.door.area);
+    
+    const otherLocation = getLocationFromDoor(currentLocation.door);
+    console.log(otherLocation);
     otherLocation.door = null;
 
     currentLocation.door = null;
@@ -908,15 +911,20 @@ function closeNewObjectPicker() {
     newObjectContainer.style.display = "none";
 }
 
+// The door creation happens in three phases, first the region picker is initialized, once the user chooses a region, the area picker is initialized, then coordinates once an area is chosen
+// The actual door is created when the user selects a coordinate
 function initializeDoorAttributePicker() {
-
-    if (currentArea === null) return;
-
+    
+    const regionDropdownContent = doorAttributeContainer.querySelector('#door-region-picker').querySelector('.dropdown-content');
+    const regionDropdownButton = doorAttributeContainer.querySelector('#door-region-picker').querySelector('.dropbtn');
     const areaDropdownContent = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropdown-content');
     const areaDropdownButton = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropbtn');
     const coordinatesDropdownContent = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropdown-content');
     const coordinatesDropdownButton = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropbtn');
 
+    while (regionDropdownContent.firstChild) {
+        regionDropdownContent.removeChild(regionDropdownContent.firstChild);
+    }
     while (areaDropdownContent.firstChild) {
         areaDropdownContent.removeChild(areaDropdownContent.firstChild);
     }
@@ -924,10 +932,59 @@ function initializeDoorAttributePicker() {
         coordinatesDropdownContent.removeChild(coordinatesDropdownContent.firstChild);
     }
 
+    regionDropdownButton.textContent = "Select";
+    areaDropdownButton.textContent = "";
+    coordinatesDropdownButton.textContent = "";
+
+    for (const region of regionsData) {            
+
+        let entry = document.createElement('a');
+        entry.textContent = region.title;
+
+        if (region.keyword === currentRegion.keyword) {
+            regionDropdownButton.textContent = region.title;
+            initializeDoorAreaPicker(region, true);
+        }
+
+        entry.addEventListener('click', function(event) {
+            
+            event.preventDefault();
+            regionDropdownButton.textContent = region.title;
+            initializeDoorAreaPicker(region, true);
+            
+        });
+        regionDropdownContent.appendChild(entry);
+    }
+
+    if (currentLocation != null && currentLocation.door != null) {
+        
+        const _region = getObjectFromKeyword(currentLocation.door.regionKeyword, regionsData);
+        regionDropdownButton.textContent = _region.title;
+        initializeDoorAreaPicker(_region, false);
+    }
+
+}
+
+function initializeDoorAreaPicker(region, modifyingDoor) {
+
+    const areaDropdownContent = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropdown-content');
+    const areaDropdownButton = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropbtn');
+    
+    const coordinatesDropdownContent = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropdown-content');
+    const coordinatesDropdownButton = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropbtn');
+
+    
+    while (areaDropdownContent.firstChild) {
+        areaDropdownContent.removeChild(areaDropdownContent.firstChild);
+    }
+    while (coordinatesDropdownContent.firstChild) {
+        coordinatesDropdownContent.removeChild(coordinatesDropdownContent.firstChild);
+    }
+    
     areaDropdownButton.textContent = "Select";
     coordinatesDropdownButton.textContent = "";
 
-    for (const area of currentArea) {
+    for (const area of region.areas) {
                 
         let entry = document.createElement('a');
         entry.textContent = area.title;
@@ -935,22 +992,23 @@ function initializeDoorAttributePicker() {
             
             event.preventDefault();
             areaDropdownButton.textContent = area.title;
-            initializeCoordinates(area);
+            initializeCoordinates(region, area);
             
         });
         areaDropdownContent.appendChild(entry);
     }
 
-    if (currentLocation != null && currentLocation.door != null) {
-
-        const _area = currentArea[getElementFromKeyword(currentLocation.door.area, currentArea)];
+    // modifyingDoor means we have changed the reigon dropdown from the initialized value of the current location we have selected
+    if (!modifyingDoor && currentLocation != null && currentLocation.door != null) {
+        
+        const _area = getObjectFromKeyword(currentLocation.door.areaKeyword, region.areas);        
         areaDropdownButton.textContent = _area.title;
-        initializeCoordinates(_area);
+        initializeCoordinates(region, _area);
     }
 
 }
 
-function initializeCoordinates(area) {
+function initializeCoordinates(region, area) {
     
     const coordinatesDropdownContent = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropdown-content');
     const coordinatesDropdownButton = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropbtn');
@@ -969,20 +1027,22 @@ function initializeCoordinates(area) {
             let entry = document.createElement('a');
             entry.textContent = location.coordinates;
             entry.addEventListener('click', function(event) {
-                
+                console.log(area);
                 event.preventDefault();
                 coordinatesDropdownButton.textContent = "[ " + location.coordinates[0] + " , " + location.coordinates[1] + " ]";
                 
                 // If we've picked coordinates, we can set the door attribute
-                currentLocation.door = { 
-                    area: area.keyword,
+                currentLocation.door = {
+                    regionKeyword: region.keyword,
+                    areaKeyword: area.keyword,
                     coordinates: location.coordinates
                 }
 
                 // find door on the other side and add it                
-                const otherLocation = getLocationFromArea(location.coordinates, area.keyword);
-                otherLocation.door = { 
-                    area: currentArea.keyword,
+                const otherLocation = getLocationFromArea(location.coordinates, area);
+                otherLocation.door = {
+                    regionKeyword: currentRegion.keyword,
+                    areaKeyword: currentArea.keyword,
                     coordinates: currentLocation.coordinates
                 };
                 
@@ -1041,7 +1101,9 @@ function getLocationFromArea(coordinates, area) {
     
     ar = [];    
     switch (objType) {
-
+        case objectType.region:
+            ar = regionsData;            
+            break;
         case objectType.item:
             ar = itemsRef;            
             break;
@@ -1066,6 +1128,21 @@ function getLocationFromArea(coordinates, area) {
     return index;
   }
 
+  function getObjectFromKeyword(keyword, array) {
+
+    if (array === undefined || array === null) console.error("getObjectFromKeyword() - keyword [" + keyword + "] No array provided");
+    
+    let obj = null;
+    
+    array.forEach((element, i) => {        
+        if (element.keyword === keyword) {
+            
+            obj = element;            
+        }
+    });
+        
+    return obj;
+}  
 
 // Function to compare two arrays
 function compareArrays(arr1, arr2) {
@@ -1200,6 +1277,15 @@ function getExitFromLocation(location, area) {
 
   console.error("getExitFromLocation() - Couldn't find exit");
   return null;
+}
+
+function getLocationFromDoor(door) {
+
+    const region = getObjectFromKeyword(door.regionKeyword, regionsData);    
+    const area = getObjectFromKeyword(door.areaKeyword, region.areas);    
+    const location = getLocationFromArea(door.coordinates, area);
+
+    return location;
 }
 
 function createPath(locationA, locationB) {

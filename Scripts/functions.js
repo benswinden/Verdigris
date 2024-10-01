@@ -52,16 +52,19 @@ let mapGrid = [];
 
 // Default location for new games is edge_woods
 let respawnLocation = {
-  area: null,
-  location: null
+    regionKeyword: null,    
+    areaKeyword: null,
+    locationCoordinates: null
 };
 
 let corpseLocation = null;
 
 // Debug
 let showDebugLog = true;
-let debugStartArea = "bramble_path";
-let debugStartCoordinates = [2,5];
+
+let startRegionKeyword = "gossamer_gardens";
+let startAreaKeyword = "bramble_path";
+let startCoordinates = [2,5];
 let debugWindowActive = false;
 
 // Header
@@ -208,7 +211,7 @@ function initializeGame() {
         if (currentLocation === -99)
             respawn();
         else
-            displayLocation(currentArea, currentLocation);
+            displayLocation(currentRegion, currentArea, currentLocation);
     }
     // No save game, so start a new game
     else {
@@ -240,9 +243,7 @@ function initializeGame() {
         inventory = [];
         inventory.push("straight_sword","green_cloak","worn_shield");
         
-        currentRegion = regions[0];
-        currentArea = getObjectFromKeyword(debugStartArea, currentRegion.areas);        
-        regionsVisited = [];        
+        currentRegion = regions[0];    
 
         titleOpen = false;
         narrationOpen = false;
@@ -252,11 +253,13 @@ function initializeGame() {
         corpseLocation = null;
 
         save();
-            
-        const startLocation = getLocationFromArea(debugStartCoordinates, currentArea);
-        if (startLocation === null) console.error("InitializeGame() - Can't find start location")
-        respawnLocation = { area: debugStartArea, location: startLocation };
-        displayLocation(currentArea, startLocation);
+        
+        const _startRegion = getObjectFromKeyword(startRegionKeyword, regions);
+        const _startArea = getObjectFromKeyword(startAreaKeyword, _startRegion.areas);
+        const _startLocation = getLocationFromArea(startCoordinates, _startArea);
+        if (_startLocation === null) console.error("InitializeGame() - Can't find start location")
+        respawnLocation = { regionKeyword: startRegionKeyword, areaKeyword: startAreaKeyword, locationCoordinates: _startLocation };
+        displayLocation(_startRegion, _startArea, _startLocation);
     }
 }
 
@@ -264,7 +267,7 @@ function initializeGame() {
 // newLocation can be an integer or a keyword value
 // Area = keyword title i.e. "bramble_path"
 // Location = coordinate pair i.e. [1,5]
-function displayLocation(area, location) {    
+function displayLocation(region, area, location) {    
     
     // This should only happen once
     if (!mapInitialize)
@@ -273,16 +276,26 @@ function displayLocation(area, location) {
     if (showDebugLog) console.log("displayLocation -  Area: " + area + "    Location: " + JSON.stringify(location));
 
     // Check whether we are entering into a door location
-    if (compareAreas(area, currentArea) && location.door != null) {        
-        const otherDoorLocation = getLocationFromArea(location.door.coordinates, location.door.area);    
-        const doorExit = getExitFromLocation(otherDoorLocation, location.door.area)
+    if (compareAreas(area, currentArea) && location.door != null) {
+
+        const _otherDoorRegion = getObjectFromKeyword(location.door.regionKeyword, regions);
+        const _otherDoorArea = getObjectFromKeyword(location.door.areaKeyword, _otherDoorRegion.areas);
+        const _otherDoorLocation = getLocationFromArea(location.door.coordinates, _otherDoorArea);
+        // Players don't arrive in the door location, they are automatically pushed into an adjacent location
+        const _otherDoorExit = getExitFromLocation(_otherDoorLocation, _otherDoorArea)
         console.log("door exit:");
-        console.log(doorExit);
-        displayLocation(location.door.area, doorExit);
+        console.log(_otherDoorExit);
+        displayLocation(_otherDoorRegion, _otherDoorArea, _otherDoorExit);
         return;
     }
 
-    currentArea = area;              
+    currentRegion = region;
+    const _regionVisited = region.visited;              // Store whether this is the first time visiting this region
+    currentRegion.visited = true;
+
+    currentArea = area;
+    const _areaVisited = currentArea.visited;           // Store whether this is the first time visiting this area
+    if (_regionVisited) currentArea.visited = true;     // We only set this to true if we've already displayed this region before, if it's the first time displaying the region, we'll do the title sequence and then loop back here at which point we'll displaying anything specific to the area we arrive in
             
     currentLocation = location;
     currentLocation.visited = true;
@@ -300,44 +313,33 @@ function displayLocation(area, location) {
     equipmentTitle.style.display = "none";
     saleTitle.style.display = "none";
         
-    ////////// TODO RE IMPLEMENT REGION TITLES    
-    //Check if we are entering a new region and should show the title card first        
-    // if ( locationsModified[currentLocation].area != "") {
 
-    //     let regionVisited = regionsVisited.indexOf(locationsModified[currentLocation].area) != -1;
-    //     if (!regionVisited) {
-    //         displayTitle();
-    //         return;
-    //     }
-    // }
+    // Check if we are entering a region we've never visited before
+    if (!_regionVisited) {
+        displayTitle();
+        return;
+    }
 
-    // // Check if we've already visited this location
-    // let areaVisited = regionsVisited.indexOf(currentArea) != -1;
-
-    // // First time visiting this location, check whether there is a narration to play first
-    // if (!areaVisited) {
-        
-        
-    //     // Check whether this location has a narration keyword
-    //     if (currentArea.narration != undefined && currentArea.narration != "") {
+    // First time visiting this location, check whether there is a narration to play first
+    if (!_areaVisited) {
+                
+        // Check whether this location has a narration keyword
+        if (currentArea.narration != undefined && currentArea.narration != "") {
             
-    //         // Check if the matching narration to this keyword has already been seen                
-    //         if (narrations[getElementFromKeyword(currentArea.narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(currentArea.narration, narrationsRef)].seen) {
+            // Check if the matching narration to this keyword has already been seen                
+            if (narrations[getElementFromKeyword(currentArea.narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(currentArea.narration, narrationsRef)].seen) {
 
-    //             displayNarration(currentArea.narration);
-    //             return;
-    //         }
-    //     }
+                displayNarration(currentArea.narration);
+                return;
+            }
+        }
 
-    //     regionsVisited.push(currentArea);
-    //     save();
-
-    //     // Check if there is narration text, then show it as this is the first time visiting
-    //     if (currentArea.update != undefined && currentArea.update != "") {
-    //         narrationText.style.display = "block";
-    //         narrationText.innerText = currentArea.update;  // Add the narration text so it appears before the main text for the locat                
-    //     }
-    // }
+        // Check if there is narration text, then show it as this is the first time visiting
+        if (currentArea.update != undefined && currentArea.update != "") {
+            narrationText.style.display = "block";
+            narrationText.innerText = currentArea.update;  // Add the narration text so it appears before the main text for the locat                
+        }
+    }
 
     mainTitle.classList = "";        
     mainTitleText.classList = "";
@@ -1123,7 +1125,7 @@ function updateButtons(skipAnimation)  {
             document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);        
             newButton.button.classList = "nav-button action-button can-hover";
             newButton.buttonText.innerText = "Exit";
-            newButton.button.onclick = function() {trainMenuOpen = false; displayLocation(currentArea, currentLocation);};
+            newButton.button.onclick = function() {trainMenuOpen = false; displayLocation(currentRegion, currentArea, currentLocation);};
         }
 
         
@@ -1341,7 +1343,7 @@ function updateMap() {
 
                 nodeObject.element.classList += " can-hover";                
                 nodeObject.element.onclick = function() { 
-                    displayLocation(currentArea, location);                                
+                    displayLocation(currentRegion, currentArea, location);                                
                     playClick();
                     recoverStamina(); 
                 };
@@ -1428,16 +1430,16 @@ function go(direction, checkForMonster) {
         
         switch (direction) {
             case 0:
-                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "north"));                
+                displayLocation(currentRegion, currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "north"));                
                 break;
             case 1:
-                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "west"));
+                displayLocation(currentRegion, currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "west"));
                 break;
             case 2:
-                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "east"));
+                displayLocation(currentRegion, currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "east"));
                 break;
             case 3:                
-                displayLocation(currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "south"));
+                displayLocation(currentRegion, currentArea, getLocationInDirection(currentLocation.coordinates, currentArea, "south"));
                 break;
             case 4:
                 createdButtons.forEach((element) => {
@@ -1481,7 +1483,7 @@ function closeNPC() {
 
     npcActive = false;
     currentNPC = -1;
-    displayLocation(currentArea, currentLocation);
+    displayLocation(currentRegion, currentArea, currentLocation);
 }
 
 function displayNarration(narrationKeyword) {
@@ -1531,7 +1533,7 @@ function continueNarration() {
 function closeNarration() {
 
     narrationOpen = false;
-    displayLocation(currentArea, currentLocation);
+    displayLocation(currentRegion, currentArea, currentLocation);
 }
 
 function displayTitle() {
@@ -1542,24 +1544,20 @@ function displayTitle() {
 
     titleOpen = true;
     updateButtons(false);
-
-    ///////// TODO Change to support regions
-    // areasVisited += locationsModified[currentLocation].area;
-    // let contextKeyword = locationsModified[currentLocation].area + "_title";        
-
-    // saleTitle.style.display = "none";
-    // narrationText.style.display = "none";        
-    // mainTitle.classList = "centered";
-    // mainTitleText.classList = "";
-    // mainTitleText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].title;
-    // secondaryTitle.style.display = "none";        
-    // mainText.innerText = locationsModified[getIndexFromKeyword(contextKeyword, objectType.location)].description;
+    
+    saleTitle.style.display = "none";
+    narrationText.style.display = "none";        
+    mainTitle.classList = "centered";
+    mainTitleText.classList = "";
+    mainTitleText.innerText = currentRegion.title;
+    secondaryTitle.style.display = "none";
+    mainText.innerText = currentRegion.description;
 }
 
 function closeTitle() {
 
     titleOpen = false;
-    displayLocation(currentArea, currentLocation);
+    displayLocation(currentRegion, currentArea, currentLocation);
 }
 
 function displayInventory() {
@@ -1594,7 +1592,7 @@ function exitInventory() {
     inventoryOpen = false;
 
     clearInventory();
-    displayLocation(currentArea, currentLocation);
+    displayLocation(currentRegion, currentArea, currentLocation);
     if (upgradeMenuOpen)
         displayUpgrade();
     if (narrationOpen)
@@ -1627,7 +1625,7 @@ function displayUpgrade() {
 function exitUpgrade() {
 
     upgradeMenuOpen = false;
-    displayLocation(currentArea, currentLocation);
+    displayLocation(currentRegion, currentArea, currentLocation);
 }
 
 function inventoryIndexOf(keyword) {
@@ -2032,7 +2030,12 @@ function respawn() {
         healAllMonsters();
 
         updateStats();
-        displayLocation(respawnLocation.area, respawnLocation.location); 
+
+        _respawnRegion = getObjectFromKeyword(respawnLocation.areaKeyword);
+        _respawnArea = getObjectFromKeyword(respawnLocation.areaKeyword, _respawnRegion);
+        _respawnLocation = getLocationFromArea(respawnLocation.locationCoordinates, _respawnArea);
+
+        displayLocation(_respawnRegion, _respawnArea, _respawnLocation); 
         save();        
         
         // TODO Add variants on this text
@@ -2227,8 +2230,9 @@ function rest() {
     healAllMonsters();
 
     respawnLocation = {
-      area: currentArea,
-      location: currentLocation
+        regionKeyword: currentRegion.keyword,
+        areaKeyword: currentArea.keyword,
+        locationCoordinates: currentLocation.coordinates
     }
 
     save();
@@ -2477,9 +2481,6 @@ function save() {
     localStorage.setItem('saveExists', "!");        // Used to test whether there is a save
     localStorage.setItem('version', JSON.stringify(version));
 
-    localStorage.setItem('locationsVisited', JSON.stringify(regionsVisited));    
-    localStorage.setItem('areasVisited', JSON.stringify(regionsVisited));
-
     localStorage.setItem('experience', JSON.stringify(experience));
     localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
@@ -2513,10 +2514,7 @@ function load() {
 
     if (showDebugLog) console.log("Load");
 
-    currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
-
-    regionsVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
-    regionsVisited = JSON.parse(localStorage.getItem('areasVisited'));    
+    currentLocation = JSON.parse(localStorage.getItem('currentLocation'));            
     experience = JSON.parse(localStorage.getItem('experience'));
     insight = JSON.parse(localStorage.getItem('insight'));
     hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
@@ -2543,8 +2541,7 @@ function load() {
     }
     else {
         
-        regions = JSON.parse(JSON.stringify(regionsRef));        
-        regionsVisited = [];        
+        regions = JSON.parse(JSON.stringify(regionsRef));                   
         npcs = JSON.parse(JSON.stringify(npcsRef));
         items = JSON.parse(JSON.stringify(itemsRef));
         narrations = JSON.parse(JSON.stringify(narrationsRef));
@@ -2635,7 +2632,7 @@ function getObjectFromKeyword(keyword, array) {
     });
         
     return obj;
-    }  
+}  
 
 function getLocationFromCurrentArea(coordinates) {
 

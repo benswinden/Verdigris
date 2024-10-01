@@ -3,6 +3,7 @@
     "keyword": "gossamer_gardens",
     "title": "Gossamer Gardens",
     "description": "Hints of an old garden maze in some age past could be seen in the manicured lines of stone paths. It had long been left to it's own devices; grown into a tangle of briar and thorny roses bushes.\n\nAncient brambles covered ancient secrets.",
+    "visited": false,
     "areas": [
       {
         "keyword": "bramble_path",
@@ -10,6 +11,7 @@
         "description": "The ancient pathways were overgrown and hard to discern which way was which.",
         "narration": "",
         "update": "",
+        "visited": false,
         "locations": [
           {
             "coordinates": [
@@ -76,9 +78,7 @@
             "visited": false,
             "seen": false,
             "items": [],
-            "monsters": [
-              "goblin_01"
-            ],
+            "monsters": [],
             "npcs": [],
             "north": null,
             "west": [
@@ -134,7 +134,10 @@
               3,
               6
             ],
-            "south": null,
+            "south": [
+              4,
+              5
+            ],
             "door": null
           },
           {
@@ -227,12 +230,34 @@
             ],
             "south": null,
             "door": {
-              "area": "thorn_hollow",
+              "regionKeyword": "gossamer_gardens",
+              "areaKeyword": "thorn_hollow",
               "coordinates": [
                 2,
                 7
               ]
             }
+          },
+          {
+            "coordinates": [
+              4,
+              5
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [
+              "centipede"
+            ],
+            "npcs": [],
+            "north": [
+              3,
+              5
+            ],
+            "west": null,
+            "east": null,
+            "south": null,
+            "door": null
           }
         ]
       },
@@ -242,6 +267,7 @@
         "description": "Despite the thick overgrowth, these pathways snaked their way through the old maze.",
         "narration": "",
         "update": "",
+        "visited": false,
         "locations": [
           {
             "coordinates": [
@@ -261,7 +287,8 @@
             "east": null,
             "south": null,
             "door": {
-              "area": "bramble_path",
+              "regionKeyword": "gossamer_gardens",
+              "areaKeyword": "bramble_path",
               "coordinates": [
                 2,
                 2
@@ -359,7 +386,14 @@
               3
             ],
             "south": null,
-            "door": null
+            "door": {
+              "regionKeyword": "old_monastery",
+              "areaKeyword": "shrouded_plaza",
+              "coordinates": [
+                3,
+                7
+              ]
+            }
           },
           {
             "coordinates": [
@@ -567,6 +601,7 @@
     "keyword": "old_monastery",
     "title": "The Old Monastery",
     "description": "At the city's edge, lay a Monastery older than most things man-made in this place. Once a flourishing place of worship, it had been left to decay and to slowly sink into the soft earth.",
+    "visited": false,
     "areas": [
       {
         "keyword": "shrouded_plaza",
@@ -574,6 +609,7 @@
         "description": "The ancient pathways were overgrown and hard to discern which way was which.",
         "narration": "",
         "update": "",
+        "visited": false,
         "locations": [
           {
             "coordinates": [
@@ -750,7 +786,14 @@
             ],
             "east": null,
             "south": null,
-            "door": null
+            "door": {
+              "regionKeyword": "gossamer_gardens",
+              "areaKeyword": "thorn_hollow",
+              "coordinates": [
+                2,
+                2
+              ]
+            }
           },
           {
             "coordinates": [
@@ -792,13 +835,7 @@
               3
             ],
             "south": null,
-            "door": {
-              "area": "thorn_hollow",
-              "coordinates": [
-                2,
-                7
-              ]
-            }
+            "door": null
           }
         ]
       },
@@ -808,6 +845,7 @@
         "description": "Despite the thick overgrowth, these pathways snaked their way through the old maze.",
         "narration": "",
         "update": "",
+        "visited": false,
         "locations": [
           {
             "coordinates": [
@@ -826,13 +864,7 @@
             ],
             "east": null,
             "south": null,
-            "door": {
-              "area": "bramble_path",
-              "coordinates": [
-                2,
-                2
-              ]
-            }
+            "door": null
           },
           {
             "coordinates": [
