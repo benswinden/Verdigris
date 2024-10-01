@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.050;
+let version = 0.051;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -252,13 +252,17 @@ function initializeGame() {
             
         corpseLocation = null;
 
-        save();
         
         const _startRegion = getObjectFromKeyword(startRegionKeyword, regions);
         const _startArea = getObjectFromKeyword(startAreaKeyword, _startRegion.areas);
         const _startLocation = getLocationFromArea(startCoordinates, _startArea);
-        if (_startLocation === null) console.error("InitializeGame() - Can't find start location")
+        
+        currentRegion = _startRegion;
+        currentArea = _startArea;
+        currentLocation = _startLocation;
         respawnLocation = { regionKeyword: startRegionKeyword, areaKeyword: startAreaKeyword, locationCoordinates: _startLocation };
+        save();
+    
         displayLocation(_startRegion, _startArea, _startLocation);
     }
 }
