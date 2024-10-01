@@ -863,11 +863,11 @@ function updateNewObjectPicker() {
             for (const item of itemsRef) {
                 
                 let entry = document.createElement('a');
-                entry.textContent = item.title;
+                entry.textContent = item.title + " (" + item.keyword + ")";
                 entry.addEventListener('click', function(event) {
                     newObjectTypeSelected = objectType.item;
                     event.preventDefault();
-                    objectDropdownButton.textContent = item.title;
+                    objectDropdownButton.textContent = item.title + " (" + item.keyword + ")";
                     newObjectSelected = { keyword: item.keyword, type: objectType.item };
                 });
                 objectDropdownContent.appendChild(entry);
@@ -878,11 +878,11 @@ function updateNewObjectPicker() {
             for (const monster of monstersRef) {
                 
                 let entry = document.createElement('a');
-                entry.textContent = monster.title;
+                entry.textContent = monster.title + " (" + monster.keyword + ")";
                 entry.addEventListener('click', function(event) {
                     newObjectTypeSelected = objectType.monster;
                     event.preventDefault();
-                    objectDropdownButton.textContent = monster.title;
+                    objectDropdownButton.textContent = monster.title + " (" + monster.keyword + ")";
                     newObjectSelected = { keyword: monster.keyword, type: objectType.monster };
                 });
                 objectDropdownContent.appendChild(entry);
@@ -893,11 +893,11 @@ function updateNewObjectPicker() {
             for (const npc of npcsRef) {
                     
                 let entry = document.createElement('a');
-                entry.textContent = npc.title;
+                entry.textContent = npc.title + " (" + npc.keyword + ")";;
                 entry.addEventListener('click', function(event) {
                     newObjectTypeSelected = objectType.npc;
                     event.preventDefault();
-                    objectDropdownButton.textContent = npc.title;
+                    objectDropdownButton.textContent = npc.title + " (" + npc.keyword + ")";
                     newObjectSelected = { keyword: npc.keyword, type: objectType.npc };
                 });
                 objectDropdownContent.appendChild(entry);

@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.052;
+let version = 0.053;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -62,9 +62,9 @@ let corpseLocation = null;
 // Debug
 let showDebugLog = true;
 
-let startRegionKeyword = "gossamer_gardens";
+let startRegionKeyword = "blightfold_maze";
 let startAreaKeyword = "bramble_path";
-let startCoordinates = [2,5];
+let startCoordinates = [3,8];
 let debugWindowActive = false;
 
 // Header
@@ -232,7 +232,7 @@ function initializeGame() {
 
         // Base stats are the players raw stats
         basePower = 0;
-        baseStamina = 3;        
+        baseStamina = 2;        
         baseDefence = 0;
         baseEvasion = 20;
                       
@@ -241,7 +241,7 @@ function initializeGame() {
         updateStats();            
 
         inventory = [];
-        inventory.push("straight_sword","green_cloak","worn_shield");
+        inventory.push("straight_sword","green_cloak");
         
         currentRegion = regions[0];    
 

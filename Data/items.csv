@@ -20,7 +20,7 @@ thorny_bramble,Thorny Bramble,bramble,"At the end of a winding garden pathway, a
 town_map,Old Town Map,map,A detailed diagram of the ruins of the town that sits in the castle's shadow.,map,true,false,false,false,0,0,0,0,350,0,,,,
 crimson_gate,Crimson Gate,gate,A great red copper gate tied into the Garden walls. It was closed and locked.,misc,false,false,false,false,0,0,0,0,0,0,,,north,crimson_key
 crimson_key,Crimson Key,key,A metal key forged in a dull red the color of drying blood,key,true,false,false,false,0,0,0,0,0,0,,,,
-,,,,,,,,,,,,,,,,,,
+blight_egg,Blight Egg,egg,"A grouping of round porous forms, glistening and trembling.",misc,false,false,false,false,0,0,0,0,0,0,,,,
 ,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,

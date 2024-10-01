@@ -1,8 +1,8 @@
 [
   {
-    "keyword": "gossamer_gardens",
-    "title": "Gossamer Gardens",
-    "description": "Hints of an old garden maze in some age past could be seen in the manicured lines of stone paths. It had long been left to it's own devices; grown into a tangle of briar and thorny roses bushes.\n\nAncient brambles covered ancient secrets.",
+    "keyword": "blightfold_maze",
+    "title": "Blightfold Maze",
+    "description": "Remnants of great gardens built in spiraling maze-shape of a past age. Stone paths and once manicured hedges have been mostly covered by the poisoned overgrowth. Long left to it's own devices; grown into a tangle of briar and thorny bushes.\n\nAncient brambles covering ancient secrets.",
     "visited": false,
     "areas": [
       {
@@ -24,9 +24,7 @@
               "green_herb_pickup"
             ],
             "monsters": [],
-            "npcs": [
-              "shrine"
-            ],
+            "npcs": [],
             "north": [
               1,
               5
@@ -50,8 +48,7 @@
             "visited": false,
             "seen": false,
             "items": [
-              "crimson_gate",
-              "crimson_key"
+              "crimson_gate"
             ],
             "monsters": [],
             "npcs": [],
@@ -100,15 +97,18 @@
             "visited": false,
             "seen": false,
             "items": [
-              "ore"
+              "blight_egg"
             ],
-            "monsters": [],
-            "npcs": [
-              "ryth"
+            "monsters": [
+              "blight_war_03"
             ],
+            "npcs": [],
             "north": null,
             "west": null,
-            "east": null,
+            "east": [
+              1,
+              6
+            ],
             "south": [
               2,
               5
@@ -122,7 +122,9 @@
             ],
             "visited": false,
             "seen": false,
-            "items": [],
+            "items": [
+              "blight_egg"
+            ],
             "monsters": [],
             "npcs": [],
             "north": [
@@ -151,7 +153,7 @@
               "thorny_bramble"
             ],
             "monsters": [
-              "grub_01"
+              "blight_war_02"
             ],
             "npcs": [],
             "north": null,
@@ -173,11 +175,9 @@
             ],
             "visited": false,
             "seen": false,
-            "items": [
-              "crimson_key"
-            ],
+            "items": [],
             "monsters": [
-              "grub_02"
+              "blight_war_01"
             ],
             "npcs": [],
             "north": null,
@@ -185,7 +185,10 @@
               3,
               6
             ],
-            "east": null,
+            "east": [
+              3,
+              8
+            ],
             "south": null,
             "door": null
           },
@@ -200,7 +203,7 @@
               "relic"
             ],
             "monsters": [
-              "centipede"
+              "crawler_01"
             ],
             "npcs": [],
             "north": null,
@@ -230,7 +233,7 @@
             ],
             "south": null,
             "door": {
-              "regionKeyword": "gossamer_gardens",
+              "regionKeyword": "blightfold_maze",
               "areaKeyword": "thorn_hollow",
               "coordinates": [
                 2,
@@ -247,15 +250,85 @@
             "seen": false,
             "items": [],
             "monsters": [
-              "centipede"
+              "crawler_01"
             ],
             "npcs": [],
             "north": [
               3,
               5
             ],
-            "west": null,
+            "west": [
+              4,
+              4
+            ],
             "east": null,
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              3,
+              8
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [
+              "green_herb_pickup"
+            ],
+            "monsters": [],
+            "npcs": [],
+            "north": null,
+            "west": [
+              3,
+              7
+            ],
+            "east": null,
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              1,
+              6
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [
+              "coins"
+            ],
+            "monsters": [
+              "blight_war_02"
+            ],
+            "npcs": [],
+            "north": null,
+            "west": [
+              1,
+              5
+            ],
+            "east": null,
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              4,
+              4
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [
+              "blight_egg"
+            ],
+            "monsters": [
+              "blight_mother_01"
+            ],
+            "npcs": [],
+            "north": null,
+            "west": null,
+            "east": [
+              4,
+              5
+            ],
             "south": null,
             "door": null
           }
@@ -287,7 +360,7 @@
             "east": null,
             "south": null,
             "door": {
-              "regionKeyword": "gossamer_gardens",
+              "regionKeyword": "blightfold_maze",
               "areaKeyword": "bramble_path",
               "coordinates": [
                 2,
@@ -327,7 +400,9 @@
             "visited": false,
             "seen": false,
             "items": [],
-            "monsters": [],
+            "monsters": [
+              "blight_war_01"
+            ],
             "npcs": [],
             "north": [
               1,
@@ -352,7 +427,9 @@
             "visited": false,
             "seen": false,
             "items": [],
-            "monsters": [],
+            "monsters": [
+              "blight_war_01"
+            ],
             "npcs": [],
             "north": [
               1,
@@ -388,10 +465,10 @@
             "south": null,
             "door": {
               "regionKeyword": "old_monastery",
-              "areaKeyword": "shrouded_plaza",
+              "areaKeyword": "east_gate",
               "coordinates": [
                 3,
-                7
+                8
               ]
             }
           },
@@ -403,7 +480,9 @@
             "visited": false,
             "seen": false,
             "items": [],
-            "monsters": [],
+            "monsters": [
+              "blight_war_02"
+            ],
             "npcs": [],
             "north": null,
             "west": [
@@ -471,7 +550,9 @@
             ],
             "visited": false,
             "seen": false,
-            "items": [],
+            "items": [
+              "green_herb_pickup"
+            ],
             "monsters": [],
             "npcs": [],
             "north": null,
@@ -534,8 +615,13 @@
             ],
             "visited": false,
             "seen": false,
-            "items": [],
-            "monsters": [],
+            "items": [
+              "blight_egg",
+              "green_herb_pickup"
+            ],
+            "monsters": [
+              "crawler_01"
+            ],
             "npcs": [],
             "north": [
               2,
@@ -559,7 +645,9 @@
             ],
             "visited": false,
             "seen": false,
-            "items": [],
+            "items": [
+              "blight_egg"
+            ],
             "monsters": [],
             "npcs": [],
             "north": [
@@ -581,8 +669,13 @@
             ],
             "visited": false,
             "seen": false,
-            "items": [],
-            "monsters": [],
+            "items": [
+              "blight_egg",
+              "crimson_key"
+            ],
+            "monsters": [
+              "blight_mother_01"
+            ],
             "npcs": [],
             "north": null,
             "west": null,
@@ -613,171 +706,13 @@
         "locations": [
           {
             "coordinates": [
-              2,
-              5
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [
-              "green_herb_pickup"
-            ],
-            "monsters": [],
-            "npcs": [
-              "shrine"
-            ],
-            "north": [
-              1,
-              5
-            ],
-            "west": [
-              2,
-              4
-            ],
-            "east": null,
-            "south": [
-              3,
-              5
-            ],
-            "door": null
-          },
-          {
-            "coordinates": [
-              2,
-              4
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [
-              "crimson_gate",
-              "crimson_key"
-            ],
-            "monsters": [
-              "goblin_01"
-            ],
-            "npcs": [],
-            "north": [
-              1,
-              4
-            ],
-            "west": [
-              2,
-              3
-            ],
-            "east": [
-              2,
-              5
-            ],
-            "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
-              2,
-              3
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [
-              "goblin_01"
-            ],
-            "npcs": [],
-            "north": null,
-            "west": [
-              2,
-              2
-            ],
-            "east": [
-              2,
-              4
-            ],
-            "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
-              1,
-              5
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [
-              "ore"
-            ],
-            "monsters": [],
-            "npcs": [
-              "ryth"
-            ],
-            "north": null,
-            "west": null,
-            "east": null,
-            "south": [
-              2,
-              5
-            ],
-            "door": null
-          },
-          {
-            "coordinates": [
-              3,
-              5
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": [
-              2,
-              5
-            ],
-            "west": null,
-            "east": [
-              3,
-              6
-            ],
-            "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
-              3,
-              6
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [
-              "thorny_bramble"
-            ],
-            "monsters": [
-              "grub_01"
-            ],
-            "npcs": [],
-            "north": null,
-            "west": [
-              3,
-              5
-            ],
-            "east": [
-              3,
-              7
-            ],
-            "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
               3,
               7
             ],
             "visited": false,
             "seen": false,
-            "items": [
-              "crimson_key"
-            ],
-            "monsters": [
-              "grub_02"
-            ],
+            "items": [],
+            "monsters": [],
             "npcs": [],
             "north": null,
             "west": [
@@ -787,41 +722,118 @@
             "east": null,
             "south": null,
             "door": {
-              "regionKeyword": "gossamer_gardens",
-              "areaKeyword": "thorn_hollow",
+              "regionKeyword": "old_monastery",
+              "areaKeyword": "east_gate",
               "coordinates": [
-                2,
-                2
+                3,
+                4
               ]
             }
           },
           {
             "coordinates": [
-              1,
-              4
+              3,
+              6
             ],
             "visited": false,
             "seen": false,
-            "items": [
-              "relic"
-            ],
-            "monsters": [
-              "centipede"
-            ],
+            "items": [],
+            "monsters": [],
             "npcs": [],
             "north": null,
-            "west": null,
-            "east": null,
-            "south": [
+            "west": [
+              3,
+              5
+            ],
+            "east": [
+              3,
+              7
+            ],
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              3,
+              5
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [],
+            "npcs": [],
+            "north": [
               2,
+              5
+            ],
+            "west": [
+              3,
               4
+            ],
+            "east": [
+              3,
+              6
+            ],
+            "south": [
+              4,
+              5
             ],
             "door": null
           },
           {
             "coordinates": [
               2,
-              2
+              5
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [],
+            "npcs": [],
+            "north": [
+              1,
+              5
+            ],
+            "west": [
+              2,
+              4
+            ],
+            "east": null,
+            "south": [
+              3,
+              5
+            ],
+            "door": null
+          },
+          {
+            "coordinates": [
+              3,
+              4
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [],
+            "npcs": [],
+            "north": [
+              2,
+              4
+            ],
+            "west": [
+              3,
+              3
+            ],
+            "east": [
+              3,
+              5
+            ],
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              2,
+              4
             ],
             "visited": false,
             "seen": false,
@@ -832,9 +844,69 @@
             "west": null,
             "east": [
               2,
+              5
+            ],
+            "south": [
+              3,
+              4
+            ],
+            "door": null
+          },
+          {
+            "coordinates": [
+              3,
               3
             ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [],
+            "npcs": [],
+            "north": null,
+            "west": null,
+            "east": [
+              3,
+              4
+            ],
             "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              4,
+              5
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [],
+            "npcs": [],
+            "north": [
+              3,
+              5
+            ],
+            "west": null,
+            "east": null,
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              1,
+              5
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [],
+            "npcs": [],
+            "north": null,
+            "west": null,
+            "east": null,
+            "south": [
+              2,
+              5
+            ],
             "door": null
           }
         ]
@@ -849,7 +921,33 @@
         "locations": [
           {
             "coordinates": [
-              2,
+              3,
+              8
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [],
+            "npcs": [],
+            "north": null,
+            "west": [
+              3,
+              7
+            ],
+            "east": null,
+            "south": null,
+            "door": {
+              "regionKeyword": "blightfold_maze",
+              "areaKeyword": "thorn_hollow",
+              "coordinates": [
+                2,
+                2
+              ]
+            }
+          },
+          {
+            "coordinates": [
+              3,
               7
             ],
             "visited": false,
@@ -859,40 +957,47 @@
             "npcs": [],
             "north": null,
             "west": [
-              2,
+              3,
               6
             ],
-            "east": null,
+            "east": [
+              3,
+              8
+            ],
             "south": null,
             "door": null
           },
           {
             "coordinates": [
-              2,
+              3,
               6
             ],
             "visited": false,
             "seen": false,
-            "items": [
-              "green_herb_pickup"
-            ],
+            "items": [],
             "monsters": [],
             "npcs": [],
-            "north": null,
-            "west": [
+            "north": [
               2,
+              6
+            ],
+            "west": [
+              3,
               5
             ],
             "east": [
-              2,
+              3,
               7
             ],
-            "south": null,
+            "south": [
+              4,
+              6
+            ],
             "door": null
           },
           {
             "coordinates": [
-              2,
+              3,
               5
             ],
             "visited": false,
@@ -900,26 +1005,23 @@
             "items": [],
             "monsters": [],
             "npcs": [],
-            "north": [
-              1,
-              5
+            "north": null,
+            "west": [
+              3,
+              4
             ],
-            "west": null,
             "east": [
+              3,
+              6
+            ],
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
               2,
               6
             ],
-            "south": [
-              3,
-              5
-            ],
-            "door": null
-          },
-          {
-            "coordinates": [
-              2,
-              3
-            ],
             "visited": false,
             "seen": false,
             "items": [],
@@ -927,111 +1029,20 @@
             "npcs": [],
             "north": [
               1,
-              3
+              6
             ],
-            "west": [
-              2,
-              2
-            ],
+            "west": null,
             "east": null,
             "south": [
               3,
-              3
-            ],
-            "door": null
-          },
-          {
-            "coordinates": [
-              2,
-              2
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": null,
-            "west": null,
-            "east": [
-              2,
-              3
-            ],
-            "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
-              1,
-              5
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": null,
-            "west": [
-              1,
-              4
-            ],
-            "east": null,
-            "south": [
-              2,
-              5
+              6
             ],
             "door": null
           },
           {
             "coordinates": [
               1,
-              4
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": [
-              0,
-              4
-            ],
-            "west": [
-              1,
-              3
-            ],
-            "east": [
-              1,
-              5
-            ],
-            "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
-              1,
-              3
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": null,
-            "west": null,
-            "east": [
-              1,
-              4
-            ],
-            "south": [
-              2,
-              3
-            ],
-            "door": null
-          },
-          {
-            "coordinates": [
-              0,
-              4
+              6
             ],
             "visited": false,
             "seen": false,
@@ -1042,15 +1053,15 @@
             "west": null,
             "east": null,
             "south": [
-              1,
-              4
+              2,
+              6
             ],
             "door": null
           },
           {
             "coordinates": [
-              3,
-              5
+              4,
+              6
             ],
             "visited": false,
             "seen": false,
@@ -1058,13 +1069,10 @@
             "monsters": [],
             "npcs": [],
             "north": [
-              2,
-              5
-            ],
-            "west": [
               3,
-              4
+              6
             ],
+            "west": null,
             "east": null,
             "south": null,
             "door": null
@@ -1080,82 +1088,20 @@
             "monsters": [],
             "npcs": [],
             "north": null,
-            "west": [
-              3,
-              3
-            ],
+            "west": null,
             "east": [
               3,
               5
             ],
             "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
-              3,
-              3
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": [
-              2,
-              3
-            ],
-            "west": null,
-            "east": [
-              3,
-              4
-            ],
-            "south": [
-              4,
-              3
-            ],
-            "door": null
-          },
-          {
-            "coordinates": [
-              4,
-              3
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": [
-              3,
-              3
-            ],
-            "west": [
-              4,
-              2
-            ],
-            "east": null,
-            "south": null,
-            "door": null
-          },
-          {
-            "coordinates": [
-              4,
-              2
-            ],
-            "visited": false,
-            "seen": false,
-            "items": [],
-            "monsters": [],
-            "npcs": [],
-            "north": null,
-            "west": null,
-            "east": [
-              4,
-              3
-            ],
-            "south": null,
-            "door": null
+            "door": {
+              "regionKeyword": "old_monastery",
+              "areaKeyword": "shrouded_plaza",
+              "coordinates": [
+                3,
+                7
+              ]
+            }
           }
         ]
       }
