@@ -22,10 +22,19 @@
             </header>
 
             <main>                
+                <div id="region-picker-container">
+                    <div class="form-label">Region</div>
+                    <div class="dropdown">
+                        <button class="dropbtn">Select</button>
+                        <div class="dropdown-content">                            
+                        </div>
+                    </div>
+                </div> 
+                
                 <div id="area-picker-container">
                     <div class="form-label">Area</div>
                     <div class="dropdown">
-                        <button class="dropbtn">Select</button>
+                        <button class="dropbtn"></button>
                         <div class="dropdown-content">                            
                         </div>
                     </div>
@@ -40,7 +49,7 @@
                     <textarea id="description-input"></textarea>
 
                     <div id="new-area-container">
-                        <button id="new-area-button">New Area</button>
+                        <button id="new-region-button">New Region</button> <button id="new-area-button">New Area</button>
                     </div>
                 </div>
 
@@ -262,7 +271,7 @@
 
     <script  src="Scripts/papaparse.min.js"></script>
     <script  src="Scripts/editor.js"></script>        
-    <script  src="Scripts/npcs.js"></script>
+    <script  src="Scripts/npcs.js"></script>    
 
     <div class="bg"> <img src="Assets/Background.png" alt=""> </div>
 </body>

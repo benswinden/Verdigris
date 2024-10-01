@@ -144,7 +144,7 @@ header {
 
 
 main {
-    margin-top: 100px;
+    margin: 50px 0 150px 0;
 }
 
 /*
@@ -173,7 +173,7 @@ input, textarea {
 }
 
 textarea {
-    height: 100px; /* Adjust the height as needed */
+    height: 200px;
 }
 
 /* Style inputs and textarea when focused */
@@ -354,7 +354,7 @@ input:focus, textarea:focus {
     gap: 15px;
 }
 
-#new-area-button, #remove-door-button, #door-button, #cancel-button, #create-object-button, #new-object-button, #load-button, #save-button{
+#new-region-button, #new-area-button, #remove-door-button, #door-button, #cancel-button, #create-object-button, #new-object-button, #load-button, #save-button{
     font-family: Eczar;
     color: #989A87;
     font-size: 16px;    
@@ -369,7 +369,7 @@ input:focus, textarea:focus {
     margin-left: 20px;
 }
 
-#new-area-button:hover, #remove-door-button:hover, #door-button:hover, #cancel-button:hover, #create-object-button:hover, #new-object-button:hover, #load-button:hover, #save-button:hover {        
+#new-region-button:hover, #new-area-button:hover, #remove-door-button:hover, #door-button:hover, #cancel-button:hover, #create-object-button:hover, #new-object-button:hover, #load-button:hover, #save-button:hover {        
     border: 3px solid #6F7221;
 }
 

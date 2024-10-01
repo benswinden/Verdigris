@@ -6,7 +6,7 @@
     "areas": [
       {
         "keyword": "bramble_path",
-        "title": "The Bramble Pathasd",
+        "title": "The Bramble Path",
         "description": "The ancient pathways were overgrown and hard to discern which way was which.",
         "narration": "",
         "update": "",
@@ -51,9 +51,7 @@
               "crimson_gate",
               "crimson_key"
             ],
-            "monsters": [
-              "goblin_01"
-            ],
+            "monsters": [],
             "npcs": [],
             "north": [
               1,

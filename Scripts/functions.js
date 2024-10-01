@@ -1,6 +1,6 @@
 // #region VARIABLES
 
-let version = 0.048;
+let version = 0.049;
 
 let insight = 0;
 let hpCurrent = 10;
@@ -25,10 +25,11 @@ let currentStamina = 0;
 let defence = 0;
 let evasion = 0;
 
-let currentArea = 0;
-let currentLocation = {};
+let currentRegion = null;
+let currentArea = null;
+let currentLocation = null;
 
-let areasVisited = [];      // A list of locations we have already visited
+let regionsVisited = [];      // A list of locations we have already visited
 
 let currentActiveButton;
 
@@ -69,6 +70,8 @@ const playerXPBar = document.querySelector('#player-xp-bar-current');
 const inventoryIcon = document.querySelector('#inventory-icon');
 const playerHPBar = document.querySelector('#player-hp-bar-current');
 const playerHPText = document.querySelector('#player-hp-text');
+const staminaSection = document.querySelector('#player-stamina-section');
+const staminaIconMaster = document.querySelector('.player-stamina-icon');         // Duplicated to make stamina icon ui
 
 // Main Content
 const mainTitle =  document.querySelector('#main-title');
@@ -111,7 +114,8 @@ const debugButton7 = document.querySelector('#debug-button7');
 const resetLocationsCheckbox = document.querySelector('#resetLocations');
 let resetLocations = false;     // We use this for debug, when selected on reload we will always re-write locationsModified from locations so that updates to the games content can be tested immediately without needing to reset the whole game
 
-let createdButtons = [];
+let createdButtons = []
+let createdStaminaIcons = []
 
 // enum
 const objectType = {
@@ -128,14 +132,15 @@ const objectType = {
 // #region Containers
 
 // These are our data arrays that contain the data for the game
+let regionsRef = [];
+let areasRef = [];
 let narrationsRef = [];
 let monstersRef = [];       // Reference for unique monsters, these will be duplicated for each location at runtime. References to the actual monster data will be within each location
-let areasRef = [];
 let npcsRef = [];
 let itemsRef = [];
 let actionsRef = [];
 
-// These are containers, mostly copies of our masters which will be modified at runtime
+// These are containers, mostly copies of our reference data which will be modified at runtime
 let areas = [];
 let monsters = [];          // These are duplicates of the monsters defined in data
 let npcs = [];
@@ -225,7 +230,7 @@ function initializeGame() {
 
         // Base stats are the players raw stats
         basePower = 0;
-        baseStamina = 1;        
+        baseStamina = 3;        
         baseDefence = 0;
         baseEvasion = 20;
                         
@@ -234,9 +239,9 @@ function initializeGame() {
         currentStamina = maxStamina;
 
         inventory = [];
-        inventory.push("straight_sword","green_cloak");
+        inventory.push("straight_sword","green_cloak","worn_shield");
         
-        areasVisited = [];        
+        regionsVisited = [];        
 
         titleOpen = false;
         narrationOpen = false;
@@ -267,7 +272,7 @@ function displayLocation(area, location) {
     if (showDebugLog) console.log("displayLocation -  Area: " + area + "    Location: " + JSON.stringify(location));
 
     // Check whether we are entering into a door location
-    if (area == currentArea && location.door != null) {        
+    if (compareAreas(area, currentArea) && location.door != null) {        
         const otherDoorLocation = getLocationFromArea(location.door.coordinates, location.door.area);    
         const doorExit = getExitFromLocation(otherDoorLocation, location.door.area)
         console.log("door exit:");
@@ -276,11 +281,7 @@ function displayLocation(area, location) {
         return;
     }
 
-    // Check whether the provided area is a keyword or an index
-    if (Number.isInteger(area))
-        currentArea = area;
-    else
-        currentArea = getIndexFromKeyword(area, objectType.area);               
+    currentArea = area;              
             
     currentLocation = location;
     currentLocation.visited = true;
@@ -298,45 +299,44 @@ function displayLocation(area, location) {
     equipmentTitle.style.display = "none";
     saleTitle.style.display = "none";
         
+    ////////// TODO RE IMPLEMENT REGION TITLES    
+    //Check if we are entering a new region and should show the title card first        
+    // if ( locationsModified[currentLocation].area != "") {
 
-    // TODO - Reactivate titles, but for regions
-    // Check if we are entering a new area and should show the title card first        
-    // if (locationsModified[currentLocation].area != "") {
-
-    //     let areaVisited = areasVisited.indexOf(locationsModified[currentLocation].area) != -1;
-    //     if (!areaVisited) {
+    //     let regionVisited = regionsVisited.indexOf(locationsModified[currentLocation].area) != -1;
+    //     if (!regionVisited) {
     //         displayTitle();
     //         return;
     //     }
     // }
 
-    // Check if we've already visited this location
-    let areaVisited = areasVisited.indexOf(currentArea) != -1;
+    // // Check if we've already visited this location
+    // let areaVisited = regionsVisited.indexOf(currentArea) != -1;
 
-    // First time visiting this location, check whether there is a narration to play first
-    if (!areaVisited) {
+    // // First time visiting this location, check whether there is a narration to play first
+    // if (!areaVisited) {
         
         
-        // Check whether this location has a narration keyword
-        if (areas[currentArea].narration != undefined && areas[currentArea].narration != "") {
+    //     // Check whether this location has a narration keyword
+    //     if (areas[currentArea].narration != undefined && areas[currentArea].narration != "") {
             
-            // Check if the matching narration to this keyword has already been seen                
-            if (narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)].seen) {
+    //         // Check if the matching narration to this keyword has already been seen                
+    //         if (narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)].seen) {
 
-                displayNarration(areas[currentArea].narration);
-                return;
-            }
-        }
+    //             displayNarration(areas[currentArea].narration);
+    //             return;
+    //         }
+    //     }
 
-        areasVisited.push(currentArea);
-        save();
+    //     regionsVisited.push(currentArea);
+    //     save();
 
-        // Check if there is narration text, then show it as this is the first time visiting
-        if (areas[currentArea].update != undefined && areas[currentArea].update != "") {
-            narrationText.style.display = "block";
-            narrationText.innerText = areas[currentArea].update;  // Add the narration text so it appears before the main text for the locat                
-        }
-    }
+    //     // Check if there is narration text, then show it as this is the first time visiting
+    //     if (areas[currentArea].update != undefined && areas[currentArea].update != "") {
+    //         narrationText.style.display = "block";
+    //         narrationText.innerText = areas[currentArea].update;  // Add the narration text so it appears before the main text for the locat                
+    //     }
+    // }
 
     mainTitle.classList = "";        
     mainTitleText.classList = "";
@@ -974,16 +974,47 @@ function updateButtons(skipAnimation)  {
                     // Check for Stamina cost, this could modify the button to not be in an active state
                     if (action.staminaCost > 0) {
                         
-                        newButton.button.querySelector('.stamina-cost-section').style.display = "flex";
-                        newButton.button.querySelector('.stamina-cost-text').innerText = action.staminaCost;
+                        newButton.button.querySelector('.stamina-cost-section').style.display = "flex";                        
+                        //newButton.button.querySelector('.stamina-cost-icon').classList = 
+
+                        let classString = "";
+
+                        // Here we determine a string based on the stamina cost and the players current stamina. The icon is set in css based on this string
+                        switch (action.staminaCost) {
+                            case 0:
+                                classString = "";
+                                break;
+                            case 1:
+                                if (currentStamina === 0)
+                                    classString = "one-zero";
+                                else if (currentStamina >= 1)
+                                    classString = "one-one";                                
+                                break;
+                            case 2:
+                                if (currentStamina === 0)
+                                    classString = "two-zero";
+                                else if (currentStamina === 1)
+                                    classString = "two-one";
+                                else if (currentStamina >= 2)
+                                    classString = "two-two";
+                                break;
+                            case 3:
+                                if (currentStamina === 0)
+                                    classString = "three-zero";
+                                else if (currentStamina === 1)
+                                    classString = "three-one";
+                                else if (currentStamina === 2)
+                                    classString = "three-two";
+                                else if (currentStamina >= 3)
+                                    classString = "three-three";
+                                break;
+                        }
+
+                        newButton.button.querySelector('.stamina-cost-icon').classList = "stamina-cost-icon " + classString;
 
                         if (action.staminaCost > currentStamina) {                        
-                            buttonActive = false;
-                            newButton.button.querySelector('.stamina-cost-text').classList = "stamina-cost-text inactive";
-                        }
-                        else {                        
-                            newButton.button.querySelector('.stamina-cost-text').classList = "stamina-cost-text active";
-                        }                                                                    
+                            buttonActive = false;                            
+                        }                        
                     }
 
                     // Check for talk actions as they have a specific parameter that could make it inactive
@@ -1656,14 +1687,30 @@ function train(trainType, cost) {
 function updateStats() {
     
     calculateStats();
+    
+    let XPCurrentPercent = experience / 1000;        
+    playerXPBar.style.width = (XPCurrentPercent * 625 + 2)  + 'px';
 
     playerHPText.innerText = hpCurrent + "/" + hpMax;
     let HPCurrentPercent = hpCurrent / hpMax;        
     playerHPBar.style.width = (HPCurrentPercent * 250 + 2)  + 'px';
-        
-    let XPCurrentPercent = experience / 1000;        
-    playerXPBar.style.width = (XPCurrentPercent * 625 + 2)  + 'px';
 
+    createdStaminaIcons.forEach((element) => {        
+        element.remove();
+    });
+    createdStaminaIcons = [];
+
+    for (let index = 0; index < maxStamina; index++) {
+        
+        const clone = staminaIconMaster.cloneNode(true);
+        staminaSection.appendChild(clone);
+        createdStaminaIcons.push(clone);
+
+        if (index < currentStamina)
+            clone.classList = "player-stamina-icon fill"
+        else
+            clone.classList = "player-stamina-icon empty"
+    }
 }
 
 // Calculates stats that are based on multiple factors
@@ -1919,6 +1966,7 @@ function spendStamina(cost) {
 
     updateStats();
     save();
+    updateButtons(true);
 
     if (currentStamina === 0) {
 
@@ -2427,8 +2475,8 @@ function save() {
     localStorage.setItem('version', JSON.stringify(version));
     localStorage.setItem('currentLocation', JSON.stringify(currentLocation));
     localStorage.setItem('currentArea', JSON.stringify(currentArea));
-    localStorage.setItem('locationsVisited', JSON.stringify(areasVisited));    
-    localStorage.setItem('areasVisited', JSON.stringify(areasVisited));    
+    localStorage.setItem('locationsVisited', JSON.stringify(regionsVisited));    
+    localStorage.setItem('areasVisited', JSON.stringify(regionsVisited));    
     localStorage.setItem('experience', JSON.stringify(experience));
     localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
@@ -2459,8 +2507,8 @@ if (showDebugLog) console.log("Load");
 
 currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
 currentArea = JSON.parse(localStorage.getItem('currentArea'));           
-areasVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
-areasVisited = JSON.parse(localStorage.getItem('areasVisited'));    
+regionsVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
+regionsVisited = JSON.parse(localStorage.getItem('areasVisited'));    
 experience = JSON.parse(localStorage.getItem('experience'));
 insight = JSON.parse(localStorage.getItem('insight'));
 hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
@@ -2487,7 +2535,7 @@ if (!resetLocations) {
 }
 else {
     areas = JSON.parse(JSON.stringify(areasRef));        
-    areasVisited = [];        
+    regionsVisited = [];        
     npcs = JSON.parse(JSON.stringify(npcsRef));
     items = JSON.parse(JSON.stringify(itemsRef));
     narrations = JSON.parse(JSON.stringify(narrationsRef));
@@ -2704,6 +2752,21 @@ function compareObjects(obj1, obj2) {
     return true;
 }
 
+/**
+* @returns {boolean} True if areas are the same
+*/
+function compareAreas(area1, area2) {
+
+    if (area1.keyword != area2.keyword)
+        return false;
+    if (area1.title != area2.title)
+        return false;
+    if (area1.description != area2.description)
+        return false;
+
+    return true;
+}
+
   /**
  * Get the coordinates of a new cell in a 2D array given the current coordinates and a direction.
  * @param {number} x - The x-coordinate of the current cell.
@@ -2853,7 +2916,7 @@ function locationsHavePath(locationA, locationB) {
       
       if (showDebugLog) console.log("formatData() - ");
     
-      areas = JSON.parse(JSON.stringify(areasRef));      
+      areas = JSON.parse(JSON.stringify(regionsRef[0].areas));      
       npcs = JSON.parse(JSON.stringify(npcsRef));      
       narrations = JSON.parse(JSON.stringify(narrationsRef));
 
@@ -2888,12 +2951,12 @@ function locationsHavePath(locationA, locationB) {
 
     try {
 
-        const response = await fetch('Data/areas.json');
+        const response = await fetch('Data/regions.json');
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const contents = await response.text();
-        areasRef = JSON.parse(contents);
+        regionsRef = JSON.parse(contents);
         
         console.log('File has been loaded successfully.');
 

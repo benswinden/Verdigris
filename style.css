@@ -157,8 +157,11 @@ header.scrolled {
     }
 }
 
+#player-stat-section {
+    display: flex;
+}
 
-#player-hp-section {
+#player-hp-section {    
     margin-left: 55px;
     line-height: 0;    
 
@@ -187,6 +190,7 @@ header.scrolled {
 
     #player-hp-text {
         margin: 0;
+        margin-top: 3px;
         padding: 0;
         line-height: 0;
         color: #E86E40;
@@ -196,6 +200,26 @@ header.scrolled {
     }
 }
 
+#player-stamina-section {
+    display: flex;
+    margin-left: 20px;
+    margin-top: -6px;
+}
+
+.player-stamina-icon {
+    display: none;
+    width: 30px;    
+}
+
+.player-stamina-icon.fill {    
+    display: block;
+    content:url("Assets/StaminaIcon_Fill.svg");
+}
+
+.player-stamina-icon.empty {    
+    display: block;
+    content:url("Assets/StaminaIcon_Empty.svg");
+}
 
 
 #inventory-button-section {
@@ -491,11 +515,47 @@ main {
         padding-left: 10px;
     }
 
-    .stamina-cost-text.active {
-        color: #7e8186;
+    .stamina-cost-icon {        
+        height: 80%;
+        margin-top: 5px;
+        margin-left: 10px;
+        margin-right: 10px;
     }
-    .stamina-cost-text.inactive {
-        color: #8F3715;
+
+    .stamina-cost-icon.three-zero {
+        content: url("Assets/StaminaReq3-0.svg");        
+    }
+
+    .stamina-cost-icon.three-one {
+        content: url("Assets/StaminaReq3-1.svg");        
+    }
+
+    .stamina-cost-icon.three-two {
+        content: url("Assets/StaminaReq3-2.svg");        
+    }
+
+    .stamina-cost-icon.three-three {
+        content: url("Assets/StaminaReq3-3.svg");        
+    }
+
+    .stamina-cost-icon.two-zero {
+        content: url("Assets/StaminaReq2-0.svg");        
+    }
+
+    .stamina-cost-icon.two-one {
+        content: url("Assets/StaminaReq2-1.svg");        
+    }
+
+    .stamina-cost-icon.two-two {
+        content: url("Assets/StaminaReq2-2.svg");        
+    }
+
+    .stamina-cost-icon.one-zero {
+        content: url("Assets/StaminaReq1-0.svg");        
+    }
+
+    .stamina-cost-icon.one-one {
+        content: url("Assets/StaminaReq1-1.svg");        
     }
 
     .button-level-icon {

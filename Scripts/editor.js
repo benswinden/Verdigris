@@ -1,6 +1,8 @@
 
+let currentRegion = null;
 let currentArea = null;
 let currentLocation = null;
+let currentEntry = null;
 
 let mapInitialize = false;
 let mapGrid = [];
@@ -9,12 +11,12 @@ let createdButtons = [];
 
 let showDebugLog = true;
 
-let areasData = [];
+let regionsData = [];
 let itemsRef = [];
 let monstersRef = [];
 let npcsRef = [];
 
-let areasTemp = [];
+let regionsTemp = [];
 
 let isLeftCtrlHeld = false;
 
@@ -47,6 +49,7 @@ const keywordInput = document.querySelector("#keyword-input");
 const titleInput = document.querySelector("#title-input");
 const descriptionInput = document.querySelector("#description-input");
 const newAreaButton = document.querySelector("#new-area-button");
+const newRegionButton = document.querySelector("#new-region-button");
 
 
 var config = 
@@ -88,7 +91,7 @@ async function initialize() {
     await loadData();
 
     initalizeMap();
-    initializeAreaPicker();
+    initializeRegionPicker();
 }
 
 function initalizeMap() {
@@ -177,26 +180,81 @@ function initalizeMap() {
     mapInitialize = true;
 }
 
-function initializeAreaPicker() {
+function initializeRegionPicker() {
 
-    const dropdownContent = document.querySelector('.dropdown-content');
-    const dropbtn = document.querySelector('.dropbtn');
+    const dropdownContent = document.querySelector('#region-picker-container').querySelector('.dropdown-content');
+    const dropbtn = document.querySelector('#region-picker-container').querySelector('.dropbtn');    
 
     while (dropdownContent.firstChild) {
         dropdownContent.removeChild(dropdownContent.firstChild);
     }
 
-    for (const area of areasData) {
+    for (const region of regionsData) {
+                
+        let entry = document.createElement('a');
+        entry.textContent = region.title;
+
+        // If we already have a set currentRegion when initializing, make sure to store the entry that matches the current selected region
+        if (currentRegion != null && region.title === currentRegion.title) 
+            currentEntry = entry;
+
+        entry.addEventListener('click', function(event) {
+            
+            currentEntry = entry;
+            currentLocation = null;
+            currentArea = null;
+
+            event.preventDefault();
+            dropbtn.textContent = region.title;
+            currentRegion = regionsData[getElementFromKeyword(region.keyword, regionsData)];
+
+            removeDoorButton.style.display = "none";
+            createDoorButton.style.display = "none";
+            doorAttributeContainer.style.display = "none";
+
+            resetMap();
+            loadRegion();
+            initializeAreaPicker();
+        });
+        dropdownContent.appendChild(entry);
+    }
+    
+    if (currentRegion != null) {
+
+        dropbtn.textContent = currentRegion.title;
+    }
+}
+
+function initializeAreaPicker() {
+
+    const dropdownContent = document.querySelector('#area-picker-container').querySelector('.dropdown-content');
+    const dropbtn = document.querySelector('#area-picker-container').querySelector('.dropbtn');
+    
+    dropbtn.textContent = "Select";
+
+    while (dropdownContent.firstChild) {
+        dropdownContent.removeChild(dropdownContent.firstChild);
+    }
+
+    const _areasData = currentRegion.areas;
+
+    for (const area of _areasData) {
                 
         let entry = document.createElement('a');
         entry.textContent = area.title;
+
+        // If we already have a set currentArea when initializing, make sure to store the entry that matches the current selected area
+        if (currentArea != null && area.title === currentArea.title) 
+            currentEntry = entry;
+
         entry.addEventListener('click', function(event) {
             
+            currentEntry = entry;
             currentLocation = null;
 
             event.preventDefault();
             dropbtn.textContent = area.title;
-            currentArea = getElementFromKeyword(area.keyword, areasData);
+            currentArea = area;
 
             removeDoorButton.style.display = "none";
             createDoorButton.style.display = "none";
@@ -206,27 +264,71 @@ function initializeAreaPicker() {
         });
         dropdownContent.appendChild(entry);
     }
-    console.log(currentArea);
-    if (currentArea != null) {
+    
+    // Allows you to de-select an area
+    let entry = document.createElement('a');
+    entry.textContent = "Deselect";
+    entry.addEventListener('click', function(event) {
+        
+        loadRegion();
+        resetMap();
+        dropbtn.textContent = "Select";
+    });
+    dropdownContent.appendChild(entry);
 
-        dropbtn.textContent = areasData[currentArea].title;
+
+    if (currentArea != null) {
+        
+        dropbtn.textContent = currentArea.title;
     }
+}
+
+function loadRegion() {
+
+    keywordInput.value = currentRegion.keyword;
+    titleInput.value = currentRegion.title;
+    descriptionInput.value = currentRegion.description;
 }
 
 function loadArea() {
 
-    keywordInput.value = areasData[currentArea].keyword;
-    titleInput.value = areasData[currentArea].title;
-    descriptionInput.value = areasData[currentArea].description;
+    keywordInput.value = currentArea.keyword;
+    titleInput.value = currentArea.title;
+    descriptionInput.value = currentArea.description;
 
     updateMap();
+}
+
+function resetArea() {
+
+    keywordInput.value = "";
+    titleInput.value = "";
+    descriptionInput.value = "";
+
+    resetMap();
+}
+
+function resetMap() {
+
+    for (let y = 0; y < mapGrid.length; y++) {
+        for (let x = 0; x < mapGrid[y].length; x++) {
+
+            const nodeObject = mapGrid[y][x];
+            
+            nodeObject.element.classList = "main-square can-hover"
+            if (nodeObject.north != null) nodeObject.north.classList = "horizontal-square"
+            if (nodeObject.west != null) nodeObject.west.classList = "vertical-square"
+            if (nodeObject.east != null) nodeObject.east.classList = "vertical-square"
+            if (nodeObject.south != null) nodeObject.south.classList = "horizontal-square"                                                          
+        }
+    }
 }
 
 function updateMap() {
 
     if (showDebugLog) console.log("updateMap() - ");
 
-    if (areasData[currentArea].locations.length > 0) {
+    if (currentArea.locations.length > 0) {
 
         // Reset state of all squares in the grid
         for (let y = 0; y < mapGrid.length; y++) {
@@ -257,7 +359,7 @@ function updateMap() {
         }
 
         // Cycle through all locations in this area
-        areasData[currentArea].locations.forEach((location, index) => {
+        currentArea.locations.forEach((location, index) => {
 
             let isAdjacentToCurrent = false;
 
@@ -500,16 +602,16 @@ function createLocation(coordinates) {
         door: null
     }
     
-    areasData[currentArea].locations.push(newLocation);
+    currentArea.locations.push(newLocation);
     return newLocation;
 }
 
 function removeLocation(location) {
 
-    if (areasData === null) return;
+    if (regionsData === null) return;
     
-    if (areasData[currentArea].locations.indexOf(location) != -1) {
-        areasData[currentArea].locations.splice(areasData[currentArea].locations.indexOf(location), 1)
+    if (currentArea.locations.indexOf(location) != -1) {
+        currentArea.locations.splice(currentArea.locations.indexOf(location), 1)
         currentLocation = null;        
         updateMap();
     }
@@ -533,7 +635,49 @@ function checkIsAdjacent(coordinatesA, coordinatesB) {
     return isAdjacent;
 }
 
+function createNewRegion() {
+
+    const newRegion =
+        {
+            keyword: "new_region",
+            title: "New region title",
+            description: "New region description.",
+            areas: [
+                {
+                    keyword: "new_area",
+                    title: "New area title",
+                    description: "New area description.",
+                    narration: "",
+                    update: "",
+                    locations: [
+                        {
+                            coordinates: [0,0],
+                            visited: false,
+                            seen: false,
+                            items: [],
+                            monsters: [],
+                            npcs: [],
+                            north: null,
+                            west: null,
+                            east: null,
+                            south: null,
+                            door: null
+                        }
+                    ]
+                }
+            ]
+        };
+    
+    regionsData.push(newRegion);
+    currentRegion = newRegion;
+    initializeRegionPicker();
+    initializeAreaPicker();
+    loadRegion();
+}
+
 function createNewArea() {
+
+    if (currentRegion === null) return;
 
     const newArea = {
         keyword: "new_area",
@@ -558,8 +702,8 @@ function createNewArea() {
         ]
     };
     
-    areasData.push(newArea);
-    currentArea = areasData.length-1;
+    currentRegion.areas.push(newArea);
+    currentArea = newArea;
     initializeAreaPicker();
     loadArea();
 }
@@ -766,6 +910,8 @@ function closeNewObjectPicker() {
 
 function initializeDoorAttributePicker() {
 
+    if (currentArea === null) return;
+
     const areaDropdownContent = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropdown-content');
     const areaDropdownButton = doorAttributeContainer.querySelector('#door-area-picker').querySelector('.dropbtn');
     const coordinatesDropdownContent = doorAttributeContainer.querySelector('#door-coordinate-picker').querySelector('.dropdown-content');
@@ -781,7 +927,7 @@ function initializeDoorAttributePicker() {
     areaDropdownButton.textContent = "Select";
     coordinatesDropdownButton.textContent = "";
 
-    for (const area of areasData) {
+    for (const area of currentArea) {
                 
         let entry = document.createElement('a');
         entry.textContent = area.title;
@@ -797,7 +943,7 @@ function initializeDoorAttributePicker() {
 
     if (currentLocation != null && currentLocation.door != null) {
 
-        const _area = areasData[getElementFromKeyword(currentLocation.door.area, areasData)];
+        const _area = currentArea[getElementFromKeyword(currentLocation.door.area, currentArea)];
         areaDropdownButton.textContent = _area.title;
         initializeCoordinates(_area);
     }
@@ -836,7 +982,7 @@ function initializeCoordinates(area) {
                 // find door on the other side and add it                
                 const otherLocation = getLocationFromArea(location.coordinates, area.keyword);
                 otherLocation.door = { 
-                    area: areasData[currentArea].keyword,
+                    area: currentArea.keyword,
                     coordinates: currentLocation.coordinates
                 };
                 
@@ -876,17 +1022,11 @@ function getElementFromKeyword(keyword, array) {
     return index;
   }  
 
-function getLocationFromArea(coordinates, area) {
-    
-    let _area = null;
-    if (Number.isInteger(area))
-        _area = area;
-    else
-        _area = getIndexFromKeyword(area, objectType.area);
+function getLocationFromArea(coordinates, area) {    
 
     let loc = null;
     
-    areasData[_area].locations.forEach((element, i) => {                
+    area.locations.forEach((element, i) => {                
 
         if (compareArrays(element.coordinates, coordinates)) {
             
@@ -901,9 +1041,7 @@ function getLocationFromArea(coordinates, area) {
     
     ar = [];    
     switch (objType) {
-        case objectType.area://Location        
-            ar = areasData;
-            break;
+
         case objectType.item:
             ar = itemsRef;            
             break;
@@ -1271,13 +1409,13 @@ document.getElementById('load-button').addEventListener('click', async function(
 async function loadData() {
 
     try {
-        const response = await fetch('Data/areas.json');
+        const response = await fetch('Data/regions.json');
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const contents = await response.text();
-        areasData = JSON.parse(contents);
-        
+        regionsData = JSON.parse(contents);        
+
         console.log('File has been loaded successfully.');
 
     } catch (error) {
@@ -1290,7 +1428,7 @@ function eventListeners() {
     document.getElementById('save-button').addEventListener('click', async function() {
 
         const fileHandle = await window.showSaveFilePicker({
-            suggestedName: 'areas.json',
+            suggestedName: 'regions.json',
             types: [{
                 description: 'JSON Files',
                 accept: { 'application/json': ['.json'] }
@@ -1302,7 +1440,7 @@ function eventListeners() {
         try {
 
             // Convert JSON object to string
-            const jsonString = JSON.stringify(areasData, null, 2);
+            const jsonString = JSON.stringify(regionsData, null, 2);
 
             // Write the JSON string to the file
             await writableStream.write(jsonString);
@@ -1362,6 +1500,11 @@ function eventListeners() {
         navMap.classList.add("selected");
     });
 
+    newRegionButton.addEventListener('click', async function() {
+        
+        createNewRegion();
+    });
+
     newAreaButton.addEventListener('click', async function() {
         
         createNewArea();
@@ -1384,24 +1527,35 @@ function eventListeners() {
 
     keywordInput.addEventListener('input', function(event) {
         
-        if (currentArea === null) { console.error("Changed keyword but no current area"); return;}
-
-        areasData[currentArea].keyword = event.target.value;
+        if (currentArea === null && currentRegion != null) { 
+            currentRegion.keyword = event.target.value;
+        }
+        else if (currentArea != null) {
+            currentArea.keyword = event.target.value;
+        }    
     });
 
     titleInput.addEventListener('input', function(event) {
         
-        if (currentArea === null) { console.error("Changed title but no current area"); return;}
-
-        document.querySelector('#area-picker-container').querySelector('.dropbtn').textContent = event.target.value;
-        areasData[currentArea].title = event.target.value;
+        if (currentArea === null && currentRegion != null) {
+            if (currentEntry != null) currentEntry.textContent = event.target.value;
+            document.querySelector('#region-picker-container').querySelector('.dropbtn').textContent = event.target.value;
+            currentRegion.title = event.target.value;
+        }
+        else if (currentArea != null) {
+            if (currentEntry != null) currentEntry.textContent = event.target.value;
+            document.querySelector('#area-picker-container').querySelector('.dropbtn').textContent = event.target.value;
+            currentArea.title = event.target.value;            
+        }    
     });
 
     descriptionInput.addEventListener('input', function(event) {
         
-        if (currentArea === null) { console.error("Changed description but no current area"); return;}
-
-        areasData[currentArea].description = event.target.value;
+        if (currentArea === null && currentRegion != null) { 
+            currentRegion.description = event.target.value;
+        }
+        else if (currentArea != null)
+            currentArea.description = event.target.value;
     });
 
 }
