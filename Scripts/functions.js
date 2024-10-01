@@ -133,7 +133,6 @@ const objectType = {
 
 // These are our data arrays that contain the data for the game
 let regionsRef = [];
-let areasRef = [];
 let narrationsRef = [];
 let monstersRef = [];       // Reference for unique monsters, these will be duplicated for each location at runtime. References to the actual monster data will be within each location
 let npcsRef = [];
@@ -141,7 +140,7 @@ let itemsRef = [];
 let actionsRef = [];
 
 // These are containers, mostly copies of our reference data which will be modified at runtime
-let areas = [];
+let regions = [];
 let monsters = [];          // These are duplicates of the monsters defined in data
 let npcs = [];
 let items = [];
@@ -241,6 +240,8 @@ function initializeGame() {
         inventory = [];
         inventory.push("straight_sword","green_cloak","worn_shield");
         
+        currentRegion = regions[0];
+        currentArea = getObjectFromKeyword(debugStartArea, currentRegion.areas);        
         regionsVisited = [];        
 
         titleOpen = false;
@@ -251,11 +252,11 @@ function initializeGame() {
         corpseLocation = null;
 
         save();
-        
-        const startLocation = getLocationFromArea(debugStartCoordinates, debugStartArea);
+            
+        const startLocation = getLocationFromArea(debugStartCoordinates, currentArea);
         if (startLocation === null) console.error("InitializeGame() - Can't find start location")
         respawnLocation = { area: debugStartArea, location: startLocation };
-        displayLocation(debugStartArea, startLocation);
+        displayLocation(currentArea, startLocation);
     }
 }
 
@@ -318,12 +319,12 @@ function displayLocation(area, location) {
         
         
     //     // Check whether this location has a narration keyword
-    //     if (areas[currentArea].narration != undefined && areas[currentArea].narration != "") {
+    //     if (currentArea.narration != undefined && currentArea.narration != "") {
             
     //         // Check if the matching narration to this keyword has already been seen                
-    //         if (narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(areas[currentArea].narration, narrationsRef)].seen) {
+    //         if (narrations[getElementFromKeyword(currentArea.narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(currentArea.narration, narrationsRef)].seen) {
 
-    //             displayNarration(areas[currentArea].narration);
+    //             displayNarration(currentArea.narration);
     //             return;
     //         }
     //     }
@@ -332,9 +333,9 @@ function displayLocation(area, location) {
     //     save();
 
     //     // Check if there is narration text, then show it as this is the first time visiting
-    //     if (areas[currentArea].update != undefined && areas[currentArea].update != "") {
+    //     if (currentArea.update != undefined && currentArea.update != "") {
     //         narrationText.style.display = "block";
-    //         narrationText.innerText = areas[currentArea].update;  // Add the narration text so it appears before the main text for the locat                
+    //         narrationText.innerText = currentArea.update;  // Add the narration text so it appears before the main text for the locat                
     //     }
     // }
 
@@ -342,8 +343,8 @@ function displayLocation(area, location) {
     mainTitleText.classList = "";
     secondaryTitle.style.display = "none";
     
-    mainTitleText.innerText = areas[currentArea].title;        
-    mainText.innerText = areas[currentArea].description;             
+    mainTitleText.innerText = currentArea.title;        
+    mainText.innerText = currentArea.description;             
 
     updateButtons(false);
 }
@@ -851,7 +852,7 @@ function updateButtons(skipAnimation)  {
         if (_monsters != undefined && _monsters.length > 0 && _monsters != "") {
             
             _monsters.forEach((monster, index) => {
-                                
+                
                 let descriptionTextActive = false;
 
                 const newButton = createButton(monster.keyword, objectType.monster);
@@ -860,7 +861,7 @@ function updateButtons(skipAnimation)  {
                 newButton.button.classList = "nav-button monster-button can-hover";
                 newButton.buttonChevron.style.display = "block";
 
-                // ITEM NAME
+                // ITEM NAME                
                 newButton.buttonText.innerText = monster.title;
                 // ITEM DESCRIPTION
                 if (monster.description != undefined && monster.description != "") {
@@ -1225,7 +1226,7 @@ function updateMap() {
     let monsterPresent = false;
     if (currentLocation.monsters != undefined) monsterPresent = currentLocation.monsters.length > 0;
     
-    if (areas[currentArea].locations.length > 0) {
+    if (currentArea.locations.length > 0) {
 
         // Reset state of all squares in the grid
         for (let y = 0; y < mapGrid.length; y++) {
@@ -1244,7 +1245,7 @@ function updateMap() {
         }
 
         // Cycle through all locations in this area
-        areas[currentArea].locations.forEach((location, index) => {
+        currentArea.locations.forEach((location, index) => {
 
             let isAdjacentToCurrent = false;
 
@@ -1458,7 +1459,7 @@ function displayNPC(index) {
         npcActive = true;
         currentNPC = index;        
 
-        mainTitleText.innerText = areas[currentArea].title;
+        mainTitleText.innerText = currentArea.title;
         mainTitleText.classList = "secondary";        
         secondaryTitle.style.display = "flex";
         
@@ -2452,13 +2453,15 @@ function toggleEquipped(keyword) {
 
 function healAllMonsters() {
 
-    for (const area of areas) {
-        for (const location of area.locations) {            
-            // Check this location has monsters listed
-            if (location.monsters != null) {
-                for (const monster of location.monsters) {            
-                    monster.hpCurrent = monster.hpMax;
-                }                
+    for (const region of regions) {
+        for (const area of region.areas) {
+            for (const location of area.locations) {            
+                // Check this location has monsters listed
+                if (location.monsters != null) {
+                    for (const monster of location.monsters) {            
+                        monster.hpCurrent = monster.hpMax;
+                    }                
+                }
             }
         }
     }
@@ -2473,10 +2476,10 @@ function save() {
     if (showDebugLog) console.log("save");
     localStorage.setItem('saveExists', "!");        // Used to test whether there is a save
     localStorage.setItem('version', JSON.stringify(version));
-    localStorage.setItem('currentLocation', JSON.stringify(currentLocation));
-    localStorage.setItem('currentArea', JSON.stringify(currentArea));
+
     localStorage.setItem('locationsVisited', JSON.stringify(regionsVisited));    
-    localStorage.setItem('areasVisited', JSON.stringify(regionsVisited));    
+    localStorage.setItem('areasVisited', JSON.stringify(regionsVisited));
+
     localStorage.setItem('experience', JSON.stringify(experience));
     localStorage.setItem('insight', JSON.stringify(insight));
     localStorage.setItem('hpCurrent', JSON.stringify(hpCurrent));
@@ -2495,140 +2498,165 @@ function save() {
     localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
     localStorage.setItem('corpseLocation', JSON.stringify(corpseLocation));
 
-    localStorage.setItem('areas', JSON.stringify(areas));        
+    localStorage.setItem('regions', JSON.stringify(regions));    
     localStorage.setItem('npcs', JSON.stringify(npcs));
     localStorage.setItem('items', JSON.stringify(items));
-    localStorage.setItem('narrations', JSON.stringify(narrations));    
+    localStorage.setItem('narrations', JSON.stringify(narrations));
+
+    // Saving variables that are object references
+    localStorage.setItem('currentRegionKeyword', JSON.stringify(currentRegion.keyword));
+    localStorage.setItem('currentAreaKeyword', JSON.stringify(currentArea.keyword));
+    localStorage.setItem('currentLocationCoordinates', JSON.stringify(currentLocation.coordinates));
   }
   
 function load() {
 
-if (showDebugLog) console.log("Load");
+    if (showDebugLog) console.log("Load");
 
-currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
-currentArea = JSON.parse(localStorage.getItem('currentArea'));           
-regionsVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
-regionsVisited = JSON.parse(localStorage.getItem('areasVisited'));    
-experience = JSON.parse(localStorage.getItem('experience'));
-insight = JSON.parse(localStorage.getItem('insight'));
-hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
-maxStamina = JSON.parse(localStorage.getItem('maxStamina'));
-currentStamina = JSON.parse(localStorage.getItem('currentStamina'));
-hpMax = JSON.parse(localStorage.getItem('hpMax'));
-gold = JSON.parse(localStorage.getItem('gold'));
-ore = JSON.parse(localStorage.getItem('ore'));
-greenHerb = JSON.parse(localStorage.getItem('greenHerb'));
-leather = JSON.parse(localStorage.getItem('leather'));
-basePower = JSON.parse(localStorage.getItem('basePower'));
-baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
-baseDefence = JSON.parse(localStorage.getItem('baseDefence'));
-inventory = JSON.parse(localStorage.getItem('inventory'));
-respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'))
-corpseLocation = JSON.parse(localStorage.getItem('corpseLocation'))
+    currentLocation = JSON.parse(localStorage.getItem('currentLocation'));           
 
-if (!resetLocations) { 
-    
-    areas = JSON.parse(localStorage.getItem('areas'));                            
-    npcs = JSON.parse(localStorage.getItem('npcs'));
-    items = JSON.parse(localStorage.getItem('items'));
-    narrations = JSON.parse(localStorage.getItem('narrations'));
-}
-else {
-    areas = JSON.parse(JSON.stringify(areasRef));        
-    regionsVisited = [];        
-    npcs = JSON.parse(JSON.stringify(npcsRef));
-    items = JSON.parse(JSON.stringify(itemsRef));
-    narrations = JSON.parse(JSON.stringify(narrationsRef));
-}
+    regionsVisited = JSON.parse(localStorage.getItem('locationsVisited')); 
+    regionsVisited = JSON.parse(localStorage.getItem('areasVisited'));    
+    experience = JSON.parse(localStorage.getItem('experience'));
+    insight = JSON.parse(localStorage.getItem('insight'));
+    hpCurrent = JSON.parse(localStorage.getItem('hpCurrent'));
+    maxStamina = JSON.parse(localStorage.getItem('maxStamina'));
+    currentStamina = JSON.parse(localStorage.getItem('currentStamina'));
+    hpMax = JSON.parse(localStorage.getItem('hpMax'));
+    gold = JSON.parse(localStorage.getItem('gold'));
+    ore = JSON.parse(localStorage.getItem('ore'));
+    greenHerb = JSON.parse(localStorage.getItem('greenHerb'));
+    leather = JSON.parse(localStorage.getItem('leather'));
+    basePower = JSON.parse(localStorage.getItem('basePower'));
+    baseStamina = JSON.parse(localStorage.getItem('baseStamina'));
+    baseDefence = JSON.parse(localStorage.getItem('baseDefence'));
+    inventory = JSON.parse(localStorage.getItem('inventory'));
+    respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'))
+    corpseLocation = JSON.parse(localStorage.getItem('corpseLocation'))
+
+    if (!resetLocations) { 
+        
+        regions = JSON.parse(localStorage.getItem('regions'));        
+        npcs = JSON.parse(localStorage.getItem('npcs'));
+        items = JSON.parse(localStorage.getItem('items'));
+        narrations = JSON.parse(localStorage.getItem('narrations'));
+    }
+    else {
+        
+        regions = JSON.parse(JSON.stringify(regionsRef));        
+        regionsVisited = [];        
+        npcs = JSON.parse(JSON.stringify(npcsRef));
+        items = JSON.parse(JSON.stringify(itemsRef));
+        narrations = JSON.parse(JSON.stringify(narrationsRef));
+    }
+
+    // Loading variables that are just references for objects
+    // We save the keywords instead, then get the object once all the data is loaded
+    const currentRegionKeyword = JSON.parse(localStorage.getItem('currentRegionKeyword'));
+    currentRegion = getObjectFromKeyword(currentRegionKeyword, regions);
+
+    const currentAreaKeyword = JSON.parse(localStorage.getItem('currentAreaKeyword'));
+    currentArea = getObjectFromKeyword(currentAreaKeyword, currentRegion.areas);
+
+    const currentLocationCoordinates = JSON.parse(localStorage.getItem('currentLocationCoordinates'));
+    currentLocation = getLocationFromArea(currentLocationCoordinates, currentArea);
 }
 
 function versionCheck() {
 
-let saveVersion = JSON.parse(localStorage.getItem('version'));
-if (showDebugLog) console.log("Current version: " + version + "    Save Version: " + saveVersion);
-return version === saveVersion;
+    let saveVersion = JSON.parse(localStorage.getItem('version'));
+    if (showDebugLog) console.log("Current version: " + version + "    Save Version: " + saveVersion);
+    return version === saveVersion;
 }
 
 function resetGame() {
 
-localStorage.clear();
-clearInventory();
-initializeGame();
+    localStorage.clear();
+    clearInventory();
+    initializeGame();
 }
 
 // Get an index from an array of the given type.
 // i.e. I want to find a location named "keyword"
 function getIndexFromKeyword(keyword, objType) {
 
-ar = [];    
-switch (objType) {
-    case objectType.area://Location        
-        ar = areas;
-        break;
-    case objectType.item:
-        ar = items;            
-        break;
-    case objectType.npc:
-        ar = npcs;            
-        break;
-}
-
-let index = -1;
-
-ar.forEach((element, i) => {        
-    if (element.keyword === keyword) {
+    ar = [];    
+    switch (objType) {
         
-        index = i;            
+        case objectType.item:
+            ar = items;            
+            break;
+        case objectType.npc:
+            ar = npcs;            
+            break;
     }
-});
 
-if (index === -1) console.error("getIndexFromkeyword() - Failed to find keyword [" + keyword + "] of object type [" + objType + "]");
-return index;
-}
+    let index = -1;
+
+    ar.forEach((element, i) => {        
+        if (element.keyword === keyword) {
+            
+            index = i;            
+        }
+    });
+
+    if (index === -1) console.error("getIndexFromkeyword() - Failed to find keyword [" + keyword + "] of object type [" + objType + "]");
+    return index;
+    }
 
 function getElementFromKeyword(keyword, array) {
 
-if (array === undefined || array === null) console.error("getElementFromKeyword() - keyword [" + keyword + "] No array provided");
+    if (array === undefined || array === null) console.error("getElementFromKeyword() - keyword [" + keyword + "] No array provided");
 
-let index = -1;
+    let index = -1;
 
-array.forEach((element, i) => {        
-    if (element.keyword === keyword) {
-        
-        index = i;            
-    }
-});
+    array.forEach((element, i) => {        
+        if (element.keyword === keyword) {
+            
+            index = i;            
+        }
+    });
 
-if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
-return index;
+    if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
+    return index;
 }  
+
+function getObjectFromKeyword(keyword, array) {
+
+    if (array === undefined || array === null) console.error("getObjectFromKeyword() - keyword [" + keyword + "] No array provided");
+    
+    let obj = null;
+    
+    array.forEach((element, i) => {        
+        if (element.keyword === keyword) {
+            
+            obj = element;            
+        }
+    });
+        
+    return obj;
+    }  
 
 function getLocationFromCurrentArea(coordinates) {
 
-let loc = null;
+    let loc = null;
 
-areas[currentArea].locations.forEach((element, i) => {                
+    currentArea.locations.forEach((element, i) => {                
 
-    if (compareArrays(element.coordinates, coordinates)) {
-        
-        loc = element;            
-    }
-});
+        if (compareArrays(element.coordinates, coordinates)) {
+            
+            loc = element;            
+        }
+    });
 
-return loc;
+    return loc;
 }
 
-function getLocationFromArea(coordinates, area) {
-    
-    let _area = null;
-    if (Number.isInteger(area))
-        _area = area;
-    else
-        _area = getIndexFromKeyword(area, objectType.area);
+function getLocationFromArea(coordinates, area) {        
 
     let loc = null;
 
-    areas[_area].locations.forEach((element, i) => {                
+    area.locations.forEach((element, i) => {                
 
         if (compareArrays(element.coordinates, coordinates)) {
             
@@ -2912,40 +2940,43 @@ function locationsHavePath(locationA, locationB) {
     return hasPath;
 }
 
-  function formatData() {    
+function formatData() {    
       
-      if (showDebugLog) console.log("formatData() - ");
+    if (showDebugLog) console.log("formatData() - ");
+
+    regions = JSON.parse(JSON.stringify(regionsRef));    
+    npcs = JSON.parse(JSON.stringify(npcsRef));      
+    narrations = JSON.parse(JSON.stringify(narrationsRef));
+
+    items = JSON.parse(JSON.stringify(itemsRef));
+
+    items.forEach((element,index) => {
+        
+        element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
+        element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
+    });
     
-      areas = JSON.parse(JSON.stringify(regionsRef[0].areas));      
-      npcs = JSON.parse(JSON.stringify(npcsRef));      
-      narrations = JSON.parse(JSON.stringify(narrationsRef));
+    // Take the references in each locations monster array, and spawn unique versions of those from MonsterRef            
+    for (const region of regions) {
+        for (const area of region.areas) {
+            for (const location of area.locations) {
 
-      items = JSON.parse(JSON.stringify(itemsRef));
+                const newMonsterArray = [];     // We will store references to all newly created monsters and overwrite the key word array that is created before runtime
+                // Check this location has monsters listed
+                if (location.monsters != null) {
+                    for (const monster of location.monsters) {
 
-      items.forEach((element,index) => {
-          
-          element.upgradeMaterial != null ? element.upgradeMaterial = element.upgradeMaterial.split(',') : element.upgradeMaterial = [];
-          element.actions != null ? element.actions = element.actions.split(',') : element.actions = [];        
-      });
-      
-      // Take the references in each locations monster array, and spawn unique versions of those from MonsterRef            
-      for (const area of areas) {
-        for (const location of area.locations) {
-            const newMonsterArray = [];     // We will store references to all newly created monsters and overwrite the key word array that is created before runtime
-            // Check this location has monsters listed
-            if (location.monsters != null) {
-                for (const monster of location.monsters) {
-
-                    // Create a duplicated of the original referenced monster in our monsters array which will serve as our runtime data for this monster
-                    let newMonster = JSON.parse(JSON.stringify( monstersRef[getElementFromKeyword(monster, monstersRef)]))
-                    newMonsterArray.push(newMonster);
+                        // Create a duplicated of the original referenced monster in our monsters array which will serve as our runtime data for this monster
+                        let newMonster = JSON.parse(JSON.stringify( monstersRef[getElementFromKeyword(monster, monstersRef)]))
+                        newMonsterArray.push(newMonster);
+                    }
                 }
-            }
 
-            location.monsters = newMonsterArray;            
+                location.monsters = newMonsterArray;            
+            }
         }
-      }
-  }
+    }
+}
 
   async function loadData() {
 
