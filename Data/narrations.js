@@ -1,4 +1,4 @@
-narrationsRef = [
+export const narrationsRef = [
     {
         keyword: "beginning",
         seen: false,

@@ -1,6 +1,6 @@
 // 1 = Location, 2 = Locked, 3 = Monster, 4 = Item, 5 = NPC, 6 = Misc Action
 
-npcsRef = [
+export const npcsRef = [
 
     //----------------------//
     //-- The Old Monastery 

@@ -277,13 +277,22 @@
             ],
             "monsters": [],
             "npcs": [],
-            "north": null,
+            "north": [
+              2,
+              8
+            ],
             "west": [
               3,
               7
             ],
-            "east": null,
-            "south": null,
+            "east": [
+              3,
+              9
+            ],
+            "south": [
+              4,
+              8
+            ],
             "door": null
           },
           {
@@ -329,6 +338,50 @@
               4,
               5
             ],
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              3,
+              9
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [
+              "strange_stone"
+            ],
+            "monsters": [],
+            "npcs": [
+              "thornhood_kijil"
+            ],
+            "north": null,
+            "west": [
+              3,
+              8
+            ],
+            "east": null,
+            "south": null,
+            "door": null
+          },
+          {
+            "coordinates": [
+              4,
+              8
+            ],
+            "visited": false,
+            "seen": false,
+            "items": [],
+            "monsters": [
+              "temple_golem"
+            ],
+            "npcs": [],
+            "north": [
+              3,
+              8
+            ],
+            "west": null,
+            "east": null,
             "south": null,
             "door": null
           }
