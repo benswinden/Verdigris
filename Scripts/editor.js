@@ -21,7 +21,6 @@ const EDITOR = (function() {
     let currentLocation = null;
     let currentEntry = null;
 
-    let mapInitialize = false;
     let mapGrid = [];
 
     let createdButtons = [];
@@ -64,7 +63,6 @@ const EDITOR = (function() {
     const descriptionInput = document.querySelector("#description-input");
     const newAreaButton = document.querySelector("#new-area-button");
     const newRegionButton = document.querySelector("#new-region-button");
-
 
     var PapaParseConfig = 
     {    
@@ -194,8 +192,6 @@ const EDITOR = (function() {
                 if (y < mapGrid.length -1) nodeObj.south = secondaryGrid[2*y + 1][x];
             }
         }
-
-        mapInitialize = true;
     }
 
     function initializeRegionPicker() {

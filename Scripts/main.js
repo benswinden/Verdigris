@@ -20,7 +20,7 @@ const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.054;
+    let version = 0.055;
 
     let insight = 0;
     let hpCurrent = 10;
@@ -2733,7 +2733,7 @@ const VERDIGRIS = (function() {
             debugWindowActive = false;
         }
     }
-    
+
     //#endregion
 
 })();
