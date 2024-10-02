@@ -20,7 +20,7 @@ const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.055;
+    let version = 0.057;
 
     let insight = 0;
     let hpCurrent = 10;
@@ -312,7 +312,7 @@ const VERDIGRIS = (function() {
             updateStats();
             save();
 
-            if (currentLocation === -99)
+            if (currentLocation === null)
                 respawn();
             else
                 displayLocation(currentRegion, currentArea, currentLocation);
@@ -339,9 +339,9 @@ const VERDIGRIS = (function() {
             baseStamina = 2;        
             baseDefence = 0;
             baseEvasion = 20;
-                        
+            
+            calculateStats();
             currentStamina = maxStamina;
-
             updateStats();            
 
             inventory = [];
@@ -2165,7 +2165,7 @@ const VERDIGRIS = (function() {
         newButton.buttonText.innerText = "Awaken";                    
         document.querySelector("#main-button-container").insertBefore(newButton.button, buttonMaster);                                                                
         newButton.button.onclick = function() { respawn();};        
-        currentLocation = -99;   // Save 'dead' state
+        currentLocation = null;   // Save 'dead' state
         save();
     }
 
