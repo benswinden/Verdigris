@@ -2,13 +2,13 @@
   {
     "keyword": "blightfold_maze",
     "title": "Blightfold Maze",
-    "description": "Remnants of great gardens built in spiraling maze-shape of a past age. Stone paths and once manicured hedges have been mostly covered by the poisoned overgrowth. Long left to it's own devices; grown into a tangle of briar and thorny bushes.\n\nAncient brambles covering ancient secrets.",
+    "description": "Remnants of great gardens from a past age, built in spiraling maze-shape. Stone paths and once manicured hedges have been mostly covered by the poisoned overgrowth. Long left to it's own devices; grown into a tangle of briar and thorny bushes.\n\nAncient brambles covering ancient secrets.",
     "visited": false,
     "areas": [
       {
         "keyword": "bramble_path",
         "title": "The Bramble Path",
-        "description": "The ancient pathways were overgrown and hard to discern which way was which.",
+        "description": "The ancient pathways are overgrown and hard to discern which way is which.",
         "narration": "",
         "update": "",
         "visited": false,

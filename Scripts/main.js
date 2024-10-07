@@ -100,6 +100,7 @@ const VERDIGRIS = (function() {
     const secondaryTitle =  document.querySelector('#secondary-title');
     const secondaryTitleText =  document.querySelector('#secondary-title-text');
     const secondaryTitleIcon =  document.querySelector('#secondary-title-icon');
+    const mainTextSection =  document.querySelector('#main-text-section');
     const mainText =  document.querySelector('#main-text');
     const narrationText =  document.querySelector('#narration-text');
     const updateText =  document.querySelector('#update-text');
@@ -269,7 +270,9 @@ const VERDIGRIS = (function() {
         
         await loadData();
         
+        
         initializeGame();
+        displayCombat();
     }
 
     async function loadData() {
@@ -364,7 +367,7 @@ const VERDIGRIS = (function() {
             currentRegion = _startRegion;
             currentArea = _startArea;
             currentLocation = _startLocation;
-            respawnLocation = { regionKeyword: startRegionKeyword, areaKeyword: startAreaKeyword, locationCoordinates: _startLocation };
+            respawnLocation = { regionKeyword: startRegionKeyword, areaKeyword: startAreaKeyword, locationCoordinates: _startLocation.coordinates };
             save();
         
             displayLocation(_startRegion, _startArea, _startLocation);
@@ -409,8 +412,6 @@ const VERDIGRIS = (function() {
             }
         }
     }
-
-
 
     // General purpose function when we want to display a location
     // newLocation can be an integer or a keyword value
@@ -1606,6 +1607,27 @@ const VERDIGRIS = (function() {
         }
     }
 
+    function displayCombat() {
+
+        mapGridContainer.style.display = "none";
+        mainTextSection.style.display = "none";
+
+        saleTitle.style.display = "none";
+        narrationText.style.display = "none";        
+        mainTitle.classList = "combat";
+        mainTitleText.classList = "";
+        mainTitleText.innerText = currentRegion.title;
+        secondaryTitle.style.display = "none";
+        mainText.innerText = currentRegion.description;
+
+        clearCreatedButtons();
+    }
+
+    function closeCombat() {
+
+        mainTextSection.style.display = "block";
+    }
+
     function displayNPC(index) {
 
             npcActive = true;
@@ -1655,7 +1677,7 @@ const VERDIGRIS = (function() {
 
         saleTitle.style.display = "none";
         narrationText.style.display = "none";        
-        mainTitleText.classList = "";;
+        mainTitleText.classList = "";
         mainTitleText.innerText = "";
         secondaryTitle.style.display = "none";
         
@@ -2181,9 +2203,9 @@ const VERDIGRIS = (function() {
 
             updateStats();
 
-            _respawnRegion = getObjectFromKeyword(respawnLocation.areaKeyword);
-            _respawnArea = getObjectFromKeyword(respawnLocation.areaKeyword, _respawnRegion);
-            _respawnLocation = getLocationFromArea(respawnLocation.locationCoordinates, _respawnArea);
+            const _respawnRegion = getObjectFromKeyword(respawnLocation.regionKeyword, regions);            
+            const _respawnArea = getObjectFromKeyword(respawnLocation.areaKeyword, _respawnRegion.areas);            
+            const _respawnLocation = getLocationFromArea(respawnLocation.locationCoordinates, _respawnArea);
 
             displayLocation(_respawnRegion, _respawnArea, _respawnLocation); 
             save();        
@@ -2657,7 +2679,10 @@ const VERDIGRIS = (function() {
         // Saving variables that are object references
         localStorage.setItem('currentRegionKeyword', JSON.stringify(currentRegion.keyword));
         localStorage.setItem('currentAreaKeyword', JSON.stringify(currentArea.keyword));
-        localStorage.setItem('currentLocationCoordinates', JSON.stringify(currentLocation.coordinates));
+        if (currentLocation === null)
+            localStorage.setItem('currentLocationCoordinates', JSON.stringify(null));   // The players current location is set to null when they are dead and haven't yet respawned
+        else
+            localStorage.setItem('currentLocationCoordinates', JSON.stringify(currentLocation.coordinates));
       }
       
     function load() {

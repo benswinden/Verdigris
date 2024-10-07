@@ -48,7 +48,8 @@ export function getElementFromKeyword(keyword, array) {
 export function getObjectFromKeyword(keyword, array) {
 
     if (array === undefined || array === null) console.error("getObjectFromKeyword() - keyword [" + keyword + "] No array provided");
-    
+    if (array.length === 0) console.warn("getObjectFromKeyword() - keyword [" + keyword + "] - Array length 0");
+
     let obj = null;
     
     array.forEach((element, i) => {        
@@ -88,6 +89,7 @@ export function getLocationFromArea(coordinates, area) {
         }
     });
 
+    //if (loc === null) console.warn("getLocationFromArea - Coordinates: [" + coordinates + "]    Area: [" + area + "] is null");
     return loc;
 }
 

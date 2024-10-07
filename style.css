@@ -90,7 +90,7 @@ h1, h2, p {
 
 header {
     position: fixed;
-    top: 0;
+    bottom: 50px;
     left: 0;
     width: 100vw;
     transition-duration: 0.4s;
@@ -111,26 +111,49 @@ header.scrolled {
     margin-top: 22px;
 }
 
-#player-level-icon {
-    position:absolute;
-    top: -18px;
-    display: block;
-    text-align: center;        
-    color: #D0BC02;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 53px;
-    width: 50px;
-    height: 50px;
-    margin: 5px 0px 0 -20px;        
-    background-image: url("Assets/PlayerXPDiamond.svg");
-    background-repeat: no-repeat;
-    z-index: 10; 
+#ability-button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+    width: 100%;
+}
+
+.ability-button {    
+    
+    width: 60px;
+    height: 60px;
+    margin: 0 10px;
+
+    background: #01090A;
+    color: #8A8766;
+    border: 3px solid #1C1D0F;    
+}
+
+.ability-button.can-hover:hover {    
+        
+    border: 3px solid #6F7221;    
 }
 
 #player-xp-section {
-    
+    position: relative;
     line-height: 0;    
+
+    #player-level-icon {
+        position:absolute;
+        top: -18px;
+        display: block;
+        text-align: center;        
+        color: #D0BC02;
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 53px;
+        width: 50px;
+        height: 50px;
+        margin: 5px 0px 0 -20px;        
+        background-image: url("Assets/PlayerXPDiamond.svg");
+        background-repeat: no-repeat;
+        z-index: 10; 
+    }
 
     #player-xp-bar-background {        
         border-radius: 2px;
@@ -269,7 +292,7 @@ header.scrolled {
 
 
 main {
-    margin-top: 140px;
+    margin-top: 110px;
     margin-bottom: 100px;
 }
 
@@ -297,6 +320,14 @@ main {
             color: #523294;
             font-size: 29px;
             letter-spacing: 2px;        
+        }
+    }
+
+    .combat {
+     
+        #main-title-text {
+            font-family: avara;
+            color: #8F3715;            
         }
     }
 
@@ -381,6 +412,132 @@ main {
     margin: 30px 0 0 25px;
     padding: 0px 0 30px 0;
 }
+
+/*
+        COMBAT SECTION
+*/
+
+#combat-container {
+    margin-top: 75px;
+}
+
+#monster-section-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.monster-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 340px;
+    width: 230px;
+    margin: 7px;
+
+    color: #8F3715;
+    border: 3px solid #512018;
+}
+
+.monster-card.active {    
+    color: #E86E40;
+    border: 3px solid #AE3E2D;
+}
+
+.monster-card.can-hover:hover {    
+    color: #E86E40;
+    border: 3px solid #AE3E2D;
+}
+
+.monster-level-icon {
+
+    position: absolute;        
+
+    display: block;
+    text-align: center;        
+    color: #8F3715;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 43px;
+    width: 40px;
+    height: 40px;    
+    
+    top: -21px;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    
+    background-image: url("Assets/SecondaryIconMonster.svg");
+    background-repeat: no-repeat;
+}
+
+.monster-card-title-text {
+    font-family: avara;
+    color: #E86E40;
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-left: 15px;
+    margin-top: 30px;
+}
+
+.monster-card-type-text {
+    font-family: Eczar;
+    color: #8F3715;
+    font-size: 18px;
+    font-weight: 400;    
+    margin-left: 15px;
+}
+
+.monster-card-image {
+    height: 170px;
+}
+
+.monster-hp-section {
+    position: absolute;    
+    bottom: -12px;    
+    line-height: 0;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100px;
+
+    .monster-hp-bar-background {        
+        border-radius: 2px;
+        background-color: #01090A;
+        border: 1px solid #512018;
+        width: 100px;
+        height: 20px;
+        margin: 5px 0 0 0;
+        display : flex;
+        align-items : center;
+        justify-content: center;
+        z-index: 1;        
+    }
+
+    .monster-hp-bar-current {
+        position: relative;
+        background-color: #512018;    
+        border-radius: 2px;
+        width: 101px;
+        height: 21px;        
+        top: -21px;
+        z-index: 2;
+    }
+
+    .monster-hp-text {
+        margin: 0;
+        margin-top: 2px;
+        padding: 0;
+        line-height: 0;
+        color: #E86E40;
+        font-size: 13px;
+        font-weight: 300;    
+        z-index: 3;
+    }
+}
+
+
 
 /*
         MAP GRID
@@ -558,20 +715,6 @@ main {
         content: url("Assets/StaminaReq1-1.svg");        
     }
 
-    .button-level-icon {
-        display: none;
-        text-align: center;        
-        color: #8F3715;
-        font-size: 17px;
-        font-weight: 600;
-        line-height: 43px;
-        width: 40px;
-        height: 40px;
-        margin: 5px 0px 0 -20px;        
-        background-image: url("Assets/SecondaryIconMonster.svg");
-        background-repeat: no-repeat;
-    }
-
     .button-chevron {     
         cursor:pointer;
         margin-left: auto;        
@@ -663,45 +806,6 @@ main {
 .monster-button.can-hover:hover {    
     color: #E86E40;
     border: 3px solid #AE3E2D;
-}
-
-
-.monster-hp-section {
-    margin-left: 43px;
-    line-height: 0;    
-
-    .monster-hp-bar-background {        
-        border-radius: 2px;
-        background-color: #01090A;
-        border: 1px solid #512018;
-        width: 100px;
-        height: 23px;
-        margin: 5px 0 0 0;
-        display : flex;
-        align-items : center;
-        justify-content: center;
-        z-index: 1;        
-    }
-
-    .monster-hp-bar-current {
-        position: relative;
-        background-color: #512018;    
-        border-radius: 2px;
-        width: 100px;
-        height: 23px;        
-        top: -24px;
-        z-index: 2;
-    }
-
-    .monster-hp-text {
-        margin: 0;
-        padding: 0;
-        line-height: 0;
-        color: #E86E40;
-        font-size: 13px;
-        font-weight: 300;    
-        z-index: 3;
-    }
 }
 
 .item-button {
