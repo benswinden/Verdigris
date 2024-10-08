@@ -26,28 +26,11 @@ export function getIndexFromKeyword(keyword, ar) {
 
     if (index === -1) console.error("getIndexFromkeyword() - Failed to find keyword [" + keyword + "] from array [" + ar + "]");
     return index;
-    }
-
-export function getElementFromKeyword(keyword, array) {
-
-    if (array === undefined || array === null) console.error("getElementFromKeyword() - keyword [" + keyword + "] No array provided");
-
-    let index = -1;
-
-    array.forEach((element, i) => {        
-        if (element.keyword === keyword) {
-            
-            index = i;            
-        }
-    });
-
-    if (index === -1) console.error("getElementFromKeyword() - Failed to find keyword [" + keyword + "] in array: " + array);
-    return index;
-}  
+    } 
 
 export function getObjectFromKeyword(keyword, array) {
 
-    if (array === undefined || array === null) console.error("getObjectFromKeyword() - keyword [" + keyword + "] No array provided");
+    if (array === undefined || array === null) console.error("getObjectFromKeyword() - keyword [" + keyword + "] Array is null or undefined");
     if (array.length === 0) console.warn("getObjectFromKeyword() - keyword [" + keyword + "] - Array length 0");
 
     let obj = null;

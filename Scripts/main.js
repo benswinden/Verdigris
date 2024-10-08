@@ -2,8 +2,7 @@
 import { npcsRef } from "../Data/npcs.js";
 import { narrationsRef } from "../Data/narrations.js";
 import {    objectType,
-            getIndexFromKeyword,
-            getElementFromKeyword,
+            getIndexFromKeyword,            
             getObjectFromKeyword,
             getLocationFromCurrentArea,
             getLocationFromArea,
@@ -65,6 +64,10 @@ const VERDIGRIS = (function() {
     let upgradeMenuOpen = false;
     let trainMenuOpen = false;
 
+    let abilityButtons = null;
+    let assignedAbilityKeywords = new Array(6).fill(null);     // Here we save the abilities we've assigned to buttons in an array of strings that can be saved and reloaded
+    assignedAbilityKeywords[5] = "run_away";
+
     let mapInitialize = false;
     let mapGrid = [];
 
@@ -87,6 +90,7 @@ const VERDIGRIS = (function() {
 
     // Header
     const header = document.querySelector('header');
+    const abilityButtonContainer = document.querySelector('#ability-button-container');
     const playerXPBar = document.querySelector('#player-xp-bar-current');
     const inventoryIcon = document.querySelector('#inventory-icon');
     const playerHPBar = document.querySelector('#player-hp-bar-current');
@@ -105,6 +109,9 @@ const VERDIGRIS = (function() {
     const narrationText =  document.querySelector('#narration-text');
     const updateText =  document.querySelector('#update-text');
     const mapGridContainer = document.querySelector("#map-grid-container");
+
+    const combatContainer = document.querySelector("#combat-container");
+    const monsterCardContainer = document.querySelector("#monster-section-container");
 
     const equipmentTitle =  document.querySelector('#equipment-title');
     const equipmentSection =  document.querySelector('#equipment-section');
@@ -143,6 +150,7 @@ const VERDIGRIS = (function() {
     let npcs = [];
     let items = [];
     let narrations = [];
+    let actions = [];
 
     var PapaParseconfig = 
     {    
@@ -269,10 +277,8 @@ const VERDIGRIS = (function() {
     async function loading() {
         
         await loadData();
-        
-        
-        initializeGame();
-        displayCombat();
+                
+        initializeGame();        
     }
 
     async function loadData() {
@@ -312,6 +318,7 @@ const VERDIGRIS = (function() {
                 return;
             }
                     
+            initializeAbilityButtons();
             updateStats();
             save();
 
@@ -370,6 +377,7 @@ const VERDIGRIS = (function() {
             respawnLocation = { regionKeyword: startRegionKeyword, areaKeyword: startAreaKeyword, locationCoordinates: _startLocation.coordinates };
             save();
         
+            initializeAbilityButtons();
             displayLocation(_startRegion, _startArea, _startLocation);
         }
     }
@@ -382,7 +390,7 @@ const VERDIGRIS = (function() {
         regions = JSON.parse(JSON.stringify(regionsRef));    
         npcs = JSON.parse(JSON.stringify(npcsRef));      
         narrations = JSON.parse(JSON.stringify(narrationsRef));
-
+        actions = JSON.parse(JSON.stringify(actionsRef));
         items = JSON.parse(JSON.stringify(itemsRef));
 
         items.forEach((element,index) => {
@@ -402,7 +410,7 @@ const VERDIGRIS = (function() {
                         for (const monster of location.monsters) {
 
                             // Create a duplicated of the original referenced monster in our monsters array which will serve as our runtime data for this monster
-                            let newMonster = JSON.parse(JSON.stringify( monstersRef[getElementFromKeyword(monster, monstersRef)]))
+                            let newMonster = JSON.parse(JSON.stringify( monstersRef[getIndexFromKeyword(monster, monstersRef)]))
                             newMonsterArray.push(newMonster);
                         }
                     }
@@ -449,8 +457,9 @@ const VERDIGRIS = (function() {
                 
         currentLocation = location;
         currentLocation.visited = true;
-        currentLocation.seen = true;
-        
+        currentLocation.seen = true;        
+
+        closeCombat();
         mapGridContainer.style.display = "flex";
         updateMap();
 
@@ -470,6 +479,12 @@ const VERDIGRIS = (function() {
             return;
         }
 
+        // Check if we are initiating combat
+        if (currentLocation.monsters.length > 0) {
+            displayCombat();
+            return;
+        }
+
         // First time visiting this location, check whether there is a narration to play first
         if (!_areaVisited) {
                     
@@ -477,7 +492,7 @@ const VERDIGRIS = (function() {
             if (currentArea.narration != undefined && currentArea.narration != "") {
                 
                 // Check if the matching narration to this keyword has already been seen                
-                if (narrations[getElementFromKeyword(currentArea.narration, narrationsRef)] != undefined && !narrations[getElementFromKeyword(currentArea.narration, narrationsRef)].seen) {
+                if (narrations[getIndexFromKeyword(currentArea.narration, narrationsRef)] != undefined && !narrations[getIndexFromKeyword(currentArea.narration, narrationsRef)].seen) {
 
                     displayNarration(currentArea.narration);
                     return;
@@ -600,7 +615,7 @@ const VERDIGRIS = (function() {
                         
                         item.actions.forEach((element, index) => {
 
-                            _contextualActions.push(actionsRef[getElementFromKeyword(element, actionsRef)]);
+                            _contextualActions.push(actions[getIndexFromKeyword(element, actions)]);
                         });            
                     }
                 }
@@ -1193,7 +1208,7 @@ const VERDIGRIS = (function() {
                             // Otherwise this button is a misc function action
                             else {
 
-                                newButton.button.onclick = function() {doAction(element.func, element.staminaCost, true); playClick();};
+                                newButton.button.onclick = function() { doAction(action.func, action.staminaCost, true); playClick();};
                             }
                         }                
                     }
@@ -1292,6 +1307,36 @@ const VERDIGRIS = (function() {
                 }, timeOut);
             });
         }    
+    }
+
+    function initializeAbilityButtons() {
+
+        abilityButtons = [];
+
+        // Fill our container of the actual button objects
+        const buttons = abilityButtonContainer.children;
+
+        // Create objects to hold button and ability information
+        for (let i = 0; i < buttons.length; i++) {
+            
+            const element = buttons[i];
+            
+            const abilityButton = {
+                button: element,
+                abilityKeyword: assignedAbilityKeywords[i]
+            }
+
+            if (abilityButton.abilityKeyword != null) {
+                
+                element.classList = "ability-button active can-hover";
+                const ability = getObjectFromKeyword(abilityButton.abilityKeyword, actions);                
+                element.onclick = function() { doAction(ability.func, ability.staminaCost, true); playClick(); };
+            }
+            else
+                element.classList = "ability-button";
+
+            abilityButtons.push(abilityButton);
+        }        
     }
 
     function initalizeMap() {
@@ -1609,6 +1654,8 @@ const VERDIGRIS = (function() {
 
     function displayCombat() {
 
+        combatContainer.style.display = "block";
+        abilityButtonContainer.style.display = "flex";
         mapGridContainer.style.display = "none";
         mainTextSection.style.display = "none";
 
@@ -1620,11 +1667,33 @@ const VERDIGRIS = (function() {
         secondaryTitle.style.display = "none";
         mainText.innerText = currentRegion.description;
 
+        const monsterCards = monsterCardContainer.children;
+        
+        for (let i = 0; i < 3; i++) {            
+            if (i < currentLocation.monsters.length) {
+
+                const card = monsterCards[i];
+                const monster = currentLocation.monsters[i];
+                
+                card.querySelector('.monster-level-icon').innerHTML = monster.level;
+                card.querySelector('.monster-card-title-text').innerHTML = monster.title;
+                card.querySelector('.monster-card-type-text').innerHTML = monster.type;
+
+                card.querySelector('.monster-hp-text').innerHTML = monster.hpCurrent + "/" + monster.hpMax;
+                
+                let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
+                // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
+                card.querySelector('.monster-hp-bar-background').style.width = (monsterHpCurrentPercent ) + 'px';
+            }
+        }
+
         clearCreatedButtons();
     }
 
     function closeCombat() {
 
+        combatContainer.style.display = "none";
+        abilityButtonContainer.style.display = "none";
         mainTextSection.style.display = "block";
     }
 
@@ -1681,11 +1750,11 @@ const VERDIGRIS = (function() {
         mainTitleText.innerText = "";
         secondaryTitle.style.display = "none";
         
-        if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex) {    
-            mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
+        if (narrations[getIndexFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex) {    
+            mainText.innerText = narrations[getIndexFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
         }
         else
-            console.error("displayNarrative - Narration index [" + currentNarrationIndex + "] is higher than text length [" + narrations[getElementFromKeyword(currentNarration, narrations)].text.length + "]");
+            console.error("displayNarrative - Narration index [" + currentNarrationIndex + "] is higher than text length [" + narrations[getIndexFromKeyword(currentNarration, narrations)].text.length + "]");
     }
 
     function continueNarration() {
@@ -1694,10 +1763,10 @@ const VERDIGRIS = (function() {
 
         currentNarrationIndex++;
 
-        if (narrations[getElementFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex)
-            mainText.innerText = narrations[getElementFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
+        if (narrations[getIndexFromKeyword(currentNarration, narrations)].text.length > currentNarrationIndex)
+            mainText.innerText = narrations[getIndexFromKeyword(currentNarration, narrations)].text[currentNarrationIndex];
         else {
-            narrations[getElementFromKeyword(currentNarration, narrations)].seen = true;
+            narrations[getIndexFromKeyword(currentNarration, narrations)].seen = true;
             closeNarration();
         }
     }
@@ -1906,7 +1975,7 @@ const VERDIGRIS = (function() {
 
     function updateMonsterUI(monsterButton) {
         
-        let monster = currentLocation.monsters[getElementFromKeyword(monsterButton.keyword, currentLocation.monsters)];
+        let monster = currentLocation.monsters[getIndexFromKeyword(monsterButton.keyword, currentLocation.monsters)];
 
         monsterButton.monsterHpText.innerText = monster.hpCurrent + "/" + monster.hpMax;
         let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
@@ -1971,6 +2040,7 @@ const VERDIGRIS = (function() {
 
 
         switch (functionString) {
+
             case "attack":            
                 let result = await attack();            
                 break;
@@ -2049,7 +2119,7 @@ const VERDIGRIS = (function() {
                 break;
         }
         
-        if (staminaCost != -1) {
+        if (staminaCost > 0 ) {
             if (staminaCost > currentStamina)
                 console.error("doAction() - staminaCost too high");
             else        
@@ -2227,7 +2297,7 @@ const VERDIGRIS = (function() {
             
             if (currentActiveButton === null) console.error("Attack() - but no active monster");
             
-            let monster = currentLocation.monsters[getElementFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
+            let monster = currentLocation.monsters[getIndexFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
             
             // Evasion chance
             let evasionNumber = Math.floor(Math.random() * 101);
@@ -2311,11 +2381,10 @@ const VERDIGRIS = (function() {
         // Wait for a short period here so that any outcome of spending stamina can resolve
         setTimeout(function() {
 
-            if (currentLocation === -99) return; // In case we died while trying to run away
+            if (currentLocation === null) return; // In case we died while trying to run away
 
             const direction = activeDirections[Math.floor(Math.random() * activeDirections.length)];        
-            
-            let location = [];
+
             let locationString = "";
 
             switch (direction) {
@@ -2348,7 +2417,7 @@ const VERDIGRIS = (function() {
 
     function monsterDeath(monsterButton) {
         
-        let monster = currentLocation.monsters[getElementFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
+        let monster = currentLocation.monsters[getIndexFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
         
         // Remove this monster from the current location    
         currentLocation.monsters.splice(currentLocation.monsters.indexOf(monster.keyword),1);
@@ -2675,6 +2744,7 @@ const VERDIGRIS = (function() {
         localStorage.setItem('npcs', JSON.stringify(npcs));
         localStorage.setItem('items', JSON.stringify(items));
         localStorage.setItem('narrations', JSON.stringify(narrations));
+        localStorage.setItem('actions', JSON.stringify(actions));
     
         // Saving variables that are object references
         localStorage.setItem('currentRegionKeyword', JSON.stringify(currentRegion.keyword));
@@ -2713,6 +2783,7 @@ const VERDIGRIS = (function() {
             npcs = JSON.parse(localStorage.getItem('npcs'));
             items = JSON.parse(localStorage.getItem('items'));
             narrations = JSON.parse(localStorage.getItem('narrations'));
+            actions = JSON.parse(localStorage.getItem('actions'));
         }
         else {
             
@@ -2720,6 +2791,7 @@ const VERDIGRIS = (function() {
             npcs = JSON.parse(JSON.stringify(npcsRef));
             items = JSON.parse(JSON.stringify(itemsRef));
             narrations = JSON.parse(JSON.stringify(narrationsRef));
+            actions = JSON.parse(JSON.stringify(actionsRef));
         }
     
         // Loading variables that are just references for objects

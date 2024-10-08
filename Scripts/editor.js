@@ -1,7 +1,6 @@
 import { npcsRef } from "../Data/npcs.js";
 import {    objectType,    
-    getIndexFromKeyword,
-    getElementFromKeyword,
+    getIndexFromKeyword,    
     getObjectFromKeyword,
     getLocationFromArea,
     compareArrays,
@@ -220,7 +219,7 @@ const EDITOR = (function() {
 
                 event.preventDefault();
                 dropbtn.textContent = region.title;
-                currentRegion = regionsData[getElementFromKeyword(region.keyword, regionsData)];
+                currentRegion = regionsData[getIndexFromKeyword(region.keyword, regionsData)];
 
                 removeDoorButton.style.display = "none";
                 createDoorButton.style.display = "none";
@@ -741,6 +740,8 @@ const EDITOR = (function() {
         if (currentLocation === null) { console.error("deleteObject but currentLocation is null"); return; }
 
         console.log("deleteObject() - keyword: " + objectKeyword + "  type: " + objType);
+        
+        let ar = null;
 
         switch (objType) {        
             case objectType.item:

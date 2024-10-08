@@ -112,7 +112,7 @@ header.scrolled {
 }
 
 #ability-button-container {
-    display: flex;
+    display: none;
     justify-content: center;
     margin-bottom: 50px;
     width: 100%;
@@ -126,12 +126,15 @@ header.scrolled {
 
     background: #01090A;
     color: #8A8766;
-    border: 3px solid #1C1D0F;    
+    border: 2px solid #1D1E0E;    
 }
 
-.ability-button.can-hover:hover {    
-        
-    border: 3px solid #6F7221;    
+.ability-button.active {            
+    border: 2px solid #363718;    
+}
+
+.ability-button.can-hover:hover {            
+    border: 2px solid #6F7221;    
 }
 
 #player-xp-section {
@@ -418,6 +421,7 @@ main {
 */
 
 #combat-container {
+    display: none;
     margin-top: 75px;
 }
 
