@@ -129,11 +129,15 @@ header.scrolled {
     border: 2px solid #1D1E0E;    
 }
 
-.ability-button.active {            
+.ability-button.can-hover {            
     border: 2px solid #363718;    
 }
 
 .ability-button.can-hover:hover {            
+    border: 2px solid #6F7221;    
+}
+
+.ability-button.active {            
     border: 2px solid #6F7221;    
 }
 
@@ -450,6 +454,10 @@ main {
 .monster-card.can-hover:hover {    
     color: #E86E40;
     border: 3px solid #AE3E2D;
+}
+
+.monster-card.inactive {        
+    border: 3px solid #28120F;
 }
 
 .monster-level-icon {

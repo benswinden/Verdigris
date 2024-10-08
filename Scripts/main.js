@@ -65,8 +65,10 @@ const VERDIGRIS = (function() {
     let trainMenuOpen = false;
 
     let abilityButtons = null;
-    let assignedAbilityKeywords = new Array(6).fill(null);     // Here we save the abilities we've assigned to buttons in an array of strings that can be saved and reloaded
-    assignedAbilityKeywords[5] = "run_away";
+    let assignedAbilityKeywords = null;     // Here we save the abilities we've assigned to buttons in an array of strings that can be saved and reloaded
+    let currentActiveAbilityObject = null;        // When the player toggles an ability button and is waiting to target something with that ability
+    
+    let initializedMonsterCards = null;
 
     let mapInitialize = false;
     let mapGrid = [];
@@ -350,6 +352,10 @@ const VERDIGRIS = (function() {
             baseDefence = 0;
             baseEvasion = 20;
             
+            assignedAbilityKeywords = new Array(6).fill(null);     // Here we save the abilities we've assigned to buttons in an array of strings that can be saved and reloaded
+            assignedAbilityKeywords[5] = "run_away";
+            assignedAbilityKeywords[0] = "straight_sword_strike";
+
             calculateStats();
             currentStamina = maxStamina;
             updateStats();            
@@ -421,10 +427,6 @@ const VERDIGRIS = (function() {
         }
     }
 
-    // General purpose function when we want to display a location
-    // newLocation can be an integer or a keyword value
-    // Area = keyword title i.e. "bramble_path"
-    // Location = coordinate pair i.e. [1,5]
     function displayLocation(region, area, location) {    
         
         // This should only happen once
@@ -1208,7 +1210,7 @@ const VERDIGRIS = (function() {
                             // Otherwise this button is a misc function action
                             else {
 
-                                newButton.button.onclick = function() { doAction(action.func, action.staminaCost, true); playClick();};
+                                newButton.button.onclick = function() { doAction(action.func, action.staminaCost, null, true); playClick();};
                             }
                         }                
                     }
@@ -1309,6 +1311,7 @@ const VERDIGRIS = (function() {
         }    
     }
 
+    // Set up ability buttons based on assigned abilities
     function initializeAbilityButtons() {
 
         abilityButtons = [];
@@ -1320,23 +1323,131 @@ const VERDIGRIS = (function() {
         for (let i = 0; i < buttons.length; i++) {
             
             const element = buttons[i];
-            
-            const abilityButton = {
+            const ability = getObjectFromKeyword(assignedAbilityKeywords[i], actions);            
+
+            const abilityButtonObject = {
                 button: element,
-                abilityKeyword: assignedAbilityKeywords[i]
+                ability: ability,
+                active: false
             }
 
-            if (abilityButton.abilityKeyword != null) {
+            if (abilityButtonObject.ability != null) {
                 
-                element.classList = "ability-button active can-hover";
-                const ability = getObjectFromKeyword(abilityButton.abilityKeyword, actions);                
-                element.onclick = function() { doAction(ability.func, ability.staminaCost, true); playClick(); };
+                element.classList = "ability-button can-hover";                
+                
+                element.onclick = function() { 
+                    
+                    if (abilityButtonObject.ability.target) {
+
+                        if (!abilityButtonObject.active) {
+                            abilityButtonObject.button.classList = "ability-button can-hover active";
+                            abilityButtonObject.active = true;
+                            currentActiveAbilityObject = abilityButtonObject;
+                            targetMonsterCards();                            
+                        }
+                        else {
+                            abilityButtonObject.button.classList = "ability-button can-hover";
+                            abilityButtonObject.active = false;
+                            currentActiveAbilityObject = null;
+                            detargetMonsterCards();
+                        }                        
+                    }
+                    else
+                        doAction(abilityButtonObject.ability.func, abilityButtonObject.ability.staminaCost, null, true); playClick(); };
             }
             else
                 element.classList = "ability-button";
 
-            abilityButtons.push(abilityButton);
+            abilityButtons.push(abilityButtonObject);
         }        
+    }
+
+    // Set up monster cards in the default state
+    function initializeMonsterCards() {
+        
+        initializedMonsterCards = [];
+        const monsterCards = monsterCardContainer.children;
+        
+        for (let i = 0; i < 3; i++) {
+            
+            const card = monsterCards[i];
+
+            if (i < currentLocation.monsters.length) {
+
+                
+                const monster = currentLocation.monsters[i];
+                
+                const monsterCardObject = {
+                    card: card,
+                    monster: monster
+                }
+                initializedMonsterCards.push(monsterCardObject);
+
+                card.classList = "monster-card";
+                card.onclick = "";
+
+                card.querySelector('.monster-level-icon').style.display = "block";
+                card.querySelector('.monster-level-icon').innerHTML = monster.level;
+                card.querySelector('.monster-card-title-text').innerHTML = monster.title;
+                card.querySelector('.monster-card-type-text').innerHTML = monster.type;
+                
+                card.querySelector('.monster-hp-section').style.display = "block";
+                card.querySelector('.monster-hp-text').innerHTML = monster.hpCurrent + "/" + monster.hpMax;
+                
+                let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
+                // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
+                card.querySelector('.monster-hp-bar-current').style.width = (monsterHpCurrentPercent + 1 ) + 'px';
+            }
+            else {
+
+                card.classList = "monster-card inactivee";
+                card.onclick = "";
+                card.querySelector('.monster-level-icon').style.display = "none";
+                card.querySelector('.monster-hp-section').style.display = "none";                
+                card.querySelector('.monster-card-title-text').innerHTML = "";
+                card.querySelector('.monster-card-type-text').innerHTML = "";
+            }
+        }
+    }
+
+    // When the player toggles active an ability button with a targeted ability, we show which monster cards can be targeted and make them clickable
+    function targetMonsterCards() {
+        
+        for (const cardObject of initializedMonsterCards) {
+
+            cardObject.card.classList = "monster-card can-hover";
+            cardObject.card.onclick = function() {
+
+                doAction(currentActiveAbilityObject.ability.func, currentActiveAbilityObject.ability.staminaCost, cardObject.monster, true); 
+                playClick();
+            }
+        }
+    }
+
+    // When a player ability gets untoggled
+    function detargetMonsterCards() {
+
+        for (const cardObject of initializedMonsterCards) {
+
+            cardObject.card.classList = "monster-card";
+            cardObject.card.onclick = "";
+        }
+    }
+
+    // When the player does damage to a monster
+    function updateMonsterCardHealth() {
+
+        for (const cardObject of initializedMonsterCards) {
+
+            const card = cardObject.card;
+            const monster = cardObject.monster;
+
+            card.querySelector('.monster-hp-text').innerHTML = monster.hpCurrent + "/" + monster.hpMax;
+                
+            let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
+            // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
+            card.querySelector('.monster-hp-bar-current').style.width = (monsterHpCurrentPercent + 1 ) + 'px';
+        }
     }
 
     function initalizeMap() {
@@ -1667,25 +1778,7 @@ const VERDIGRIS = (function() {
         secondaryTitle.style.display = "none";
         mainText.innerText = currentRegion.description;
 
-        const monsterCards = monsterCardContainer.children;
-        
-        for (let i = 0; i < 3; i++) {            
-            if (i < currentLocation.monsters.length) {
-
-                const card = monsterCards[i];
-                const monster = currentLocation.monsters[i];
-                
-                card.querySelector('.monster-level-icon').innerHTML = monster.level;
-                card.querySelector('.monster-card-title-text').innerHTML = monster.title;
-                card.querySelector('.monster-card-type-text').innerHTML = monster.type;
-
-                card.querySelector('.monster-hp-text').innerHTML = monster.hpCurrent + "/" + monster.hpMax;
-                
-                let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
-                // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
-                card.querySelector('.monster-hp-bar-background').style.width = (monsterHpCurrentPercent ) + 'px';
-            }
-        }
+        initializeMonsterCards();
 
         clearCreatedButtons();
     }
@@ -2015,7 +2108,7 @@ const VERDIGRIS = (function() {
     // #region ACTIONS
 
     // Translate a string provided in through the context data into an action
-    async function doAction(actionString, staminaCost, resetText) {    
+    async function doAction(actionString, staminaCost, target, resetText) {    
 
         if (resetText)
             resetUpdateText();
@@ -2042,7 +2135,7 @@ const VERDIGRIS = (function() {
         switch (functionString) {
 
             case "attack":            
-                let result = await attack();            
+                let result = await attack(target);            
                 break;
             case "upgrade":
                 displayUpgrade();
@@ -2119,12 +2212,12 @@ const VERDIGRIS = (function() {
                 break;
         }
         
-        if (staminaCost > 0 ) {
-            if (staminaCost > currentStamina)
-                console.error("doAction() - staminaCost too high");
-            else        
-                spendStamina(staminaCost);
-        }        
+        // if (staminaCost > 0 ) {
+        //     if (staminaCost > currentStamina)
+        //         console.error("doAction() - staminaCost too high");
+        //     else        
+        //         spendStamina(staminaCost);
+        // }        
     }
 
     function doActionComplete() {
@@ -2287,17 +2380,15 @@ const VERDIGRIS = (function() {
             console.error("respawn() - Trying to respawn with an empty respawnLocation");
     }
 
-    function attack() {
+    function attack(target) {
 
         return new Promise((resolve, reject) => {
 
-            if (currentLocation === -99) return;
+            if (currentLocation === null) return;
 
-            if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo
+            if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo                        
             
-            if (currentActiveButton === null) console.error("Attack() - but no active monster");
-            
-            let monster = currentLocation.monsters[getIndexFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
+            let monster = target;
             
             // Evasion chance
             let evasionNumber = Math.floor(Math.random() * 101);
@@ -2315,8 +2406,9 @@ const VERDIGRIS = (function() {
             else {            
 
                 // PLAYER ATTACK
-                monster.hpCurrent -= power;
-                updateMonsterUI(currentActiveButton);
+                monster.hpCurrent = Math.max(monster.hpCurrent - power, 0);
+
+                updateMonsterCardHealth();
                     
                 let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
                 addUpdateText(updateString);  
@@ -2326,7 +2418,7 @@ const VERDIGRIS = (function() {
                     // CHECK FOR MONSTER DEATH
                     if (monster.hpCurrent <= 0) {
 
-                        monsterDeath(currentActiveButton);
+                        monsterDeath(monster);
                     }
                     
                     resolve("Complete");
@@ -2415,12 +2507,17 @@ const VERDIGRIS = (function() {
         }, 750);    
     }
 
-    function monsterDeath(monsterButton) {
-        
-        let monster = currentLocation.monsters[getIndexFromKeyword(currentActiveButton.keyword, currentLocation.monsters)];
-        
-        // Remove this monster from the current location    
-        currentLocation.monsters.splice(currentLocation.monsters.indexOf(monster.keyword),1);
+    function monsterDeath(monster) {
+                        
+        // Remove this monster from the current location
+        let monsterIndex = -1;
+        // Find the correct monster in the location list
+        for (let i = 0; i < currentLocation.monsters.length; i++) {
+            const _monster = currentLocation.monsters[i];
+            if (_monster.keyword === monster.keyword && _monster.hpCurrent === monster.hpCurrent)
+                monsterIndex = i;
+        }        
+        currentLocation.monsters.splice(monsterIndex,1);
 
         const monsterExperience = getRandomInt(monster.experienceMin, monster.experienceMax);
 
@@ -2429,16 +2526,15 @@ const VERDIGRIS = (function() {
         experience += monsterExperience;
         insight += monster.insight;
         gold += monster.gold;
-        updateStats();     
-        
-        // If there are no other monsters here, we should recover our stamina
-        recoverStamina();
-
+        updateStats();             
         save();
+    
+        if (currentLocation.monsters.length === 0) {
+            displayLocation(currentRegion, currentArea, currentLocation);            
+        }
+        else
+            initializeMonsterCards();
 
-        currentActiveButton = null;
-        updateMap();
-        updateButtons(true);
         addUpdateText(storedMonsterString);
     }
 
@@ -2739,6 +2835,8 @@ const VERDIGRIS = (function() {
         localStorage.setItem('inventory', JSON.stringify(inventory));
         localStorage.setItem('respawnLocation', JSON.stringify(respawnLocation));
         localStorage.setItem('corpseLocation', JSON.stringify(corpseLocation));
+
+        localStorage.setItem('assignedAbilityKeywords', JSON.stringify(assignedAbilityKeywords));
     
         localStorage.setItem('regions', JSON.stringify(regions));    
         localStorage.setItem('npcs', JSON.stringify(npcs));
@@ -2776,6 +2874,8 @@ const VERDIGRIS = (function() {
         inventory = JSON.parse(localStorage.getItem('inventory'));
         respawnLocation = JSON.parse(localStorage.getItem('respawnLocation'))
         corpseLocation = JSON.parse(localStorage.getItem('corpseLocation'))
+
+        assignedAbilityKeywords = JSON.parse(localStorage.getItem('assignedAbilityKeywords'))
     
         if (!resetLocations) { 
             
