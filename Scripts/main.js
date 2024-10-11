@@ -13,13 +13,15 @@ import {    objectType,
             compareAreas,
             getLocationInDirection,
             getExitFromLocation,
-            locationsHavePath } from "./Util.js";
+            locationsHavePath,
+            deepCopyWithFunctions            
+         } from "./Util.js";
 
 const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.057;
+    let version = 0.058;
 
     let insight = 0;
     let hpCurrent = 10;
@@ -90,6 +92,14 @@ const VERDIGRIS = (function() {
     let startCoordinates = [3,8];
     let debugWindowActive = false;
 
+    // Title Screen
+    const titleContent = document.querySelector('#title-content');
+    const newGameButton = document.querySelector('#new-game-text');
+    const continueButton = document.querySelector('#continue-text');
+
+    // Main Content
+    const gameContent = document.querySelector('#game-content');
+
     // Header
     const header = document.querySelector('header');
     const abilityButtonContainer = document.querySelector('#ability-button-container');
@@ -144,8 +154,7 @@ const VERDIGRIS = (function() {
     // These are our data arrays that contain the data for the game
     let regionsRef = [];
     let monstersRef = [];       // Reference for unique monsters, these will be duplicated for each location at runtime. References to the actual monster data will be within each location
-    let itemsRef = [];
-    let actionsRef = [];
+    let itemsRef = [];    
 
     // These are containers, mostly copies of our reference data which will be modified at runtime
     let regions = [];
@@ -168,6 +177,16 @@ const VERDIGRIS = (function() {
     // Once the window is loaded, we add listeners and check for data load before initializing the game
     document.addEventListener('DOMContentLoaded', function() {
 
+            // Title Screen
+        titleContent.style.display = "flex";
+        gameContent.style.display = "none";
+
+        newGameButton.onclick = newGame;
+        continueButton.onclick = continueGame;
+
+
+            // Main Game Content
+
         // Begin loading data that is contained in csv files
         const promise1 = fetch('Data/items.csv')
         .then((response) => response.text())
@@ -183,14 +202,6 @@ const VERDIGRIS = (function() {
         monstersRef = Papa.parse(data, PapaParseconfig).data;
         // Filter out empty rows
         monstersRef = monstersRef.filter(({ keyword }) => keyword != null);
-        });
-
-        const promise3 = fetch('Data/actions.csv')
-        .then((response) => response.text())
-        .then((data) => { 
-        actionsRef = Papa.parse(data, PapaParseconfig).data;
-        // Filter out empty rows
-        actionsRef = actionsRef.filter(({ keyword }) => keyword != null);
         });
 
         inventoryIcon.onclick = displayInventory;
@@ -270,7 +281,7 @@ const VERDIGRIS = (function() {
         });
 
         // We wait till all async processes have completed before starting the game
-        Promise.all([promise1, promise2, promise3]).then((values) => {
+        Promise.all([promise1, promise2]).then((values) => {
             
             loading();
         });
@@ -279,8 +290,19 @@ const VERDIGRIS = (function() {
     async function loading() {
         
         await loadData();
-                
-        initializeGame();        
+
+        continueButton.style.display = "none";
+        
+        // Check whether there is already a save game
+        if (localStorage.getItem('saveExists')) {            
+
+            let validVersion = versionCheck();
+
+            if (validVersion) {
+                if (showDebugLog) console.log("Save game exists & version is valid - enabling continue");
+                continueButton.style.display = "block";            
+            }
+        }        
     }
 
     async function loadData() {
@@ -302,90 +324,84 @@ const VERDIGRIS = (function() {
         }
     }
 
-    function initializeGame() {
+    function newGame() {
 
-        if (showDebugLog) console.log("InitializeGame - ");
+        if (showDebugLog) console.log("Starting new game...");
+
+        // Formatting and making copies of data to be edited at runtime
+        formatData();
+
+        experience = 0;
+        insight = 0;
+        hpCurrent = 140;
+        hpMax = 140;
+        gold = 2;
+        ore = 0;
+        leather = 0;
+        greenHerb = 0;
+
+        // Base stats are the players raw stats
+        basePower = 0;
+        baseStamina = 2;        
+        baseDefence = 0;
+        baseEvasion = 20;
         
-        // Check whether there is already a save game
-        if (localStorage.getItem('saveExists')) {
-            if (showDebugLog) console.log("Save game exists");
+        assignedAbilityKeywords = new Array(6).fill(null);     // Here we save the abilities we've assigned to buttons in an array of strings that can be saved and reloaded
+        assignedAbilityKeywords[4] = "run_away";
+        assignedAbilityKeywords[5] = "flask";
+        assignedAbilityKeywords[0] = "straight_sword_strike";
 
-            let validVersion = versionCheck();
+        calculateStats();
+        currentStamina = maxStamina;
+        updateStats();            
 
-            if (validVersion)
-                load();
-            else {
-                if (showDebugLog) console.log("Invalid save found - resetting game");
-                resetGame();
-                return;
-            }
+        inventory = [];
+        inventory.push("straight_sword","green_cloak");
+        
+        currentRegion = regions[0];    
+
+        titleOpen = false;
+        narrationOpen = false;
+        npcActive = false;
+        currentNPC = -1;
+            
+        corpseLocation = null;
+
+        
+        const _startRegion = getObjectFromKeyword(startRegionKeyword, regions);
+        const _startArea = getObjectFromKeyword(startAreaKeyword, _startRegion.areas);
+        const _startLocation = getLocationFromArea(startCoordinates, _startArea);
+        
+        currentRegion = _startRegion;
+        currentArea = _startArea;
+        currentLocation = _startLocation;
+        respawnLocation = { regionKeyword: startRegionKeyword, areaKeyword: startAreaKeyword, locationCoordinates: _startLocation.coordinates };
+        save();
+    
+        titleContent.style.display = "none";
+        gameContent.style.display = "block";
+
+        initializeAbilityButtons();
+        displayLocation(_startRegion, _startArea, _startLocation);
+    }
+
+    function continueGame() {
+        
+        if (showDebugLog) console.log("Continuing saved game ...");
+
+        load();
                     
-            initializeAbilityButtons();
-            updateStats();
-            save();
+        updateStats();
+        save();
 
-            if (currentLocation === null)
-                respawn();
-            else
-                displayLocation(currentRegion, currentArea, currentLocation);
-        }
-        // No save game, so start a new game
-        else {
+        titleContent.style.display = "none";
+        gameContent.style.display = "block";
 
-            if (showDebugLog) console.log("Save game doesn't exist");        
-            
-            // Using JSON to create deep newButtons of our starting data arrays
-            formatData();
-
-            experience = 0;
-            insight = 0;
-            hpCurrent = 140;
-            hpMax = 140;
-            gold = 2;
-            ore = 0;
-            leather = 0;
-            greenHerb = 0;
-
-            // Base stats are the players raw stats
-            basePower = 0;
-            baseStamina = 2;        
-            baseDefence = 0;
-            baseEvasion = 20;
-            
-            assignedAbilityKeywords = new Array(6).fill(null);     // Here we save the abilities we've assigned to buttons in an array of strings that can be saved and reloaded
-            assignedAbilityKeywords[5] = "run_away";
-            assignedAbilityKeywords[0] = "straight_sword_strike";
-
-            calculateStats();
-            currentStamina = maxStamina;
-            updateStats();            
-
-            inventory = [];
-            inventory.push("straight_sword","green_cloak");
-            
-            currentRegion = regions[0];    
-
-            titleOpen = false;
-            narrationOpen = false;
-            npcActive = false;
-            currentNPC = -1;
-                
-            corpseLocation = null;
-
-            
-            const _startRegion = getObjectFromKeyword(startRegionKeyword, regions);
-            const _startArea = getObjectFromKeyword(startAreaKeyword, _startRegion.areas);
-            const _startLocation = getLocationFromArea(startCoordinates, _startArea);
-            
-            currentRegion = _startRegion;
-            currentArea = _startArea;
-            currentLocation = _startLocation;
-            respawnLocation = { regionKeyword: startRegionKeyword, areaKeyword: startAreaKeyword, locationCoordinates: _startLocation.coordinates };
-            save();
-        
-            initializeAbilityButtons();
-            displayLocation(_startRegion, _startArea, _startLocation);
-        }
+        initializeAbilityButtons();
+        if (currentLocation === null)
+            respawn();
+        else
+            displayLocation(currentRegion, currentArea, currentLocation);
     }
 
     // Should only happen on a new game. Takes reference data files and creates new ones to be saved and modified during the game
@@ -396,7 +412,7 @@ const VERDIGRIS = (function() {
         regions = JSON.parse(JSON.stringify(regionsRef));    
         npcs = JSON.parse(JSON.stringify(npcsRef));      
         narrations = JSON.parse(JSON.stringify(narrationsRef));
-        actions = JSON.parse(JSON.stringify(actionsRef));
+        actions = actionsRef.map(action => deepCopyWithFunctions(action));        
         items = JSON.parse(JSON.stringify(itemsRef));
 
         items.forEach((element,index) => {
@@ -1322,41 +1338,66 @@ const VERDIGRIS = (function() {
         // Create objects to hold button and ability information
         for (let i = 0; i < buttons.length; i++) {
             
-            const element = buttons[i];
+            const button = buttons[i];
             const ability = getObjectFromKeyword(assignedAbilityKeywords[i], actions);            
 
             const abilityButtonObject = {
-                button: element,
+                button: button,
                 ability: ability,
                 active: false
             }
 
             if (abilityButtonObject.ability != null) {
                 
-                element.classList = "ability-button can-hover";                
+                button.classList = "ability-button can-hover";
+
+                // Reset stamina icons
+                button.querySelector('.stamina-container').innerHTML = '';
+
+                // If this ability has a stamina cost, create small stamina icons at the bottom of the button to indicate the cost
+                if (ability.staminaCost > 0) {
+                    
+                    for (let i = 0; i < ability.staminaCost; i++) {
+                        const img = document.createElement('img');
+                        img.src = 'Assets/StaminaIcon_NoPad.svg';
+                        button.querySelector('.stamina-container').appendChild(img);
+                    }
+                }                
+
+                if (ability.icon != null) {
+                    button.querySelector('.ability-button-icon').setAttribute('src', 'Assets/Ability_Icons/' + ability.icon + '.svg');
+                }
+                else
+                    button.querySelector('.ability-button-icon').setAttribute('src', '');
                 
-                element.onclick = function() { 
+                button.onclick = function() { 
                     
                     if (abilityButtonObject.ability.target) {
 
                         if (!abilityButtonObject.active) {
+                            
                             abilityButtonObject.button.classList = "ability-button can-hover active";
                             abilityButtonObject.active = true;
-                            currentActiveAbilityObject = abilityButtonObject;
+                            currentActiveAbilityObject = abilityButtonObject;                            
                             targetMonsterCards();                            
                         }
                         else {
+                            
                             abilityButtonObject.button.classList = "ability-button can-hover";
                             abilityButtonObject.active = false;
                             currentActiveAbilityObject = null;
                             detargetMonsterCards();
                         }                        
                     }
-                    else
-                        doAction(abilityButtonObject.ability.func, abilityButtonObject.ability.staminaCost, null, true); playClick(); };
+                    else {
+                        
+                        useAbility(abilityButtonObject.ability, null);                    
+                        playClick();
+                    }
+                };
             }
             else
-                element.classList = "ability-button";
+                button.classList = "ability-button";
 
             abilityButtons.push(abilityButtonObject);
         }        
@@ -1417,8 +1458,8 @@ const VERDIGRIS = (function() {
 
             cardObject.card.classList = "monster-card can-hover";
             cardObject.card.onclick = function() {
-
-                doAction(currentActiveAbilityObject.ability.func, currentActiveAbilityObject.ability.staminaCost, cardObject.monster, true); 
+                
+                useAbility(currentActiveAbilityObject.ability, cardObject.monster);            
                 playClick();
             }
         }
@@ -2105,7 +2146,266 @@ const VERDIGRIS = (function() {
 
     // #endregion
 
+    // #region COMBAT & ABILITIES
+    // Abilities are actions taken in combat using the ability bar
+
+    // This is the reference data, which will be duplicated and stored at runtime so that it can be modified while maintaining this reference copy
+    const actionsRef = [
+        {
+            keyword: "straight_sword_strike",
+            title: "Sword Strike",
+            target: true,
+            active: true,
+            staminaCost: 1,
+            location: null,
+            effect: async function(target) {
+                
+                await playerAttack(target);
+            },
+            icon: "sword"        
+        },
+        {
+            keyword: "run_away",
+            title: "Run Away",
+            target: false,
+            active: true,
+            staminaCost: 0,
+            location: null,        
+            effect: async function() {
+                
+                await runAway();
+            },
+            icon: "run"
+        },
+        {
+            keyword: "flask",
+            title: "Flask of Ether",
+            target: false,
+            active: true,
+            staminaCost: 1,
+            location: null,
+            effect: function() {
+                
+                console.log(this.title);
+            },
+            icon: "flask"
+        }
+    ]
+
+    async function useAbility(ability, target) {
+        
+        if (target != null)
+            await ability.effect(target);
+        else
+            await ability.effect();
+
+        // Spend stamina if this ability had a cost
+        if (ability.staminaCost > 0 ) {
+            if (ability.staminaCost > currentStamina)
+                console.error("useAbility() - staminaCost too high");
+            else        
+                spendStamina(ability.staminaCost);
+        } 
+
+        if (currentStamina === 0) {
+
+            await playerTurnComplete(true);
+        }    
+
+        console.log("Done");
+    }
+
+    function spendStamina(cost) {
+
+        if (currentStamina >= cost)
+            currentStamina -= cost;
+        else {
+            console.error("spendStamina - Cost [" + cost + "] is greater than currentStamina [" + currentStamina + "]");
+            return;
+        }
+
+        updateStats();
+        save();
+    }
+
+    async function playerTurnComplete() {
+
+        if (showDebugLog) console.log("playerActionComplete() - ");
+            
+        let monsters = currentLocation.monsters;    
+        
+        if (monsters.length > 0 && monsters != "") {
+
+            for (const monster of monsters) {
+
+                await monsterAttack(monster);
+    
+                if (hpCurrent <= 0) {
+                    playerDeath();
+                    return;
+                }
+            }            
+        }    
+
+        recoverMax(false);
+        updateStats();
+        save();
+    }
+
+    function playerAttack(target) {
+
+        return new Promise((resolve, reject) => {
+
+            if (currentLocation === null) return;
+
+            if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo                        
+            
+            let monster = target;
+            
+            // Evasion chance
+            let evasionNumber = Math.floor(Math.random() * 101);
+            if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
+
+            if (evasionNumber <= monster.evasion) {
+                
+                setTimeout(() => {
+                    let updateString = "The " + monster.shortTitle + " evades your attack."
+                    addUpdateText(updateString);
+
+                    resolve("Complete");
+                }, 300);
+            }
+            else {            
+ 
+                setTimeout(() => {    
+
+                    // PLAYER ATTACK
+                    monster.hpCurrent = Math.max(monster.hpCurrent - power, 0);
+
+                    updateMonsterCardHealth();
+                        
+                    let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
+                    addUpdateText(updateString);  
+
+                    // CHECK FOR MONSTER DEATH
+                    if (monster.hpCurrent <= 0) {
+
+                        monsterDeath(monster);
+                    }
+                    
+                    resolve("Complete");
+                }, 300);
+            }    
+        });
+    }
+    
+    function monsterAttack(monster) {
+        
+        return new Promise((resolve, reject) => {
+
+            let monstersActionString = "";      
+
+            // Evasion chance
+            let evasionNumber = Math.floor(Math.random() * 101);                
+
+            if (evasionNumber <= evasion) {
+
+                monstersActionString +=  "You evade the " + monster.shortTitle + "'s attack."
+                addUpdateText(monstersActionString);
+            }
+            else {                  
+
+                setTimeout(() => {    
+
+                    // MONSTER ATTACK
+                    let monsterDamage = Math.max(0, monster.power - defence);        
+                    hpCurrent -= monsterDamage;
+                    if (monstersActionString != "") monstersActionString += "\n";
+                    monstersActionString += "The " + monster.shortTitle + " does " + monsterDamage + " damage to you.";
+                    addUpdateText(monstersActionString);
+                    
+                    resolve("Complete");
+                }, 300);
+            }
+
+            
+
+        });
+    }
+
+    function monsterDeath(monster) {
+                        
+        // Remove this monster from the current location
+        let monsterIndex = -1;
+        // Find the correct monster in the location list
+        for (let i = 0; i < currentLocation.monsters.length; i++) {
+            const _monster = currentLocation.monsters[i];
+            if (_monster.keyword === monster.keyword && _monster.hpCurrent === monster.hpCurrent)
+                monsterIndex = i;
+        }        
+        currentLocation.monsters.splice(monsterIndex,1);
+
+        const monsterExperience = getRandomInt(monster.experienceMin, monster.experienceMax);
+
+        let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monsterExperience + " experience and " +  monster.gold + " gold";
+        addUpdateText(storedMonsterString);
+
+        experience += monsterExperience;
+        insight += monster.insight;
+        gold += monster.gold;
+        updateStats();             
+        save();
+    
+        if (currentLocation.monsters.length === 0) {
+            displayLocation(currentRegion, currentArea, currentLocation);            
+        }
+        else
+            initializeMonsterCards();
+    
+    }
+
+    
+    function runAway() {
+        
+        // Wait for a short period here so that any outcome of spending stamina can resolve
+        setTimeout(function() {
+
+            if (currentLocation === null) return; // In case we died while trying to run away
+
+            const direction = activeDirections[Math.floor(Math.random() * activeDirections.length)];        
+
+            let locationString = "";
+
+            switch (direction) {
+
+                // North
+                case 0:
+                    locationString = "north";
+                    go(0, false);
+                    break;
+                // West
+                case 1:
+                    locationString = "west";
+                    go(1, false);
+                    break;
+                // East
+                case 2:
+                    locationString = "east";
+                    go(2, false);
+                    break;
+                // South
+                case 3:
+                    locationString = "south";
+                    go(3, false);
+                    break;            
+            }
+
+            addUpdateText("You run blindly to the " + locationString);
+        }, 750);    
+    }
+
     // #region ACTIONS
+    // Actions involve other actions players can do outside of combat
 
     // Translate a string provided in through the context data into an action
     async function doAction(actionString, staminaCost, target, resetText) {    
@@ -2135,7 +2435,7 @@ const VERDIGRIS = (function() {
         switch (functionString) {
 
             case "attack":            
-                let result = await attack(target);            
+                let result = await playerAttack(target);            
                 break;
             case "upgrade":
                 displayUpgrade();
@@ -2210,71 +2510,11 @@ const VERDIGRIS = (function() {
             case "consoleLog":  // For debug
                 console.log("!!!");
                 break;
-        }
-        
-        // if (staminaCost > 0 ) {
-        //     if (staminaCost > currentStamina)
-        //         console.error("doAction() - staminaCost too high");
-        //     else        
-        //         spendStamina(staminaCost);
-        // }        
+        }                   
     }
 
     function doActionComplete() {
 
-    }
-
-    function playerActionComplete() {
-
-        if (showDebugLog) console.log("playerActionComplete() - ");
-            
-        let monsters = currentLocation.monsters;    
-
-        let playerDead = false;
-        if (monsters.length > 0 && monsters != "") {
-
-            monsters.forEach((monster, index) => {
-
-                if (currentLocation != -99)      // Check in case a previous monster already killed us
-                    playerDead = triggerEnemyAttack(monster);
-            });            
-        }    
-
-        if (playerDead) return;
-
-        recoverMax(false);
-        updateStats();
-        save();        
-        updateButtons(true);    
-    }
-
-    function triggerEnemyAttack(monster) {
-
-        let monstersActionString = "";      
-
-        // Evasion chance
-        let evasionNumber = Math.floor(Math.random() * 101);                
-
-        if (evasionNumber <= evasion) {
-
-            monstersActionString +=  "You evade the " + monster.shortTitle + "'s attack."                    
-        }
-        else {      
-
-            let monsterDamage = Math.max(0, monster.power - defence);        
-            hpCurrent -= monsterDamage;
-            if (monstersActionString != "") monstersActionString += "\n";
-            monstersActionString += "The " + monster.shortTitle + " does " + monsterDamage + " damage to you.";
-        }
-
-        if (monstersActionString != "") addUpdateText(monstersActionString);
-
-        if (hpCurrent <= 0) {
-            playerDeath();
-            return true;
-        }
-
-        return false;
     }
 
     function recoverStamina() {
@@ -2287,25 +2527,6 @@ const VERDIGRIS = (function() {
 
         if (!monstersPresent)
             recoverMax(false);
-    }
-
-    function spendStamina(cost) {
-
-        if (currentStamina >= cost)
-            currentStamina -= cost;
-        else {
-            console.error("spendStamina - Cost [" + cost + "] is greater than currentStamina [" + currentStamina + "]");
-            return;
-        }
-
-        updateStats();
-        save();
-        updateButtons(true);
-
-        if (currentStamina === 0) {
-
-            playerActionComplete(true);
-        }    
     }
 
     function playerDeath() {
@@ -2380,63 +2601,6 @@ const VERDIGRIS = (function() {
             console.error("respawn() - Trying to respawn with an empty respawnLocation");
     }
 
-    function attack(target) {
-
-        return new Promise((resolve, reject) => {
-
-            if (currentLocation === null) return;
-
-            if (showDebugLog) console.log("attack() - ");         // Unhelpful console log imo                        
-            
-            let monster = target;
-            
-            // Evasion chance
-            let evasionNumber = Math.floor(Math.random() * 101);
-            if (showDebugLog) console.log("Monster evasion - " + monster.evasion + "  evade number: " + evasionNumber);
-
-            if (evasionNumber <= monster.evasion) {
-                
-                setTimeout(() => {
-                    let updateString = "The " + monster.shortTitle + " evades your attack."
-                    addUpdateText(updateString);
-
-                    resolve("Complete");
-                }, 500);
-            }
-            else {            
-
-                // PLAYER ATTACK
-                monster.hpCurrent = Math.max(monster.hpCurrent - power, 0);
-
-                updateMonsterCardHealth();
-                    
-                let updateString = "You do " + power + " damage to the " + monster.shortTitle + "."
-                addUpdateText(updateString);  
-
-                setTimeout(() => {    
-
-                    // CHECK FOR MONSTER DEATH
-                    if (monster.hpCurrent <= 0) {
-
-                        monsterDeath(monster);
-                    }
-                    
-                    resolve("Complete");
-                }, 500);
-            }    
-        });
-    }
-
-    function block(staminaCost) {
-
-        if (showDebugLog) console.log("block() - Defence: " + defence + "   Stamina Cost: " + staminaCost);         // Unhelpful console log imo
-                        
-        
-        console.log("BLOCK NOT IMPLEMENTED");
-        
-        spendStamina(staminaCost);
-    }
-
     function recover() {
 
         // let maxRecoverAmount = 3;
@@ -2459,88 +2623,13 @@ const VERDIGRIS = (function() {
 
         if (currentStamina != maxStamina) {
             currentStamina = maxStamina;
-            if (isPlayerAction) playerActionComplete(true);
+            
             updateStats();
             save();
 
             // let updateString = "You recover your stamina."
             // addUpdateText(updateString);
         }
-    }
-
-    function runAway() {
-        
-        // Wait for a short period here so that any outcome of spending stamina can resolve
-        setTimeout(function() {
-
-            if (currentLocation === null) return; // In case we died while trying to run away
-
-            const direction = activeDirections[Math.floor(Math.random() * activeDirections.length)];        
-
-            let locationString = "";
-
-            switch (direction) {
-
-                // North
-                case 0:
-                    locationString = "north";
-                    go(0, false);
-                    break;
-                // West
-                case 1:
-                    locationString = "west";
-                    go(1, false);
-                    break;
-                // East
-                case 2:
-                    locationString = "east";
-                    go(2, false);
-                    break;
-                // South
-                case 3:
-                    locationString = "south";
-                    go(3, false);
-                    break;            
-            }
-
-            addUpdateText("You run blindly to the " + locationString);
-        }, 750);    
-    }
-
-    function monsterDeath(monster) {
-                        
-        // Remove this monster from the current location
-        let monsterIndex = -1;
-        // Find the correct monster in the location list
-        for (let i = 0; i < currentLocation.monsters.length; i++) {
-            const _monster = currentLocation.monsters[i];
-            if (_monster.keyword === monster.keyword && _monster.hpCurrent === monster.hpCurrent)
-                monsterIndex = i;
-        }        
-        currentLocation.monsters.splice(monsterIndex,1);
-
-        const monsterExperience = getRandomInt(monster.experienceMin, monster.experienceMax);
-
-        let storedMonsterString = "The " + monster.shortTitle + " falls dead at your feet\nYou receive " + monsterExperience + " experience and " +  monster.gold + " gold";
-
-        experience += monsterExperience;
-        insight += monster.insight;
-        gold += monster.gold;
-        updateStats();             
-        save();
-    
-        if (currentLocation.monsters.length === 0) {
-            displayLocation(currentRegion, currentArea, currentLocation);            
-        }
-        else
-            initializeMonsterCards();
-
-        addUpdateText(storedMonsterString);
-    }
-
-    function dodge() {
-        if (showDebugLog) console.log("didge() - ");    
-        spendStamina(1);
     }
 
     function talk() {
@@ -2842,7 +2931,9 @@ const VERDIGRIS = (function() {
         localStorage.setItem('npcs', JSON.stringify(npcs));
         localStorage.setItem('items', JSON.stringify(items));
         localStorage.setItem('narrations', JSON.stringify(narrations));
-        localStorage.setItem('actions', JSON.stringify(actions));
+
+        // Actions contains functions within it, so needs to be treated specially
+        saveArrayToLocalStorage('actions', actions);        
     
         // Saving variables that are object references
         localStorage.setItem('currentRegionKeyword', JSON.stringify(currentRegion.keyword));
@@ -2883,7 +2974,9 @@ const VERDIGRIS = (function() {
             npcs = JSON.parse(localStorage.getItem('npcs'));
             items = JSON.parse(localStorage.getItem('items'));
             narrations = JSON.parse(localStorage.getItem('narrations'));
-            actions = JSON.parse(localStorage.getItem('actions'));
+
+            // Retrieve and re-connect serialized functions
+            actions = retrieveArrayFromLocalStorage('actions');
         }
         else {
             
@@ -2891,7 +2984,7 @@ const VERDIGRIS = (function() {
             npcs = JSON.parse(JSON.stringify(npcsRef));
             items = JSON.parse(JSON.stringify(itemsRef));
             narrations = JSON.parse(JSON.stringify(narrationsRef));
-            actions = JSON.parse(JSON.stringify(actionsRef));
+            actions = actionsRef.map(action => deepCopyWithFunctions(action));
         }
     
         // Loading variables that are just references for objects
@@ -2931,6 +3024,38 @@ const VERDIGRIS = (function() {
         }
     }
 
-    //#endregion
+    function saveArrayToLocalStorage(key, array) {
 
+        const serializedArray = array.map(obj => {
+            const serializedObj = JSON.stringify(obj, (key, value) => {
+                return typeof value === 'function' ? value.toString() : value;
+            });
+            return serializedObj;
+        });
+    
+        localStorage.setItem(key, JSON.stringify(serializedArray));
+    }
+    
+    function retrieveArrayFromLocalStorage(key) {
+        const serializedArray = JSON.parse(localStorage.getItem(key));
+    
+        if (!serializedArray) return null;
+    
+        const array = serializedArray.map(serializedObj => {
+            const obj = JSON.parse(serializedObj);
+    
+            for (const key in obj) {            
+                if (typeof obj[key] === 'string' && (obj[key].startsWith('function') || obj[key].startsWith('async'))) {                
+                    obj[key] = eval('(' + obj[key] + ')');
+                }
+            }
+    
+            return obj;
+        });
+    
+        return array;
+    }
+
+    //#endregion
+    
 })();

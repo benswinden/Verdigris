@@ -152,7 +152,10 @@
             "items": [
               "thorny_bramble"
             ],
-            "monsters": [],
+            "monsters": [
+              "blight_war_03",
+              "blight_war_02"
+            ],
             "npcs": [],
             "north": null,
             "west": [
@@ -176,7 +179,6 @@
             "items": [],
             "monsters": [
               "blight_war_01",
-              "temple_golem",
               "large_rat"
             ],
             "npcs": [],
@@ -250,7 +252,9 @@
             "seen": false,
             "items": [],
             "monsters": [
-              "crawler_01"
+              "crawler_01",
+              "crawler_01",
+              "blight_war_03"
             ],
             "npcs": [],
             "north": [

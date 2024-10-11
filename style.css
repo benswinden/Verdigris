@@ -35,7 +35,49 @@ body {
     margin: 0;
 }
 
-#content {
+#title-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    margin:0px;
+    margin-top: 25%;
+    padding: 0px;    
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+
+    #selections {
+        margin-top: 50px;
+    }
+
+    #game-name-text {
+        font-family: avara;
+        color: #8F871E;
+        font-size: 45px;
+        letter-spacing: 2px;        
+    }
+
+    #new-game-text, #continue-text {
+        color: #8F3715;
+        font-size: 20px;
+        font-weight: 400;        
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    #new-game-text:hover, #continue-text:hover {
+        color: #E86E40;
+        cursor: pointer;
+    }
+
+    #continue-text {
+        margin-top: 20px;
+    }
+}
+
+#game-content {
     height: 100%;
     margin:0px;
     padding: 0px;    
@@ -119,12 +161,12 @@ header.scrolled {
 }
 
 .ability-button {    
-    
+    position: relative;
     width: 60px;
     height: 60px;
     margin: 0 10px;
 
-    background: #01090A;
+    background: #0611137b;
     color: #8A8766;
     border: 2px solid #1D1E0E;    
 }
@@ -139,6 +181,15 @@ header.scrolled {
 
 .ability-button.active {            
     border: 2px solid #6F7221;    
+}
+
+.stamina-container {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    width: 60px;
+    bottom: -7px;
 }
 
 #player-xp-section {
@@ -442,6 +493,7 @@ main {
     width: 230px;
     margin: 7px;
 
+    background: #01090A;
     color: #8F3715;
     border: 3px solid #512018;
 }

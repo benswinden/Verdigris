@@ -348,3 +348,22 @@ export function locationsHavePath(locationA, locationB, itemsArray) {
     
     return hasPath;
 }
+
+export function deepCopyWithFunctions(obj) {
+
+    // Create a deep copy of the object without functions
+    const copy = JSON.parse(JSON.stringify(obj, (key, value) => {
+        return typeof value === 'function' ? undefined : value;
+    }));
+
+    // Manually copy the functions
+    for (const key in obj) {
+        if (typeof obj[key] === 'function') {
+            copy[key] = obj[key];
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            copy[key] = deepCopyWithFunctions(obj[key]);
+        }
+    }
+
+    return copy;
+}
