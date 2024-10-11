@@ -59,6 +59,8 @@ const VERDIGRIS = (function() {
     let npcActive = false;
     let currentNPC = -1;
 
+    let combatActive = false;
+
     let activeDirections = [];      // Array that contains which directions (0=north, 1=west, 2=east, 3=south ) have active buttons currently
 
     let inventory = [];             // Inventory contains index numbers for items in the items array
@@ -220,21 +222,24 @@ const VERDIGRIS = (function() {
                     exitInventory();
                 }
             }
-        });
 
-        inventoryIcon.onmouseover = (event) => { playClick(); };
-
-        document.addEventListener('keydown', function(event) { if (event.code == 'KeyW') { go(0, true); playClick(); } });            // North
-        document.addEventListener('keydown', function(event) { if (event.code == 'KeyA') { go(1, true); playClick(); } });            // West
-        document.addEventListener('keydown', function(event) { if (event.code == 'KeyD') { go(2, true); playClick(); } });            // East
-        document.addEventListener('keydown', function(event) { if (event.code == 'KeyS') { go(3, true); playClick(); } });            // South
-        document.addEventListener('keydown', function(event) { if (event.code == 'Enter') { go(4, true); playClick(); } });           // For "Next" buttons
-
-        document.addEventListener('keydown', function(event) {
             if (event.code == 'KeyQ') {
                 console.log("Debug - Q");
             }
+            if (event.code == 'KeyW') { go(0, true); playClick(); }
+            if (event.code == 'KeyA') { go(1, true); playClick(); }
+            if (event.code == 'KeyD') { go(2, true); playClick(); }
+            if (event.code == 'KeyS') { go(3, true); playClick(); }
+            if (event.code == 'Enter') { go(4, true); playClick(); }
+            if (event.code == 'Digit1') { activateAbility(0); }
+            if (event.code == 'Digit2') { activateAbility(1); }
+            if (event.code == 'Digit3') { activateAbility(2); }
+            if (event.code == 'Digit4') { activateAbility(3); }
+            if (event.code == 'Digit5') { activateAbility(4); }
+            if (event.code == 'Digit6') { activateAbility(5); }
         });
+
+        inventoryIcon.onmouseover = (event) => { playClick(); };
 
 
         // DEBUG
@@ -448,6 +453,9 @@ const VERDIGRIS = (function() {
         // This should only happen once
         if (!mapInitialize)
             initalizeMap();
+
+        // In case this was deactivated for some prior reason
+        header.style.display = "block";
 
         if (showDebugLog) console.log("displayLocation -  Area: " + area + "    Location: " + JSON.stringify(location));
 
@@ -1372,28 +1380,7 @@ const VERDIGRIS = (function() {
                 
                 button.onclick = function() { 
                     
-                    if (abilityButtonObject.ability.target) {
-
-                        if (!abilityButtonObject.active) {
-                            
-                            abilityButtonObject.button.classList = "ability-button can-hover active";
-                            abilityButtonObject.active = true;
-                            currentActiveAbilityObject = abilityButtonObject;                            
-                            targetMonsterCards();                            
-                        }
-                        else {
-                            
-                            abilityButtonObject.button.classList = "ability-button can-hover";
-                            abilityButtonObject.active = false;
-                            currentActiveAbilityObject = null;
-                            detargetMonsterCards();
-                        }                        
-                    }
-                    else {
-                        
-                        useAbility(abilityButtonObject.ability, null);                    
-                        playClick();
-                    }
+                    activateAbility(i);                    
                 };
             }
             else
@@ -1403,52 +1390,149 @@ const VERDIGRIS = (function() {
         }        
     }
 
-    // Set up monster cards in the default state
-    function initializeMonsterCards() {
-        
-        initializedMonsterCards = [];
-        const monsterCards = monsterCardContainer.children;
-        
-        for (let i = 0; i < 3; i++) {
-            
-            const card = monsterCards[i];
+    function activateAbility(abilityNumber) {
 
-            if (i < currentLocation.monsters.length) {
+        if (!combatActive) return;
 
-                
-                const monster = currentLocation.monsters[i];
-                
-                const monsterCardObject = {
-                    card: card,
-                    monster: monster
-                }
-                initializedMonsterCards.push(monsterCardObject);
+        let abilityButtonObject = null;
 
-                card.classList = "monster-card";
-                card.onclick = "";
+        switch (abilityNumber) {
+            case 0:                
+                abilityButtonObject = abilityButtons[0];
+                break;
+            case 1:
+                abilityButtonObject = abilityButtons[1];
+                break;
+            case 2:
+                abilityButtonObject = abilityButtons[2];
+                break;
+            case 3:
+                abilityButtonObject = abilityButtons[3];
+                break;
+            case 4:
+                abilityButtonObject = abilityButtons[4];
+                break;
+            case 5:
+                abilityButtonObject = abilityButtons[5];
+                break;
+        }
 
-                card.querySelector('.monster-level-icon').style.display = "block";
-                card.querySelector('.monster-level-icon').innerHTML = monster.level;
-                card.querySelector('.monster-card-title-text').innerHTML = monster.title;
-                card.querySelector('.monster-card-type-text').innerHTML = monster.type;
+        if (abilityButtonObject === null || abilityButtonObject.ability === null) return;
+
+        if (abilityButtonObject.ability.target) {
+
+            if (!abilityButtonObject.active) {
                 
-                card.querySelector('.monster-hp-section').style.display = "block";
-                card.querySelector('.monster-hp-text').innerHTML = monster.hpCurrent + "/" + monster.hpMax;
-                
-                let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
-                // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
-                card.querySelector('.monster-hp-bar-current').style.width = (monsterHpCurrentPercent + 1 ) + 'px';
+                abilityButtonObject.button.classList = "ability-button can-hover active";
+                abilityButtonObject.active = true;
+                currentActiveAbilityObject = abilityButtonObject;                            
+                targetMonsterCards();                            
             }
             else {
+                
+                abilityButtonObject.button.classList = "ability-button can-hover";
+                abilityButtonObject.active = false;
+                currentActiveAbilityObject = null;
+                detargetMonsterCards();
+            }                        
+        }
+        else {
+            
+            useAbility(abilityButtonObject.ability, null);                    
+            playClick();
+        }
+    }
 
-                card.classList = "monster-card inactivee";
+    async function displayCombat() {
+
+        combatActive = true;
+        clearCreatedButtons();
+
+        combatContainer.style.display = "block";    
+        mapGridContainer.style.display = "none";
+        mainTextSection.style.display = "none";
+
+        saleTitle.style.display = "none";
+        narrationText.style.display = "none";        
+        mainTitle.classList = "combat";
+        mainTitleText.classList = "";
+        mainTitleText.innerText = currentRegion.title;
+        secondaryTitle.style.display = "none";
+        mainText.innerText = currentRegion.description;
+    
+        await initializeMonsterCards();
+
+        setTimeout(function() {
+            abilityButtonContainer.style.display = "flex";
+            playClick();
+        }, 500);    
+    }
+
+    function closeCombat() {
+
+        combatActive = false;
+        currentActiveAbilityObject = null;
+        combatContainer.style.display = "none";
+        abilityButtonContainer.style.display = "none";
+        mainTextSection.style.display = "block";
+    }
+
+    // Set up monster cards in the default state
+    async function initializeMonsterCards() {
+        return new Promise((resolve) => {
+
+            initializedMonsterCards = [];
+            const monsterCards = monsterCardContainer.children;
+            
+            for (const card of monsterCards) {
+                card.classList = "monster-card inactive";
                 card.onclick = "";
                 card.querySelector('.monster-level-icon').style.display = "none";
                 card.querySelector('.monster-hp-section').style.display = "none";                
                 card.querySelector('.monster-card-title-text').innerHTML = "";
                 card.querySelector('.monster-card-type-text').innerHTML = "";
             }
-        }
+
+            for (let i = 0; i < 3; i++) {
+                
+                const card = monsterCards[i];
+
+                if (i < currentLocation.monsters.length) {
+                    
+                    const monster = currentLocation.monsters[i];
+                    
+                    const monsterCardObject = {
+                        card: card,
+                        monster: monster
+                    }
+                    initializedMonsterCards.push(monsterCardObject);
+
+                    setTimeout(function() {
+                        
+                        card.classList = "monster-card";
+                        card.onclick = "";
+
+                        card.querySelector('.monster-level-icon').style.display = "block";
+                        card.querySelector('.monster-level-icon').innerHTML = monster.level;
+                        card.querySelector('.monster-card-title-text').innerHTML = monster.title;
+                        card.querySelector('.monster-card-type-text').innerHTML = monster.type;
+                        
+                        card.querySelector('.monster-hp-section').style.display = "block";
+                        card.querySelector('.monster-hp-text').innerHTML = monster.hpCurrent + "/" + monster.hpMax;
+                        
+                        let monsterHpCurrentPercent = monster.hpCurrent / monster.hpMax * 100;
+                        // The width of our hp bar is the current hp percentage * 2 because the total width of the bar is 200    
+                        card.querySelector('.monster-hp-bar-current').style.width = (monsterHpCurrentPercent + 1 ) + 'px';
+
+                        playClick();
+                        if (i === currentLocation.monsters.length - 1) resolve();
+                    }, 300 + (300 * i));
+                }
+            }
+
+            if (currentActiveAbilityObject != null)
+                targetMonsterCards();            
+        });
     }
 
     // When the player toggles active an ability button with a targeted ability, we show which monster cards can be targeted and make them clickable
@@ -1802,33 +1886,6 @@ const VERDIGRIS = (function() {
             playClick();
             recoverStamina();
         }
-    }
-
-    function displayCombat() {
-
-        combatContainer.style.display = "block";
-        abilityButtonContainer.style.display = "flex";
-        mapGridContainer.style.display = "none";
-        mainTextSection.style.display = "none";
-
-        saleTitle.style.display = "none";
-        narrationText.style.display = "none";        
-        mainTitle.classList = "combat";
-        mainTitleText.classList = "";
-        mainTitleText.innerText = currentRegion.title;
-        secondaryTitle.style.display = "none";
-        mainText.innerText = currentRegion.description;
-
-        initializeMonsterCards();
-
-        clearCreatedButtons();
-    }
-
-    function closeCombat() {
-
-        combatContainer.style.display = "none";
-        abilityButtonContainer.style.display = "none";
-        mainTextSection.style.display = "block";
     }
 
     function displayNPC(index) {
@@ -2543,6 +2600,9 @@ const VERDIGRIS = (function() {
             removeItemFromLocation("corpse", corpseLocation);
         }
         
+        combatContainer.style.display = "none";
+        abilityButtonContainer.style.display = "none";
+        header.style.display = "none";
 
         let funcString = "getCorpse|" + gold + "|You recover what gold you can from the corpse"
         // Set the quantity of the corpse item to the amount of gold we are holding
@@ -3010,7 +3070,7 @@ const VERDIGRIS = (function() {
     
         localStorage.clear();
         clearInventory();
-        initializeGame();
+        newGame();
     }
         
     function toggleDebugWindow() {
