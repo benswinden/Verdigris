@@ -57,6 +57,22 @@ body {
     background-color: var(--fill--300);
 }
 
+#fullscreen-blocker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--fill--300);
+    z-index: 9999;
+    transition: all 3s ease;
+    pointer-events: none;
+}
+
+#fullscreen-blocker.inactive {
+    background-color: transparent;
+}
+
 .bg {
     z-index: -99;
     position: fixed; 

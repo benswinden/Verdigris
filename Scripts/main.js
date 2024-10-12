@@ -21,7 +21,7 @@ const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.059;
+    let version = 0.060;
 
     let insight = 0;
     let hpCurrent = 10;
@@ -93,6 +93,8 @@ const VERDIGRIS = (function() {
     let startAreaKeyword = "bramble_path";
     let startCoordinates = [3,8];
     let debugWindowActive = false;
+
+    const screenBlocker = document.querySelector('#fullscreen-blocker');
 
     // Title Screen
     const titleContent = document.querySelector('#title-content');
@@ -295,6 +297,8 @@ const VERDIGRIS = (function() {
     async function loading() {
         
         await loadData();
+
+        screenBlocker.classList = "inactive";
 
         continueButton.style.display = "none";
         
