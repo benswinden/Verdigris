@@ -1506,10 +1506,10 @@ const VERDIGRIS = (function() {
                         monster: monster
                     }
                     initializedMonsterCards.push(monsterCardObject);
-
+                    
                     setTimeout(function() {
                         
-                        card.classList = "monster-card active";
+                        card.classList = "monster-card asd active";
                         card.onclick = "";
 
                         card.querySelector('.monster-level-icon').style.display = "block";
@@ -1529,9 +1529,6 @@ const VERDIGRIS = (function() {
                     }, 300 + (300 * i));
                 }
             }
-
-            if (currentActiveAbilityObject != null)
-                targetMonsterCards();            
         });
     }
 
@@ -1539,9 +1536,9 @@ const VERDIGRIS = (function() {
     function targetMonsterCards() {
         
         // TODO Targetting for abilities, certain abilities can only target monsters in certain positions
-
+                
         for (const cardObject of initializedMonsterCards) {
-
+            console.log(cardObject);
             cardObject.card.classList = "monster-card active can-hover";
             cardObject.card.onclick = function() {
                 
@@ -1553,7 +1550,7 @@ const VERDIGRIS = (function() {
 
     // When a player ability gets untoggled
     function detargetMonsterCards() {
-
+        
         for (const cardObject of initializedMonsterCards) {
 
             cardObject.card.classList = "monster-card active";
@@ -2392,7 +2389,7 @@ const VERDIGRIS = (function() {
         });
     }
 
-    function monsterDeath(monster) {
+    async function monsterDeath(monster) {
                         
         // Remove this monster from the current location
         let monsterIndex = -1;
@@ -2418,8 +2415,14 @@ const VERDIGRIS = (function() {
         if (currentLocation.monsters.length === 0) {
             displayLocation(currentRegion, currentArea, currentLocation);            
         }
-        else
-            initializeMonsterCards();
+        else {
+            await initializeMonsterCards();
+            
+            // Once we've re-inialized new positions, check if we should re-target because an ability is active
+            if (currentActiveAbilityObject != null) {                
+                targetMonsterCards();            
+            }
+        }
     
     }
 
