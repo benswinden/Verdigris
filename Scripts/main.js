@@ -21,7 +21,7 @@ const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.060;
+    let version = 0.061;
 
     let insight = 0;
     let hpCurrent = 10;
@@ -359,13 +359,13 @@ const VERDIGRIS = (function() {
         assignedAbilityKeywords[4] = "run_away";
         assignedAbilityKeywords[5] = "flask";
         assignedAbilityKeywords[0] = "straight_sword_strike";
+                        
+        inventory = [];
+        inventory.push("straight_sword","green_cloak");
 
         calculateStats();
         currentStamina = maxStamina;
         updateStats();            
-
-        inventory = [];
-        inventory.push("straight_sword","green_cloak");
         
         currentRegion = regions[0];    
 
@@ -2120,6 +2120,8 @@ const VERDIGRIS = (function() {
     // Update the header with current stat values
     function updateStats() {
         
+        if (showDebugLog) console.log ("updateStats() - ");
+
         calculateStats();
         
         let XPCurrentPercent = experience / 1000;        
