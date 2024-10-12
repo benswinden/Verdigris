@@ -1509,7 +1509,7 @@ const VERDIGRIS = (function() {
 
                     setTimeout(function() {
                         
-                        card.classList = "monster-card";
+                        card.classList = "monster-card active";
                         card.onclick = "";
 
                         card.querySelector('.monster-level-icon').style.display = "block";
@@ -1538,9 +1538,11 @@ const VERDIGRIS = (function() {
     // When the player toggles active an ability button with a targeted ability, we show which monster cards can be targeted and make them clickable
     function targetMonsterCards() {
         
+        // TODO Targetting for abilities, certain abilities can only target monsters in certain positions
+
         for (const cardObject of initializedMonsterCards) {
 
-            cardObject.card.classList = "monster-card can-hover";
+            cardObject.card.classList = "monster-card active can-hover";
             cardObject.card.onclick = function() {
                 
                 useAbility(currentActiveAbilityObject.ability, cardObject.monster);            
@@ -1554,7 +1556,7 @@ const VERDIGRIS = (function() {
 
         for (const cardObject of initializedMonsterCards) {
 
-            cardObject.card.classList = "monster-card";
+            cardObject.card.classList = "monster-card active";
             cardObject.card.onclick = "";
         }
     }
@@ -3074,6 +3076,7 @@ const VERDIGRIS = (function() {
     }
         
     function toggleDebugWindow() {
+        
         if (!debugWindowActive) {
             debugWindow.style.display = "block";
             debugWindowActive = true;

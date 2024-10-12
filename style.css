@@ -1,3 +1,51 @@
+:root {
+    /* Color styles */
+    --white--100: rgba(205, 206, 198, 1);
+    --white--200: rgba(150, 151, 145, 1);
+    --gold--primary--300: rgba(28, 29, 15, 1);
+    --gold--primary--200: rgba(54, 55, 24, 1);
+    --gold--primary--100: rgba(111, 114, 33, 1);
+    --gold--secondary--100: rgba(186, 183, 151, 1);
+    --gold--secondary--200: rgba(138, 135, 102, 1);
+    --gold--secondary--300: rgba(56, 55, 36, 1);
+    --red--primary--100: rgba(174, 62, 45, 1);
+    --red--primary--200: rgba(81, 32, 24, 1);
+    --red--primary--300: rgba(56, 24, 19, 1);
+    --red--secondary--100: rgba(232, 110, 64, 1);
+    --red--secondary--200: rgba(143, 55, 21, 1);
+    --red--secondary--300: rgba(88, 36, 16, 1);
+    --gray--primary--100: rgba(124, 141, 151, 1);
+    --gray--primary--200: rgba(50, 55, 58, 1);
+    --gray--primary--300: rgba(31, 35, 37, 1);
+    --gray--secondary--100: rgba(192, 200, 207, 1);
+    --gray--secondary--200: rgba(126, 129, 134, 1);
+    --gray--secondary--300: rgba(60, 64, 69, 1);
+    --green--primary--100: rgba(51, 104, 67, 1);
+    --green--primary--200: rgba(43, 56, 47, 1);
+    --green--primary--300: rgba(37, 49, 41, 1);
+    --green--secondary--100: rgba(196, 217, 176, 1);
+    --green--secondary--200: rgba(108, 125, 91, 1);
+    --green--secondary--300: rgba(77, 88, 65, 1);
+    --blue--primary--100: rgba(4, 44, 187, 1);
+    --blue--primary--200: rgba(24, 43, 108, 1);
+    --blue--primary--300: rgba(37, 45, 71, 1);
+    --blue--secondary--100: rgba(185, 197, 241, 1);
+    --blue--secondary--200: rgba(128, 136, 167, 1);
+    --blue--secondary--300: rgba(85, 90, 107, 1);
+    --purple--primary--100: rgba(123, 26, 241, 1);
+    --purple--primary--200: rgba(80, 46, 149, 1);
+    --purple--primary--300: rgba(63, 39, 112, 1);
+    --purple--secondary--100: rgba(210, 194, 228, 1);
+    --purple--secondary--200: rgba(157, 140, 176, 1);
+    --purple--secondary--300: rgba(103, 87, 121, 1);
+    --fill--100: rgba(6, 17, 19, 0.5);
+    --fill--200: rgba(2, 12, 13, 1);
+    --fill--300: rgba(1, 9, 10, 1);
+    --debug: rgb(255, 0, 98);
+}
+
+
+
 @font-face {
     font-family: avara;
     src: url(Fonts/Avara.otf);
@@ -8,7 +56,7 @@ html {
 }
 
 body {
-    background-color: #020C0D;
+    background-color: var(--fill--300);
 }
 
 .bg {
@@ -54,21 +102,21 @@ body {
 
     #game-name-text {
         font-family: avara;
-        color: #8F871E;
-        font-size: 45px;
+        color: var(--gold--primary--100);
+        font-size: 55px;
         letter-spacing: 2px;        
     }
 
     #new-game-text, #continue-text {
-        color: #8F3715;
-        font-size: 20px;
+        color: var(--red--secondary--200);
+        font-size: 25px;        
         font-weight: 400;        
         letter-spacing: 1px;
         text-align: center;
     }
 
     #new-game-text:hover, #continue-text:hover {
-        color: #E86E40;
+        color: var(--red--secondary--100);
         cursor: pointer;
     }
 
@@ -84,7 +132,7 @@ body {
     max-width: 700px;
     margin: auto;
     font-family: Eczar;
-    background-color: #010c0b52;    
+    background-color: #010c0b8e;
 }
 
 h1, h2, p {
@@ -140,7 +188,7 @@ header {
 }
 
 header.scrolled {
-    background-color: #030807e6;
+    background-color: var(--fill--300);
 }
 
 #header-container {
@@ -166,21 +214,20 @@ header.scrolled {
     height: 60px;
     margin: 0 10px;
 
-    background: #0611137b;
-    color: #8A8766;
-    border: 2px solid #1D1E0E;    
+    background: var(--fill--100);    
+    border: 2px solid var(--gold--primary--300);
 }
 
 .ability-button.can-hover {            
-    border: 2px solid #363718;    
+    border: 2px solid var(--gold--primary--200);    
 }
 
 .ability-button.can-hover:hover {            
-    border: 2px solid #6F7221;    
+    border: 2px solid var(--gold--primary--100);    
 }
 
 .ability-button.active {            
-    border: 2px solid #6F7221;    
+    border: 2px solid var(--gold--primary--100);    
 }
 
 .stamina-container {
@@ -201,7 +248,7 @@ header.scrolled {
         top: -18px;
         display: block;
         text-align: center;        
-        color: #D0BC02;
+        color: var(--gold--primary--100);
         font-size: 17px;
         font-weight: 600;
         line-height: 53px;
@@ -213,27 +260,28 @@ header.scrolled {
         z-index: 10; 
     }
 
-    #player-xp-bar-background {        
+    #player-xp-bar-background {
+        position: relative;
         border-radius: 2px;
         background-color: transparent;
-        border: 2px solid #363718;
+        border: 3px solid var(--gold--primary--300);
         width: 625px;
         height: 8px;
         margin: 5px 0 0 0;
         display : flex;
         align-items : center;
         justify-content: center;
-        z-index: 1;        
+        z-index: 3;        
     }
 
     #player-xp-bar-current {
         position: relative;
         border-radius: 0px;
-        background-color: #575943;    
-        border-radius: 2px;
+        background-color: var(--gold--secondary--300);
+        border-radius: 0px;
         width: 300px;
-        height: 8px;        
-        top: -10px;
+        height: 10px;        
+        top: -12px;
         z-index: 2;
     }
 }
@@ -248,8 +296,8 @@ header.scrolled {
 
     #player-hp-bar-background {        
         border-radius: 2px;
-        background-color: #01090A;
-        border: 2px solid #512018;
+        background-color: var(--fill--300);
+        border: 2px solid var(--red--primary--200);
         width: 250px;
         height: 16px;
         margin: 5px 0 0 0;
@@ -261,7 +309,7 @@ header.scrolled {
 
     #player-hp-bar-current {
         position: relative;
-        background-color: #512018;    
+        background-color: var(--red--primary--200);  
         border-radius: 2px;
         width: 200px;
         height: 16px;        
@@ -274,7 +322,7 @@ header.scrolled {
         margin-top: 3px;
         padding: 0;
         line-height: 0;
-        color: #E86E40;
+        color: var(--red--secondary--100);
         font-size: 13px;
         font-weight: 500;    
         z-index: 3;
@@ -308,15 +356,15 @@ header.scrolled {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #01090A;
-    border: 1px solid #363718;
+    background: var(--fill--300);
+    border: 2px solid var(--gold--primary--200);
     width: 40px;
     height: 35px;
     margin-left: 15px;
     margin-top: -7px;
 
     .open-inventory {
-        width: 75%;
+        width: 75%;        
         content:url("Assets/InventoryIcon.svg");
     }
 
@@ -328,7 +376,7 @@ header.scrolled {
 
 #inventory-button-section:hover {
 
-    border: 1px solid #6F7221;
+    border: 2px solid var(--gold--primary--100);
 
     .open-inventory {
         width: 75%;
@@ -354,8 +402,7 @@ main {
     margin-bottom: 100px;
 }
 
-.title-section {
-    color: black;
+.title-section {    
     margin: 0 0 0 0;
 
     #main-title {
@@ -365,7 +412,7 @@ main {
 
     #main-title-text {
         font-family: avara;
-        color: #8F871E;
+        color: var(--gold--primary--100);
         font-size: 25px;
         letter-spacing: 2px;        
     }
@@ -375,7 +422,7 @@ main {
 
         #main-title-text {
             font-family: avara;
-            color: #523294;
+            color: var(--purple--primary--100);
             font-size: 29px;
             letter-spacing: 2px;        
         }
@@ -385,7 +432,7 @@ main {
      
         #main-title-text {
             font-family: avara;
-            color: #8F3715;            
+            color: var(--red--secondary--200);
         }
     }
 
@@ -403,20 +450,14 @@ main {
     }
 
     #secondary-title-icon {
-        text-align: center;        
-        color: #8F3715;
+        text-align: center;                
         font-size: 17px;
         font-weight: 600;
         line-height: 43px;
         width: 42px;
         height: 40px;
-        margin-right: 20px;
-        background-image: url("Assets/SecondaryIconMonster.svg");
+        margin-right: 20px;        
         background-repeat: no-repeat;
-    }
-
-    #secondary-title-icon.monster {
-        background-image: url("Assets/SecondaryIconMonster.svg");
     }
 
     #secondary-title-icon.npc {
@@ -424,22 +465,17 @@ main {
     }
 
     #secondary-title-text {
-        color: #8F871E;        
+        color: var(--green--primary--100);
     }
 }
     
 #main-title-text.secondary{
-    color: #363718;
+    color: var(--gold--primary--200);
     font-size: 25px;
 }
 
-#main-title-text.title{
-    color: #804FB1;
-    font-size: 29px;
-} 
-
 #main-text-section {
-    color: #CDCEC6;
+    color: var(--white--100);
     font-size: 20px;
     font-weight: 400;        
     letter-spacing: 1px;
@@ -447,7 +483,7 @@ main {
     margin: 30px 0 25px 0;
 
     #narration-text {
-        color: #969791;
+        color: var(--white--200);
         display: none;        
         font-weight: 400;
         font-style: italic;
@@ -460,7 +496,7 @@ main {
 }
 
 #update-text {
-    color: #969791;
+    color: var(--white--200);
     display: block; 
     font-style: italic;
     font-size: 20px;       
@@ -493,23 +529,23 @@ main {
     width: 230px;
     margin: 7px;
 
-    background: #01090A;
-    color: #8F3715;
-    border: 3px solid #512018;
+    background: var(--fill--300);
+    color: var(--red--primary--200);
+    border: 3px solid var(--red--primary--300);
 }
 
 .monster-card.active {    
-    color: #E86E40;
-    border: 3px solid #AE3E2D;
+    color: var(--red--secondary--100);
+    border: 3px solid var(--red--primary--200);
 }
 
 .monster-card.can-hover:hover {    
-    color: #E86E40;
-    border: 3px solid #AE3E2D;
+    color: var(--red--secondary--100);
+    border: 3px solid var(--red--primary--100);
 }
 
 .monster-card.inactive {        
-    border: 3px solid #28120F;
+    border: 3px solid var(--red--primary--300);
 }
 
 .monster-level-icon {
@@ -518,7 +554,7 @@ main {
 
     display: block;
     text-align: center;        
-    color: #8F3715;
+    color: var(--red--primary--200);
     font-size: 17px;
     font-weight: 600;
     line-height: 43px;
@@ -537,7 +573,7 @@ main {
 
 .monster-card-title-text {
     font-family: avara;
-    color: #E86E40;
+    color: var(--red--secondary--100);
     font-size: 22px;
     letter-spacing: 2px;
     margin-left: 15px;
@@ -546,7 +582,7 @@ main {
 
 .monster-card-type-text {
     font-family: Eczar;
-    color: #8F3715;
+    color: var(--red--secondary--200);
     font-size: 18px;
     font-weight: 400;    
     margin-left: 15px;
@@ -568,8 +604,8 @@ main {
 
     .monster-hp-bar-background {        
         border-radius: 2px;
-        background-color: #01090A;
-        border: 1px solid #512018;
+        background-color: var(--fill--300);
+        border: 1px solid var(--red--primary--200);
         width: 100px;
         height: 20px;
         margin: 5px 0 0 0;
@@ -581,7 +617,7 @@ main {
 
     .monster-hp-bar-current {
         position: relative;
-        background-color: #512018;    
+        background-color: var(--red--primary--200);
         border-radius: 2px;
         width: 101px;
         height: 21px;        
@@ -594,7 +630,7 @@ main {
         margin-top: 2px;
         padding: 0;
         line-height: 0;
-        color: #E86E40;
+        color: var(--red--secondary--100);
         font-size: 13px;
         font-weight: 300;    
         z-index: 3;
@@ -628,21 +664,21 @@ main {
         border: 2px solid transparent;
     }
     .main-square.visited {        
-        border: 2px solid #363718;
+        border: 2px solid var(--gold--primary--200);
     }    
     .main-square.seen {        
-        border: 2px solid #1D1E0E;
+        border: 2px solid var(--gold--primary--300);
     }
     .main-square.current {
       background-image: url("Assets/mapPlayerIcon.svg");
-      border: 2px solid #6F7221;
+      border: 2px solid var(--gold--primary--100);
     }
     .main-square.can-hover:hover {        
-        border: 2px solid #6F7221;
+        border: 2px solid var(--gold--primary--100);
     }
     .main-square.current-hostile {
         background-image: url("Assets/mapPlayerIcon.svg");
-        border: 2px solid #8F3715;
+        border: 2px solid var(--red--primary--100);
     }
     .main-square.door {                
         border-style: dashed;
@@ -659,10 +695,10 @@ main {
         border-bottom: 2px solid transparent;
     }
     .vertical-square.active {        
-        border-bottom: 2px solid #6F7221;
+        border-bottom: 2px solid var(--gold--primary--100);
     }
     .vertical-square.inactive {        
-        border-bottom: 2px solid #363718;
+        border-bottom: 2px solid var(--gold--primary--200);
     }    
 
     .horizontal-square {
@@ -673,10 +709,10 @@ main {
         border-right: 2px solid transparent;
     }
     .horizontal-square.active {
-        border-right: 2px solid #6F7221;
+        border-right: 2px solid var(--gold--primary--100);
     }
     .horizontal-square.inactive {
-        border-right: 2px solid #363718;
+        border-right: 2px solid var(--gold--primary--200);
     }
 }
 
@@ -693,7 +729,7 @@ main {
 
 #inventory-title, #equipment-title, #sale-title {
     display: block;
-    color: #8F871E;
+    color: var(--gold--primary--100);
     font-size: 12px;
     font-weight: 500;
     padding-bottom: 10px;
@@ -712,7 +748,7 @@ main {
     text-align: left;
     border-radius: 3px;
     border: none;
-    background: #01090A;
+    background: var(--fill--300);
     width: 100%;
     height: 100%;
     line-height: 50px;    
@@ -792,7 +828,7 @@ main {
         display: block;
         font-size: 18px;
         line-height: 1.75em;
-        color: #dd0ec1;        
+        color: var(--debug);
         padding-bottom: 35px;
         font-weight: 600;        
     }
@@ -822,27 +858,29 @@ main {
 }
 
 .action-button {
-    color: #8A8766;
-    border: 3px solid #363718;
+    color: var(--gold--secondary--200);
+    border: 3px solid var(--gold--primary--200)
 }
 
 .action-button.can-hover:hover {    
-    color: #BAB797;
-    border: 3px solid #6F7221;
+    color: var(--gold--secondary--100);
+    border: 3px solid var(--gold--primary--100);
 }
 
 .action-button-inactive {
-    color: #383724;
-    border: 3px solid #1C1D0F;
+    color: var(--gold--secondary--300);
+    border: 3px solid var(--gold--primary--300);
 }
-
+/*
+*       TODO Monster Buttons are deprecated
+*/
 .monster-button {
-    color: #8F3715;
-    border: 3px solid #512018;
+    color: var(--debug);
+    border: 3px solid var(--debug);
 
     .description-section {
         margin-left: 23px;
-        color: #877C7A; 
+        color: var(--debug);
     }
 
     .chevron-closed {
@@ -863,21 +901,25 @@ main {
 }
 
 .monster-button.active {    
-    color: #E86E40;
-    border: 3px solid #AE3E2D;
+    color: var(--debug);
+    border: 3px solid var(--debug);
 }
 
 .monster-button.can-hover:hover {    
-    color: #E86E40;
-    border: 3px solid #AE3E2D;
+    color: var(--debug);
+    border: 3px solid var(--debug);
 }
 
+/*
+*       Remove Above
+*/
+
 .item-button {
-    color: #7e8186;
-    border: 3px solid #32373A;
+    color: var(--gray--secondary--200);
+    border: 3px solid var(--gray--primary--200);
 
     .description-section {        
-        color: #7e8186; 
+        color: var(--gray--secondary--200);
     }
 
     .chevron-closed {
@@ -902,10 +944,10 @@ main {
     }
 
     .item-cost-text.active {
-        color: #7e8186;
+        color: var(--gray--secondary--100);
     }
     .item-cost-text.inactive {
-        color: #8F3715;
+        color: var(--red--secondary--200);
     }  
 
     .upgrade-material-cost {
@@ -914,10 +956,10 @@ main {
         margin-right: 15px;
     }
     .upgrade-material-cost.active {
-        color: #7e8186;
+        color: var(--gray--secondary--100);
     }
     .upgrade-material-cost.inactive {
-        color: #8F3715;
+        color: var(--red--secondary--200);
     }
 
     .button-stat-section {
@@ -925,7 +967,7 @@ main {
 
         div {
             font-size: 18px;
-            color: #877C7A;
+            color: var(--gray--secondary--100);
         }
 
         li {
@@ -947,13 +989,13 @@ main {
 }
 
 .item-button.active {    
-    color: #C0C8CF;
-    border: 3px solid #7C8D97;
+    color: var(--gray--secondary--100);
+    border: 3px solid var(--gray--primary--100);
 }
 
 .item-button.can-hover:hover {    
-    color: #C0C8CF;
-    border: 3px solid #7C8D97;
+    color: var(--gray--secondary--100);
+    border: 3px solid var(--gray--primary--100);
 }
 
 /* Lists are used for stat section in the expanded item button
@@ -971,7 +1013,7 @@ ul {
 }
 
 li {
-    color: #CDCEC6;
+    color: var(--gray--secondary--100);
     font-size: 21px;
     font-weight: 400;
     display: flex;    
@@ -985,18 +1027,18 @@ li.hidden {
 
 
 .npc-button {
-    color: #6C7D5B;
-    border: 3px solid #2B382F;
+    color: var(--green--secondary--200);
+    border: 3px solid var(--green--primary--200);
 }
 
 .npc-button.can-hover:hover {    
-    color: #C4D9B0;
-    border: 3px solid #336843;
+    color: var(--green--secondary--100);
+    border: 3px solid var(--green--primary--100);
 }
 
 .locked-item-button {
-    color: #3C4045;
-    border: 3px solid #1F2325;
+    color: var(--debug);
+    border: 3px solid var(--debug);
 }
 
 #equip-button {
