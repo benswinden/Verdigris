@@ -98,8 +98,10 @@ const VERDIGRIS = (function() {
 
     // Title Screen
     const titleContent = document.querySelector('#title-content');
+    const titleScreenContainer = document.querySelector('#title-screen-container');
     const newGameButton = document.querySelector('#new-game-text');
     const continueButton = document.querySelector('#continue-text');
+    const characterCreationContainer = document.querySelector('#character-creation-container');
 
     // Main Content
     const gameContent = document.querySelector('#game-content');
@@ -340,6 +342,9 @@ const VERDIGRIS = (function() {
         // Formatting and making copies of data to be edited at runtime
         formatData();
 
+        displayCharacterCreation();
+        return;
+
         experience = 0;
         insight = 0;
         hpCurrent = 140;
@@ -359,7 +364,7 @@ const VERDIGRIS = (function() {
         assignedAbilityKeywords[4] = "run_away";
         assignedAbilityKeywords[5] = "flask";
         assignedAbilityKeywords[0] = "straight_sword_strike";
-                        
+
         inventory = [];
         inventory.push("straight_sword","green_cloak");
 
@@ -392,6 +397,12 @@ const VERDIGRIS = (function() {
 
         initializeAbilityButtons();
         displayLocation(_startRegion, _startArea, _startLocation);
+    }
+
+    function displayCharacterCreation() {
+
+        titleScreenContainer.style.display = "none";
+        characterCreationContainer.style.display = "block";
     }
 
     function continueGame() {

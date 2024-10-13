@@ -97,18 +97,26 @@ body {
     margin: 0;
 }
 
+/*
+*           TITLE SCREEN & CHARACTER CREATION
+*/  
+
+
 #title-content {
     display: none;
     flex-direction: column;
     align-items: center;
     height: 100%;
     margin:0px;
-    margin-top: 25%;
     padding: 0px;    
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
     justify-content: center;
+}
+
+#title-screen-container {
+    margin-top: 40vh;
 
     #selections {
         margin-top: 50px;
@@ -138,6 +146,138 @@ body {
         margin-top: 20px;
     }
 }
+
+
+#character-creation-container {
+    margin-top: 35vh;
+    display: none;
+
+    #history-select-title-text {
+        display: flex;
+        justify-content: center;
+        font-family: avara;
+        color: var(--gold--primary--100);
+        font-size: 26px;
+        letter-spacing: 2px;
+        margin-bottom: 80px;
+        font-weight: bold;
+    }
+
+    #history-display-container {
+        display: flex;    
+    }
+
+    #history-image-box {
+        height: 340px;
+        width: 230px;
+        border: 3px solid var(--gold--primary--200);
+        background-image: url("Assets/Character/HeirApparent.png");
+        background-repeat: no-repeat;
+    }
+
+    #history-text-container {
+        display: flex;
+        flex-direction: column;    
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        max-width: 400px;
+        margin: 0 10px 0 85px;
+    }
+
+    #history-title-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        
+        .history-select-line {
+            width: 80px;
+            height: 2px;        
+            background-color: var(--gold--primary--200);
+            mask: url('Assets/General/History-Select-Line.svg') no-repeat center;
+            -webkit-mask: url('Assets/General/History-Select-Line.svg') no-repeat center;        
+        }
+
+        #history-title-text {            
+            font-family: eczar;
+            color: var(--white--100);
+            font-size: 26px;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+    }
+
+    #history-description-text {    
+        font-family: eczar;
+        color: var(--white--100);
+        font-size: 14px;
+        font-weight: 100;
+        letter-spacing: 2px;
+        line-height: 22px;
+        width: 400px;
+
+        p {
+            margin: 15px 0;
+        }
+    }
+
+    #history-select-button {
+        
+        border-radius: 3px;    
+        background: var(--fill--300);
+        width: 105px;
+        height: 28px;    
+        font-weight: bold;
+        font-size: 20px;
+        padding: 0;    
+        color: var(--gold--secondary--200);
+        border: 3px solid var(--gold--primary--200);
+        text-align: center;
+        padding-top: 2px;
+        margin-top: 20px;
+    }
+}
+
+#history-select-carousel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+}
+
+.arrow-left {
+    width: 50px;
+    height: 50px;
+    margin-right: 20px;
+    background-color: var(--gold--primary--200);
+    mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
+    -webkit-mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
+}
+
+.carousel-dot {
+    width: 12px;
+    height: 12px;
+    margin: 0 7px;
+    background-color: var(--gold--primary--200);
+    mask: url('Assets/General/Carousel-Dot.svg') no-repeat center;
+    -webkit-mask: url('Assets/General/Carousel-Dot.svg') no-repeat center;    
+}
+
+.carousel-dot.active {
+    background-color: var(--gold--primary--100);
+}
+
+.arrow-right {
+    width: 50px;
+    height: 50px;
+    margin-left: 20px;
+    background-color: var(--gold--primary--200);
+    mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
+    -webkit-mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
+    transform: scaleX(-1); /* Flips the image horizontally */
+}
+
 
 #game-content {
     display: none;
@@ -190,7 +330,7 @@ h1, h2, p {
 }
 
 /*
-        HEADER
+             HEADER
 */
 
 header {
@@ -234,7 +374,7 @@ header.scrolled {
 }
 
 .ability-button.can-hover {            
-    border: 2px solid var(--gold--primary--200);    
+    border: 2px solid var(--gold--primary--200);
 }
 
 .ability-button.can-hover:hover {            
