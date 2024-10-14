@@ -21,7 +21,7 @@ const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.062;
+    let version = 0.063;
 
     let insight = 0;
     let hpCurrent = 10;
@@ -337,12 +337,29 @@ const VERDIGRIS = (function() {
             }
         });
 
+        preloadImages();
+
         // We wait till all async processes have completed before starting the game
         Promise.all([promise1, promise2]).then((values) => {
             
             loading();
         });
     });
+
+    // Preload images function
+    function preloadImages() {
+        
+        let imageUrls = [];
+        
+        for (const history of histories) {            
+            imageUrls.push("Assets/Character/" + history.image + ".png");
+        }
+        
+        imageUrls.forEach(url => {
+            const img = new Image();
+            img.src = url;
+        });
+    }
 
     async function loading() {
         
