@@ -21,7 +21,7 @@ const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.063;
+    let version = 0.064;
 
     let insight = 0;
     let hpCurrent = 10;
