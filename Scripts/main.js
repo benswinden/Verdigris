@@ -299,7 +299,7 @@ const VERDIGRIS = (function() {
         debugButton2.onclick = function() { console.log("Debug: Reset & Resume " + storedLocation); let x = currentContext; let y = currentContextType; let z = storedLocation; resetGame(); storedLocation = z;  changeContext(x,y); toggleDebugWindow();};  
         debugButton2b.onclick = function() { console.log("Debug: Kill Monster"); if (currentContextType == 3) monsterDeath();  toggleDebugWindow();}
         debugButton2c.onclick = function() { console.log("Debug: Die"); playerDeath(); }
-        debugButton3.onclick = function() { insight++; save(); updateStats();};
+        debugButton3.onclick = function() { experience+=50; save(); updateStats();};
         debugButton4.onclick = function() { hp++; save(); updateStats();};
         debugButton5.onclick = function() { gold++; save(); updateStats();};
         debugButton6.onclick = function() { currentStamina++; save(); updateStats();};
@@ -3234,6 +3234,7 @@ const VERDIGRIS = (function() {
         localStorage.clear();
         clearInventory();
         newGame();
+        continueNewGame();
     }
         
     function toggleDebugWindow() {

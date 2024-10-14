@@ -427,7 +427,7 @@ header.scrolled {
 
 #player-xp-section {
     position: relative;
-    line-height: 0;    
+    line-height: 0;
 
     #player-level-icon {
         position:absolute;
@@ -451,7 +451,7 @@ header.scrolled {
         border-radius: 2px;
         background-color: transparent;
         border: 3px solid var(--gold--primary--300);
-        width: 625px;
+        width: 690px;
         height: 8px;
         margin: 5px 0 0 0;
         display : flex;
@@ -474,10 +474,12 @@ header.scrolled {
 
 #player-stat-section {
     display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 8px;    
 }
 
-#player-hp-section {    
-    margin-left: 55px;
+#player-hp-section {        
     line-height: 0;    
 
     #player-hp-bar-background {        
@@ -537,45 +539,6 @@ header.scrolled {
 }
 
 
-#inventory-button-section {
-    cursor:pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: var(--fill--300);
-    border: 2px solid var(--gold--primary--200);
-    width: 40px;
-    height: 35px;
-    margin-left: 15px;
-    margin-top: -7px;
-
-    .open-inventory {
-        width: 75%;        
-        content:url("Assets/InventoryIcon.svg");
-    }
-
-    .close-inventory {
-        width: 65%;
-        content:url("Assets/ExitIcon.svg");
-    }
-}
-
-#inventory-button-section:hover {
-
-    border: 2px solid var(--gold--primary--100);
-
-    .open-inventory {
-        width: 75%;
-        content:url("Assets/InventoryIconHover.svg");
-    }
-
-    .close-inventory {
-        width: 65%;
-        content:url("Assets/ExitIconHover.svg");
-    }
-}
-
-
 
 
 /*
@@ -590,6 +553,11 @@ main {
 
 .title-section {    
     margin: 0 0 0 0;
+
+    #main-title-container {
+        display: flex;    
+        justify-content: space-between;
+    }
 
     #main-title {
         display: flex;
@@ -621,10 +589,44 @@ main {
             color: var(--red--secondary--200);
         }
     }
+        
+    #inventory-button-section {
+        cursor:pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--fill--300);
+        border: 2px solid var(--gold--primary--200);
+        width: 40px;
+        height: 35px;        
+        margin: 20px 20px 20px 0;
 
-    #main-title-icon {        
-        margin-right: 25px;
-    }    
+        .open-inventory {
+            width: 75%;        
+            content:url("Assets/InventoryIcon.svg");
+        }
+
+        .close-inventory {
+            width: 65%;
+            content:url("Assets/ExitIcon.svg");
+        }
+    }
+
+    #inventory-button-section:hover {
+
+        border: 2px solid var(--gold--primary--100);
+
+        .open-inventory {
+            width: 75%;
+            content:url("Assets/InventoryIconHover.svg");
+        }
+
+        .close-inventory {
+            width: 65%;
+            content:url("Assets/ExitIconHover.svg");
+        }
+    }
+
 
     #secondary-title {
         font-family: Eczar;
@@ -632,7 +634,7 @@ main {
         font-size: 22px;
         letter-spacing: 1px;
         font-weight: 400;
-        margin: 20px 20px 10px 0;
+        margin: 0px 20px 10px 0;
     }
 
     #secondary-title-icon {
@@ -699,7 +701,7 @@ main {
 
 #combat-container {
     display: none;
-    margin-top: 75px;
+    margin-top: 175px;
 }
 
 #monster-section-container {
