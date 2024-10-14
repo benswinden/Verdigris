@@ -116,7 +116,7 @@ body {
 }
 
 #title-screen-container {
-    margin-top: 40vh;
+    margin-top: 45vh;
 
     #selections {
         margin-top: 50px;
@@ -170,7 +170,7 @@ body {
     #history-image-box {
         height: 340px;
         width: 230px;
-        border: 3px solid var(--gold--primary--200);
+        border: 3px solid var(--gold--primary--100);
         background-image: url("Assets/Character/HeirApparent.png");
         background-repeat: no-repeat;
     }
@@ -180,7 +180,7 @@ body {
         flex-direction: column;    
         justify-content: center;
         align-items: center;
-        gap: 10px;
+        gap: 25px;
         max-width: 400px;
         margin: 0 10px 0 85px;
     }
@@ -189,9 +189,9 @@ body {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        width: 100%;
+        width: 100%;        
         
-        .history-select-line {
+        .history-select-line1, .history-select-line2 {
             width: 80px;
             height: 2px;        
             background-color: var(--gold--primary--200);
@@ -205,6 +205,9 @@ body {
             font-size: 26px;
             letter-spacing: 2px;
             font-weight: bold;
+            max-width: 200px;
+            line-height: 35px;
+            text-align: center;
         }
     }
 
@@ -237,6 +240,17 @@ body {
         padding-top: 2px;
         margin-top: 20px;
     }
+
+    
+    #history-select-button.can-hover:hover {    
+        color: var(--gold--secondary--100);
+        border: 3px solid var(--gold--primary--100);
+    }
+
+    #history-select-button.inactive {
+        color: var(--gold--secondary--300);
+        border: 3px solid var(--gold--primary--300);
+    }
 }
 
 #history-select-carousel-container {
@@ -255,6 +269,28 @@ body {
     -webkit-mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
 }
 
+.arrow-right {
+    width: 50px;
+    height: 50px;
+    margin-left: 20px;
+    background-color: var(--gold--primary--200);
+    mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
+    -webkit-mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
+    transform: scaleX(-1); /* Flips the image horizontally */
+}
+
+.arrow-left:hover, .arrow-right:hover {
+    cursor: pointer;
+    background-color: var(--gold--primary--100);
+}
+
+#carousel-dot-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 .carousel-dot {
     width: 12px;
     height: 12px;
@@ -264,18 +300,13 @@ body {
     -webkit-mask: url('Assets/General/Carousel-Dot.svg') no-repeat center;    
 }
 
-.carousel-dot.active {
+.carousel-dot:hover {
+    cursor: pointer;
     background-color: var(--gold--primary--100);
 }
 
-.arrow-right {
-    width: 50px;
-    height: 50px;
-    margin-left: 20px;
-    background-color: var(--gold--primary--200);
-    mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
-    -webkit-mask: url('Assets/General/Arrow-Left.svg') no-repeat center;
-    transform: scaleX(-1); /* Flips the image horizontally */
+.carousel-dot.active {
+    background-color: var(--gold--primary--100);
 }
 
 

@@ -21,7 +21,7 @@ const VERDIGRIS = (function() {
 
     // #region VARIABLES
 
-    let version = 0.061;
+    let version = 0.062;
 
     let insight = 0;
     let hpCurrent = 10;
@@ -60,6 +60,11 @@ const VERDIGRIS = (function() {
     let currentNPC = -1;
 
     let combatActive = false;
+
+        // Character Creation
+    let currentDisplayedHistoryIndex = 0;
+    let characterCreationCarouselDots = [];
+    let selectedHistory;
 
     let activeDirections = [];      // Array that contains which directions (0=north, 1=west, 2=east, 3=south ) have active buttons currently
 
@@ -101,7 +106,13 @@ const VERDIGRIS = (function() {
     const titleScreenContainer = document.querySelector('#title-screen-container');
     const newGameButton = document.querySelector('#new-game-text');
     const continueButton = document.querySelector('#continue-text');
+    // Character Creation
     const characterCreationContainer = document.querySelector('#character-creation-container');
+    const characterCreationTitle = document.querySelector('#history-title-text');
+    const characterCreationDescription = document.querySelector('#history-description-text');
+    const characterCreationSelectButton = document.querySelector('#history-select-button');
+    const characterCreationCarousel = document.querySelector('#history-select-carousel-container');
+
 
     // Main Content
     const gameContent = document.querySelector('#game-content');
@@ -175,6 +186,43 @@ const VERDIGRIS = (function() {
         dynamicTyping: true,
         skipEmptyLines: true
     }
+
+
+    let histories = [
+        {
+            title: "Traveler",
+            description: "A worn ranger come from a foreign land where the forests enveloped the earth and sky.\n\nAdept with quick blade and the bow. Moves silently among the brush and speaks the language of beasts.",
+            color: "gold",
+            image: "Traveler"
+        },
+        {
+            title: "Moon Witch",
+            description: "Magicker come down from the Steppes. Carrying with them forgotten tales and chants of the sky's misfortunes and follies.\n\nGrant us great strength, grant us requiem from the peering eyes that burn.",
+            color: "red",
+            image: "MoonWitch"
+        },        
+        {
+            title: "Knight Archivist",
+            description: "Child of the Last Library and ardent defender of the gathered knowledge of Kings.\n\nZealously seeking that which has long been hidden, though some secrets are best left buried.",
+            color: "gray",
+            image: "KnightArchivist"
+        },
+        {
+            title: "Geomancer",
+            description: "Only in true Quiet can one hear the rumbling murmurs of the deepest darkest depths.\n\nFeel the earth that binds, speak the language of the earthen silence and harness the power of the Unknowable Colossus.",
+            color: "green",
+            image: "Geomancer"
+        },
+        {
+            title: "Heir Apparent",
+            description: "Born to lead the Last Kingdom of men, but given no Prophecy, nor Crown, nor Shroud.\n\nOnly once its is written in the bones of the earth will Divine Right be given.",
+            color: "purple",
+            image: "HeirApparent"
+        }
+    ]
+
+
+
 
     //#endregion
 
@@ -343,8 +391,11 @@ const VERDIGRIS = (function() {
         formatData();
 
         displayCharacterCreation();
-        return;
+    }
 
+    // After the player has chosen their history
+    function continueNewGame() {
+        
         experience = 0;
         insight = 0;
         hpCurrent = 140;
@@ -400,9 +451,82 @@ const VERDIGRIS = (function() {
     }
 
     function displayCharacterCreation() {
-
+        
         titleScreenContainer.style.display = "none";
         characterCreationContainer.style.display = "block";
+
+        const leftArrow = characterCreationContainer.querySelector('.arrow-left');
+        const rightArrow = characterCreationContainer.querySelector('.arrow-right');    
+
+        leftArrow.onclick = function() {
+            currentDisplayedHistoryIndex -= 1;
+            if (currentDisplayedHistoryIndex < 0) currentDisplayedHistoryIndex = histories.length - 1;
+            changeDisplayedHistory();
+        }
+        rightArrow.onclick = function() {
+            currentDisplayedHistoryIndex += 1;
+            if (currentDisplayedHistoryIndex > histories.length - 1) currentDisplayedHistoryIndex = 0;
+            changeDisplayedHistory();
+        }
+        
+
+        characterCreationCarouselDots = characterCreationCarousel.querySelector('#carousel-dot-container').children;
+
+        // Set onclick for the carousel dots
+        for (let index = 0; index < characterCreationCarouselDots.length; index++) {
+            
+            const dot = characterCreationCarouselDots[index];
+            dot.onclick = function() {
+                currentDisplayedHistoryIndex = index;
+                changeDisplayedHistory();
+            };
+        }
+
+        changeDisplayedHistory();
+    }
+
+    function changeDisplayedHistory() {
+        
+        const historyIndex = currentDisplayedHistoryIndex;
+
+        if (historyIndex > histories.length - 1) return;
+
+        characterCreationTitle.innerHTML = histories[historyIndex].title;
+        characterCreationDescription.innerHTML = histories[historyIndex].description.replace(/\n/g, '<br>');
+        
+        characterCreationContainer.querySelector('#character-glyph').src = "Assets/Character/Char_Glyph_" + histories[historyIndex].image + ".svg";
+        characterCreationContainer.querySelector('#history-image-box').style.backgroundImage = "url(Assets/Character/" + histories[historyIndex].image + ".png)";
+    
+        // Construct the color value to be used in css based on the chose history
+        const colorVariable = "--" + histories[historyIndex].color + "--primary--100";
+        const colorValue = getComputedStyle(document.documentElement).getPropertyValue(colorVariable).trim();
+        characterCreationContainer.querySelector('#history-image-box').style.border = "3px solid " + colorValue;        
+        characterCreationContainer.querySelector('.history-select-line1').style.backgroundColor = colorValue;
+        characterCreationContainer.querySelector('.history-select-line2').style.backgroundColor = colorValue;
+
+        // Set the visual state of the carousel dots
+        for (let index = 0; index < characterCreationCarouselDots.length; index++) {
+
+            const dot = characterCreationCarouselDots[index];
+            if (index === historyIndex)
+                dot.classList = "carousel-dot active";
+            else
+                dot.classList = "carousel-dot";
+        }
+
+        if (historyIndex === 0) {
+            characterCreationSelectButton.classList = "can-hover";
+            characterCreationSelectButton.textContent = "Select";
+            characterCreationSelectButton.onclick = function() {
+                selectedHistory = histories[currentDisplayedHistoryIndex];
+                continueNewGame();
+            }
+        }
+        else {
+            characterCreationSelectButton.classList = "inactive";
+            characterCreationSelectButton.textContent = "Locked";
+        }
+
     }
 
     function continueGame() {
