@@ -191,7 +191,7 @@ const VERDIGRIS = (function() {
     let histories = [
         {
             title: "Traveler",
-            description: "A worn ranger come from a foreign land where the forests enveloped the earth and sky.\n\nAdept with quick blade and the bow. Moves silently among the brush and speaks the language of beasts.",
+            description: "A worn ranger come from a foreign land where the forests enveloped the earth and sky.\n\nAdept with quick blade and bow. Move silently among the brush and speak the language of beasts.",
             color: "gold",
             image: "Traveler"
         },
@@ -203,7 +203,7 @@ const VERDIGRIS = (function() {
         },        
         {
             title: "Knight Archivist",
-            description: "Child of the Last Library and ardent defender of the gathered knowledge of Kings.\n\nZealously seeking that which has long been hidden, though some secrets are best left buried.",
+            description: "Child of the Last Library and ardent defender of the gathered knowledge of Kings.\n\nZealously seek that which has long been hidden, though some secrets are best left buried.",
             color: "gray",
             image: "KnightArchivist"
         },
