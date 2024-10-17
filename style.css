@@ -1,18 +1,18 @@
 :root {
-    /* Color styles */
+   /* Color styles */
     --white--100: rgba(205, 206, 198, 1);
     --white--200: rgba(150, 151, 145, 1);
-    --gold--primary--300: rgba(28, 29, 15, 1);
-    --gold--primary--200: rgba(54, 55, 24, 1);
     --gold--primary--100: rgba(111, 114, 33, 1);
+    --gold--primary--200: rgba(54, 55, 24, 1);
+    --gold--primary--300: rgba(28, 29, 15, 1);
     --gold--secondary--100: rgba(186, 183, 151, 1);
     --gold--secondary--200: rgba(138, 135, 102, 1);
     --gold--secondary--300: rgba(56, 55, 36, 1);
     --red--primary--100: rgba(174, 62, 45, 1);
     --red--primary--200: rgba(81, 32, 24, 1);
     --red--primary--300: rgba(56, 24, 19, 1);
-    --red--secondary--100: rgba(232, 110, 64, 1);
-    --red--secondary--200: rgba(143, 55, 21, 1);
+    --red--secondary--100: rgba(236, 133, 94, 1);
+    --red--secondary--200: rgba(187, 116, 77, 1);
     --red--secondary--300: rgba(88, 36, 16, 1);
     --gray--primary--100: rgba(124, 141, 151, 1);
     --gray--primary--200: rgba(50, 55, 58, 1);
@@ -33,7 +33,7 @@
     --blue--secondary--200: rgba(128, 136, 167, 1);
     --blue--secondary--300: rgba(85, 90, 107, 1);
     --purple--primary--100: rgba(123, 26, 241, 1);
-    --purple--primary--200: rgba(80, 46, 149, 1);
+    --purple--primary--200: rgba(62, 39, 111, 1);
     --purple--primary--300: rgba(63, 39, 112, 1);
     --purple--secondary--100: rgba(210, 194, 228, 1);
     --purple--secondary--200: rgba(157, 140, 176, 1);
@@ -122,11 +122,8 @@ body {
         margin-top: 50px;
     }
 
-    #game-name-text {
-        font-family: avara;
-        color: var(--gold--primary--100);
-        font-size: 55px;
-        letter-spacing: 2px;        
+    #game-logo {
+        margin-bottom: 50px;
     }
 
     #new-game-text, #continue-text {
@@ -422,7 +419,7 @@ header.scrolled {
     justify-content: center;
     gap: 4px;
     width: 60px;
-    bottom: -7px;
+    bottom: -9px;
 }
 
 #player-xp-section {
