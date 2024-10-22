@@ -2,12 +2,14 @@
    /* Color styles */
     --white--100: rgba(205, 206, 198, 1);
     --white--200: rgba(150, 151, 145, 1);
+    --gold--primary--050: rgba(165, 170, 10, 1);
     --gold--primary--100: rgba(111, 114, 33, 1);
     --gold--primary--200: rgba(54, 55, 24, 1);
     --gold--primary--300: rgba(28, 29, 15, 1);
     --gold--secondary--100: rgba(186, 183, 151, 1);
     --gold--secondary--200: rgba(138, 135, 102, 1);
     --gold--secondary--300: rgba(56, 55, 36, 1);
+    --red--primary--050: rgba(238, 61, 34, 1);
     --red--primary--100: rgba(174, 62, 45, 1);
     --red--primary--200: rgba(81, 32, 24, 1);
     --red--primary--300: rgba(56, 24, 19, 1);
@@ -127,7 +129,7 @@ body {
     }
 
     #new-game-text, #continue-text {
-        color: var(--red--secondary--200);
+        color: var(--red--primary--100);
         font-size: 25px;        
         font-weight: 400;        
         letter-spacing: 1px;
@@ -135,7 +137,7 @@ body {
     }
 
     #new-game-text:hover, #continue-text:hover {
-        color: var(--red--secondary--100);
+        color: var(--red--primary--050);
         cursor: pointer;
     }
 
@@ -583,7 +585,7 @@ main {
      
         #main-title-text {
             font-family: avara;
-            color: var(--red--secondary--200);
+            color: var(--red--primary--100)
         }
     }
         
