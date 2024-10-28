@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encounter</title>
+    <link rel="shortcut icon" href="#" />
+    <link rel="stylesheet" href="encounter.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <div id="wrapper">
+        
+        <div id="main-content-container">
+
+            <div id="player-hp-bar-container">
+                <div id="player-hp-bar-background">
+                    <div id="player-hp-text">
+                        37 / 142
+                    </div>                
+                </div>
+                <div id="player-hp-bar-current">                        
+                </div>
+            </div>        
+
+            <div id="content-frame-container">
+
+                <div id="main-content-frame">
+                    <div class="content-frame-corner-bracket top-left"></div>
+                    <div class="content-frame-corner-bracket bottom-left"></div>
+                    <div class="content-frame-corner-bracket top-right"></div>
+                    <div class="content-frame-corner-bracket bottom-right"></div>
+                    
+                    <div id="enemy-section-container">
+                        <div class="enemy-card">
+                            
+                            <div class="enemy-script-container">
+                                <div class="enemy-script-box"></div>
+                                <div class="enemy-script-icon">1</div>
+                            </div>
+                            <div class="enemy-script-container">
+                                <div class="enemy-script-box"></div>
+                                <div class="enemy-script-icon">2</div>
+                            </div>
+                            <div class="enemy-script-container">
+                                <div class="enemy-script-box"></div>
+                                <div class="enemy-script-icon">3</div>
+                            </div>
+                            <div class="enemy-script-container">
+                                <div class="enemy-script-box"></div>
+                                <div class="enemy-script-icon">4</div>
+                            </div>
+
+                            <div class="enemy-level-icon">3</div>
+
+                            <div class="enemy-title-text-container">
+                                <div class="enemy-card-title-text">Veilguard Watcher</div>
+                                <div class="enemy-card-type-text">Undead</div>
+                            </div>
+                            <img src="" class="enemy-card-image">
+                            <div class="enemy-card-mod-text">Barriers have spectral</div>
+                            <div class="enemy-hp-section">
+                                <div class="enemy-hp-bar-background">
+                                    <div class="enemy-hp-text">12 / 100</div>                
+                                </div>
+                                <div class="enemy-hp-bar-current"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="side-content-frame">
+                    <div class="content-frame-corner-bracket top-left"></div>
+                    <div class="content-frame-corner-bracket bottom-left"></div>
+                    <div class="content-frame-corner-bracket top-right"></div>
+                    <div class="content-frame-corner-bracket bottom-right"></div>
+                </div>
+            </div>
+
+            <div id="bottom-frame-container">
+
+                <div id="deck-frame-container">
+
+                    <div class="right-align-container">
+                        <div id="draw-indicator">
+                            12
+                        </div>
+
+                        <div id="hand-container">
+                            <div class="player-script-container">
+                                <div class="player-script-box"></div>
+                                <div class="player-script-icon">1</div>
+                            </div>
+                            <div class="player-script-container">
+                                <div class="player-script-box"></div>
+                                <div class="player-script-icon">2</div>
+                            </div>
+                            <div class="player-script-container">
+                                <div class="player-script-box"></div>
+                                <div class="player-script-icon">3</div>
+                            </div>                                                    
+                        </div>
+                    </div>
+
+                    <div id="discard-indicator">
+                        2
+                    </div>
+
+                    <div class="break"></div>
+
+                    <div id="energy-marker-container">
+                        <div class="energy-marker"></div>
+                        <div class="energy-marker"></div>
+                        <div class="energy-marker"></div>
+                        <div class="energy-marker"></div>
+                    </div>
+
+                    <div id="cycle-button">Run Cycle</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="Scripts/encounter.js"></script>
+</body>
+</html>
