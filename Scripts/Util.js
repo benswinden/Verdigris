@@ -367,3 +367,7 @@ export function deepCopyWithFunctions(obj) {
 
     return copy;
 }
+
+export function log(text) {
+    console.log(text);
+}
