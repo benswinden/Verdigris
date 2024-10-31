@@ -56,6 +56,14 @@ body {
     color: var(--purple--primary--100)
 }
 
+.reduced {    
+    color: var(--red--primary--050);
+}
+
+.gray-text {
+    color: var(--white--200);
+}
+
 #main-content-container {    
     max-width: 2160px;
     margin: auto;
@@ -135,7 +143,7 @@ body {
         background: var(--fill--300);        
         border: 3px solid var(--white--100);
 
-        #energy-marker-container {
+        #enemy-energy-marker-container {
             display: flex;
             
 
@@ -143,8 +151,8 @@ body {
                 height: 27px;
                 width: 26px;
                 background-color: var(--blue--primary--050);
-                mask: url('Assets/Redesign/General_Interface/Enemy_Energy_Marker_Full.svg') no-repeat center;
-                -webkit-mask: url('Assets/Redesign/General_Interface/Enemy_Energy_Marker_Full.svg') no-repeat center;
+                mask: url('Redesign_Assets/General_Interface/Enemy_Energy_Marker_Full.svg') no-repeat center;
+                -webkit-mask: url('Redesign_Assets/General_Interface/Enemy_Energy_Marker_Full.svg') no-repeat center;
             }
 
             .energy-marker:not(:first-child) {
@@ -333,8 +341,8 @@ body {
     width: 17px;
     height: 16px;
     background-color: var(--white--200);
-    mask: url('Assets/Redesign/General_Interface/Corner_Bracket_TopLeft.svg') no-repeat center;
-    -webkit-mask: url('Assets/Redesign/General_Interface/Corner_Bracket_TopLeft.svg') no-repeat center;
+    mask: url('Redesign_Assets/General_Interface/Corner_Bracket_TopLeft.svg') no-repeat center;
+    -webkit-mask: url('Redesign_Assets/General_Interface/Corner_Bracket_TopLeft.svg') no-repeat center;
 }
 
 .content-frame-corner-bracket.top-left {        
@@ -367,6 +375,7 @@ body {
     .player-command {    
         display: flex;
         align-items: center;
+        gap:5px;
         font-size: 12px;    
         text-align: left;
         color: var(--white--050);
@@ -390,7 +399,7 @@ body {
 #player-command-indicator {
     width: 103px;
     height: 22px;
-    background-image: url('Assets/Redesign/General_Interface/Side_PlayerCommand_Indicator.svg');
+    background-image: url('Redesign_Assets/General_Interface/Side_PlayerCommand_Indicator.svg');
     background-repeat: no-repeat;
     background-position: center;
     margin: auto;
@@ -398,7 +407,7 @@ body {
 }
 
 #player-command-indicator.active {
-    background-image: url('Assets/Redesign/General_Interface/Side_PlayerCommand_Indicator_Active.svg');
+    background-image: url('Redesign_Assets/General_Interface/Side_PlayerCommand_Indicator_Active.svg');
 }
 
 #enemy-content-container {
@@ -415,6 +424,7 @@ body {
         .enemy-command {    
             display: flex;
             align-items: center;
+            gap:5px;
             font-size: 12px;    
             text-align: left;
             color: var(--white--050);
@@ -424,6 +434,12 @@ body {
             height: 30px;        
             font-weight: 500;
             padding-left: 10px;
+        }
+
+        .enemy-command.inactive {
+            color: var(--red--primary--200);
+            border: 2px solid var(--red--primary--300);
+            text-decoration: line-through;
         }
 
         .enemy-command:not(:first-child) {
@@ -505,8 +521,20 @@ body {
                     .player-script-box {
                         height: 100px;
                         width: 100px;
-                        border: 2px solid var(--white--100);
+                        border: 2px solid var(--white--200);
                         background: var(--fill--300);                        
+                    }
+
+                    .player-script-box.can-hover-active {                        
+                        border: 2px solid var(--white--100);                     
+                    }
+                    .player-script-box.can-hover-inactive {                        
+                        border: 2px solid var(--white--300);                     
+                    }
+
+                    .player-script-box.can-hover:hover {
+                        cursor: pointer;                        
+                        border: 2px solid var(--white--050);                     
                     }
             
                     .player-script-icon {
@@ -517,6 +545,78 @@ body {
                         color: var(--white--100);
                         font-size: 26px;
                         font-weight: 300;
+                        pointer-events: none;
+                    }
+
+                    .player-script-info-card {
+                        display: none;
+                        flex-direction: column;
+                        justify-content: space-between;
+
+                        position: absolute;
+                        left: -80px;
+                        bottom: 150px;                    
+                        width: 260px;
+                        height: 180px;
+                        border: 2px solid var(--white--050);
+                        background: var(--fill--300);
+
+                        .info-card-icon {                        
+                            position: absolute;
+                            top: 10px;
+                            right: 10px;
+                            width: 40px;
+                            height: 40px;
+                        }
+
+                        .info-card-title {
+                            color: var(--White-050, #F8F8F8);
+                            font-family: Citizen;
+                            font-size: 24px;
+                            font-weight: 400;
+                            margin-top: 15px;
+                            margin-left: 20px;
+                        }
+
+                        .info-card-type {
+                            color: var(--White-100, #8D8786);
+                            font-family: "Source Code Pro";
+                            font-size: 16px;
+                            font-weight: 600;
+                            margin-top: 10px;
+                            margin-left: 20px;
+                        }
+
+                        .info-card-command-container {
+                            display:flex;
+                            flex-direction: column;
+
+                            .info-card-command {        
+                                font-size: 13px;    
+                                text-align: left;
+                                color: var(--white--050);                                
+                                font-weight: 400;
+                                padding-left: 10px;
+                            }
+
+                        }
+
+                        .info-card-energy-container {
+                            display: flex;
+                            justify-content: flex-end
+                        }
+
+                        .info-card-energy-marker {
+                                height: 27px;
+                                width: 26px;
+                                background-color: var(--blue--primary--050);
+                                mask: url('Redesign_Assets/General_Interface/Enemy_Energy_Marker_Full.svg') no-repeat center;
+                                -webkit-mask: url('Redesign_Assets/General_Interface/Enemy_Energy_Marker_Full.svg') no-repeat center;                            
+                        }
+
+                        .info-card-energy-marker:not(:first-child) {
+                            margin-left: -5px;
+                        }
                     }
                 }
 
@@ -547,14 +647,23 @@ body {
 
             .energy-marker {
                 height: 39px;
-                width: 41px;
-                background-color: var(--blue--primary--050);
-                mask: url('Assets/Redesign/General_Interface/Deck_Energy_Marker_Full.svg') no-repeat center;
-                -webkit-mask: url('Assets/Redesign/General_Interface/Deck_Energy_Marker_Full.svg') no-repeat center;
+                width: 41px;                
             }
 
             .energy-marker:not(:first-child) {
                 margin-left: -8px;
+            }
+
+            .energy-marker.full {
+                background-color: var(--blue--primary--050);
+                mask: url('Redesign_Assets/General_Interface/Deck_Energy_Marker_Full.svg') no-repeat center;
+                -webkit-mask: url('Redesign_Assets/General_Interface/Deck_Energy_Marker_Full.svg') no-repeat center;
+            }
+
+            .energy-marker.empty {
+                background-color: var(--blue--primary--200);
+                mask: url('Redesign_Assets/General_Interface/Deck_Energy_Marker_Empty.svg') no-repeat center;
+                -webkit-mask: url('Redesign_Assets/General_Interface/Deck_Energy_Marker_Empty.svg') no-repeat center;
             }
         }
         
