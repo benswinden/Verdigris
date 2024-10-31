@@ -15,6 +15,8 @@ const VERDIGRIS = (function() {
     let energyCurrent = 2;
     let energyMax = 2;
 
+    let scriptDrawCurrent = 4;
+
     let createdPlayerCommandObjects = [];
     let createdEnemyCommandObjects = [];
 
@@ -25,6 +27,8 @@ const VERDIGRIS = (function() {
     let deck = [];
     let discard = [];
 
+    let cycleRunning = false;
+
     /*
     *   DOM Elements    
     */
@@ -33,6 +37,7 @@ const VERDIGRIS = (function() {
     const enemyScriptContainer2 = enemyCard.querySelector('.enemy-script-container-2');
     const enemyScriptContainer3 = enemyCard.querySelector('.enemy-script-container-3');
     const enemyScriptContainer4 = enemyCard.querySelector('.enemy-script-container-4');
+    const enemyEnergyMarkerContainer = enemyCard.querySelector('#enemy-energy-marker-container');
     const enemyLevelText = enemyCard.querySelector('.enemy-level-text');
     const enemyNameText = enemyCard.querySelector('.enemy-card-title-text');
     const enemyTypeText = enemyCard.querySelector('.enemy-card-type-text');
@@ -52,6 +57,7 @@ const VERDIGRIS = (function() {
     const playerHPText = document.querySelector('#player-hp-text');
 
     const playerEnergyContainer = document.querySelector('#energy-marker-container');
+    const cycleButton = document.querySelector('#cycle-button');
 
     document.addEventListener('DOMContentLoaded', function() {
 
@@ -75,10 +81,10 @@ const VERDIGRIS = (function() {
         for (let index = 0; index < 2; index++) 
             installScript(scripts[3]);
 
-        updateHP();
-        displayCommands();
+        updateHP();        
         displayEnemy(enemies[0]);
         updateEnergy();
+        deactivateCycleButton();
 
         hand = [];
         deck = [];
@@ -91,16 +97,44 @@ const VERDIGRIS = (function() {
         shuffleArray(deck);
         drawNumber.innerText = deck.length;
         discardNumber.innerText = "0";
-        for (let index = 0; index < 3; index++)
+        for (let index = 0; index < scriptDrawCurrent; index++)
             drawScript();
+    }
 
-        updateHand();
+    function startNewTurn() {
+
+        log("Start New Turn -");
+        deactivateCycleButton();
+
+        displayEnemy(currentEnemy);
+
+        // Discard hand        
+        for (let index = 0; index < hand.length; index++) {
+            const script = hand[index];
+            discard.push(script);
+            discardNumber.innerText = discard.length;            
+        }        
+
+        hand = [];        
+
+        createdPlayerCommandObjects = [];
+        playerCommandContainer.innerHTML = "";
+        energyCurrent = energyMax;
+        updateEnergy();
+        
+        if (hand.length < scriptDrawCurrent) {
+
+            const cardDrawNumber = scriptDrawCurrent - hand.length;
+            for (let index = 0; index < cardDrawNumber; index++)
+                drawScript();
+        }
     }
 
     function drawScript() {
         
         let script = deck.splice(0,1)[0];        
         hand.push(script);
+        updateHand();
     }
 
     function updateHand() {
@@ -140,10 +174,6 @@ const VERDIGRIS = (function() {
 
                 newScriptContainer.querySelector('.player-script-box').addEventListener('click', function() {
                     executeScript(script);
-                    discard.push(script);
-                    discardNumber.innerText = discard.length;
-                    hand.splice(hand.indexOf(script), 1);
-                    updateHand();
                 });
             }
             else
@@ -181,6 +211,7 @@ const VERDIGRIS = (function() {
 
     }
 
+    // When a player plays a script during their turn
     function executeScript(script) {
         
         if (energyCurrent >= script.cost) {
@@ -205,6 +236,12 @@ const VERDIGRIS = (function() {
             }
 
             createdPlayerCommandObjects.push(newCommandObject);
+
+            discard.push(script);
+            discardNumber.innerText = discard.length;
+            hand.splice(hand.indexOf(script), 1);
+            updateHand();
+            activateCycleButton();
         }        
     }
 
@@ -215,6 +252,7 @@ const VERDIGRIS = (function() {
         playerHPBar.style.width = (HPCurrentPercent * 610 + 2)  + 'px';
     }    
 
+    // When a script is added to your deck
     function installScript(script) {        
         const scriptCopy = deepCopyWithFunctions(script);
         playerInstalledScripts.push(scriptCopy);        
@@ -228,62 +266,168 @@ const VERDIGRIS = (function() {
         enemyNameText.innerText = enemy.name;
         enemyTypeText.innerText = enemy.type;
 
+        installEnemyScripts();
+        executeEnemyScripts();
         updateEnemy();
     }
 
+    function installEnemyScripts() {
+
+        currentEnemy.installedScripts = [];
+
+        // Reset script containers
+        for (let index = 0; index < 4; index++) {
+            let container = null;
+            switch (index) {
+                case 0:
+                    container = enemyScriptContainer1;
+                    break;
+                case 1:
+                    container = enemyScriptContainer2;
+                    break;
+                case 2:
+                    container = enemyScriptContainer3;
+                    break;
+                case 3:
+                    container = enemyScriptContainer4;
+                    break;
+            }
+             
+            container.querySelector('.enemy-script-number').style.display = "block";
+            container.querySelector('.enemy-script-icon').src = "";
+            container.querySelector('.enemy-script-box').classList = "enemy-script-box";
+        }
+
+        for (let index = 0; index < currentEnemy.scripts.length; index++) {
+            
+            let container = null;
+            let scriptCopy = deepCopyWithFunctions(getObjectFromKeyword(currentEnemy.scripts[index], scripts));
+            currentEnemy.installedScripts.push(scriptCopy);
+            
+            switch (index) {
+                case 0:
+                    container = enemyScriptContainer1;
+                    break;
+                case 1:
+                    container = enemyScriptContainer2;
+                    break;
+                case 2:
+                    container = enemyScriptContainer3;
+                    break;
+                case 3:
+                    container = enemyScriptContainer4;
+                    break;
+            }
+            
+            container.querySelector('.enemy-script-number').style.display = "none";
+
+            // Input information into the info card
+            container.querySelector('.info-card-icon').src = "Redesign_Assets/Scripts/Icon_" + scriptCopy.icon + ".svg";
+            container.querySelector('.info-card-title').innerHTML = scriptCopy.name.replace(/ /g, '<br>');
+            container.querySelector('.info-card-type').innerHTML = scriptCopy.type;
+            const commandContainer = container.querySelector('.info-card-command-container');
+
+            for (const command of scriptCopy.commands) {
+
+                const commandObject = getObjectFromKeyword(command, commands);
+                const newCommandElement = document.createElement('div');
+                newCommandElement.classList = "info-card-command";
+                commandContainer.appendChild(newCommandElement);                
+                newCommandElement.innerHTML = "<span class=\"gray-text\">█</span> " + commandObject.action.actionText(false);
+            }
+
+            for (let index = 0; index < scriptCopy.cost; index++) {
+                let newEnergyMarker = document.createElement('div');
+                newEnergyMarker.classList.add("info-card-energy-marker");
+                container.querySelector('.info-card-energy-container').appendChild(newEnergyMarker);
+            }
+
+            container.querySelector('.enemy-script-icon').src = "Redesign_Assets/Scripts/Icon_" + scriptCopy.icon + ".svg";            
+            container.querySelector('.enemy-script-box').classList.add("can-hover-active");            
+
+            // Set onmouseover event
+            container.querySelector('.enemy-script-box').addEventListener('mouseover', function() {
+                container.querySelector('.enemy-script-info-card').style.display = "flex";
+            });
+            container.querySelector('.enemy-script-box').addEventListener('mouseleave', function() {
+                container.querySelector('.enemy-script-info-card').style.display = "none";
+            });        
+        }
+    }
+
+    function executeEnemyScripts() {
+
+        enemyCommandContainer.innerHTML = "";
+        createdEnemyCommandObjects = [];
+
+        for (const script of currentEnemy.installedScripts) {
+            
+            for (const command of script.commands) {
+
+                let commandCopy = deepCopyWithFunctions(getObjectFromKeyword(command, commands));
+                log(currentEnemy.name +" executing " + script.name + " - Injecting command: " + commandCopy.action.actionText());
+
+                let newCommandElement = document.createElement('div');
+                newCommandElement.className = 'enemy-command';
+                newCommandElement.innerHTML = commandCopy.action.actionText();
+                enemyCommandContainer.appendChild(newCommandElement);
+
+                let newCommandObject = {
+                    command: commandCopy,
+                    element: newCommandElement
+                }
+
+                createdEnemyCommandObjects.push(newCommandObject);
+            }
+        }
+    }
+
     function updateEnemy() {
+
+        enemyEnergyMarkerContainer.innerHTML = "";
+        for (let index = 0; index < currentEnemy.energyCurrent; index++) {
+            
+            const energyMarker = document.createElement('div');
+            energyMarker.classList = "energy-marker full";
+            enemyEnergyMarkerContainer.appendChild(energyMarker);
+        }
+
+        if (energyMax != currentEnemy.energyCurrent) {
+            for (let index = 0; index < energyMax - currentEnemy.energyCurrent; index++) {
+                const energyMarker = document.createElement('div');
+                energyMarker.classList = "energy-marker empty";
+                enemyEnergyMarkerContainer.appendChild(energyMarker);        
+            }
+        }
+    
 
         enemyHPText.innerText = currentEnemy.hpCurrent + "/" + currentEnemy.hpMax;
         let HPCurrentPercent = currentEnemy.hpCurrent / currentEnemy.hpMax;        
         enemyHPBar.style.width = (HPCurrentPercent * 290 + 2)  + 'px';
     }
 
-    function displayCommands() {
-        
-        playerCommandContainer.innerHTML = "";
-        createdPlayerCommandObjects = [];
+    function activateCycleButton() {
 
-        // for (let index = 0; index < 1; index++) {
+        cycleButton.classList.add("can-hover");
+        cycleButton.onclick = function() {
+            runCycle();
+            deactivateCycleButton();
+        }; 
+    }
 
-        //     let commandCopy = deepCopyWithFunctions(getObjectFromKeyword("attack", commands));        
+    function deactivateCycleButton() {
 
-        //     let newCommandElement = document.createElement('div');
-        //     newCommandElement.className = 'player-command';            
-        //     newCommandElement.innerHTML = commandCopy.action.actionText();
-        //     playerCommandContainer.appendChild(newCommandElement);
-
-        //     let newCommandObject = {
-        //         command: commandCopy,
-        //         element: newCommandElement
-        //     }
-
-        //     createdPlayerCommandObjects.push(newCommandObject);
-        // }
-
-        enemyCommandContainer.innerHTML = "";
-        createdEnemyCommandObjects = [];
-
-        for (let index = 0; index < 4; index++) {
-
-            let commandCopy = deepCopyWithFunctions(getObjectFromKeyword("block", commands));        
-
-            let newCommandElement = document.createElement('div');
-            newCommandElement.className = 'enemy-command';
-            newCommandElement.innerHTML = commandCopy.action.actionText();
-            enemyCommandContainer.appendChild(newCommandElement);
-
-            let newCommandObject = {
-                command: commandCopy,
-                element: newCommandElement
-            }
-
-            createdEnemyCommandObjects.push(newCommandObject);
-        }
+        cycleButton.classList.remove("can-hover");
+        cycleButton.onclick = "";
     }
 
     async function runCycle() {
         
+        if (cycleRunning) return;
+
         log("runCycle - Begin"); playClick();
+
+        cycleRunning = true;
 
         commandIndicator.classList.add("active");       // Visually activate the command indicator, this display where in the command stack we currently are
 
@@ -327,6 +471,9 @@ const VERDIGRIS = (function() {
 
         commandIndicator.classList.remove("active");
         playerCommandContainer.appendChild(commandIndicator);
+
+        cycleRunning = false;
+        startNewTurn();
     }
 
     async function waitForButtonPress() {
