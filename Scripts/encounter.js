@@ -132,7 +132,19 @@ const VERDIGRIS = (function() {
 
     function drawScript() {
         
-        let script = deck.splice(0,1)[0];        
+        if (deck.length == 0) {
+
+            for (const script of discard)
+                deck.push(script);
+
+            discard = [];
+            discardNumber.innerText = discard.length;
+            drawNumber.innerText = deck.length;    
+            shuffleArray(deck); 
+        }
+
+        let script = deck.splice(0,1)[0];
+        drawNumber.innerText = deck.length;       
         hand.push(script);
         updateHand();
     }

@@ -190,34 +190,29 @@ const VERDIGRIS = (function() {
 
     let histories = [
         {
-            title: "Traveler",
-            description: "A worn ranger come from a foreign land where the forests enveloped the earth and sky.\n\nAdept with quick blade and bow. Move silently among the brush and speak the language of beasts.",
-            color: "gold",
-            image: "Traveler"
+            title: "Strider",
+            description: "A worn traveler come from a foreign land where Verdant Shroud enveloped the earth and sky.\n\nNavigate with a fluency in the Ecosystem’s rhythms, both organic and synthetic.\n\nSkills: Data tracking, bio-digital traps, long-range energy weaponry, environment manipulation",
+            color: "gray"        
         },
         {
-            title: "Moon Witch",
-            description: "Magicker come down from the Steppes. Carrying with them forgotten tales and chants of the sky's misfortunes and follies.\n\nGrant us great strength, grant us requiem from the peering eyes that burn.",
-            color: "red",
-            image: "MoonWitch"
+            title: "Archivist",
+            description: "Child of the Last Library and keeper of the gathered knowledge of Kings.\n\nZealously seek that which has long been hidden, though some secrets are best left buried.\n\nSkills: Encryption and decryption, stealth infiltration, reality manipulation, algorithmic sabotage.",
+            color: "gray"        
         },        
         {
-            title: "Knight Archivist",
-            description: "Child of the Last Library and ardent defender of the gathered knowledge of Kings.\n\nZealously seek that which has long been hidden, though some secrets are best left buried.",
-            color: "gray",
-            image: "KnightArchivist"
+            title: "Phalanx",
+            description: "Once ardent defender of the Twilight Loom, now purpose-lost wanderer.\n\nWith so much war and strife across the Ecosystem, there are always those willing to pay for a strong arm.\n\nSkills: Shield combat, defensive protocols, close-quarters combat, plasma lance.",
+            color: "gray"        
         },
         {
-            title: "Geomancer",
-            description: "Only in true Quiet can one hear the rumbling murmurs of the deepest darkest depths.\n\nFeel the earth that binds, speak the language of the earthen silence and harness the power of the Unknowable Colossus.",
-            color: "green",
-            image: "Geomancer"
+            title: "Netborn",
+            description: "Of prophecy and omen. An aberrant lineage that seems unwilling to die, despite their persecution.\n\nSpeak the native tongue of soft-code and swim through the upstream flow.\n\nSkills: Environmental attunement, dataflow travel, cryptographic regeneration, organic simulation-shaping.",
+            color: "gray"        
         },
         {
-            title: "Heir Apparent",
-            description: "Born to lead the Last Kingdom of men, but given no Prophecy, nor Crown, nor Shroud.\n\nOnly once its is written in the bones of the earth will Divine Right be given.",
-            color: "purple",
-            image: "HeirApparent"
+            title: "Exo",
+            description: "Hardcoded wireframe mesh. Chaos design shrouded in darkness. The shape-shifting system ghost.\n\nHaunted by visions of the Mirror Void. Aura of unease and manifest nothingness.\n\nSkills: Reality distortion, dream manipulation, shadow weaving, chaos.",
+            color: "gray"        
         }
     ]
 
@@ -511,13 +506,11 @@ const VERDIGRIS = (function() {
         characterCreationTitle.innerHTML = histories[historyIndex].title;
         characterCreationDescription.innerHTML = histories[historyIndex].description.replace(/\n/g, '<br>');
         
-        characterCreationContainer.querySelector('#character-glyph').src = "Assets/Character/Char_Glyph_" + histories[historyIndex].image + ".svg";
-        characterCreationContainer.querySelector('#history-image-box').style.backgroundImage = "url(Assets/Character/" + histories[historyIndex].image + ".png)";
+        characterCreationContainer.querySelector('#character-glyph').src = "Redesign_Assets/General_Interface/Character_Glyph_Gray.svg";
     
         // Construct the color value to be used in css based on the chose history
         const colorVariable = "--" + histories[historyIndex].color + "--primary--100";
-        const colorValue = getComputedStyle(document.documentElement).getPropertyValue(colorVariable).trim();
-        characterCreationContainer.querySelector('#history-image-box').style.border = "3px solid " + colorValue;        
+        const colorValue = getComputedStyle(document.documentElement).getPropertyValue(colorVariable).trim();        
         characterCreationContainer.querySelector('.history-select-line1').style.backgroundColor = colorValue;
         characterCreationContainer.querySelector('.history-select-line2').style.backgroundColor = colorValue;
 
